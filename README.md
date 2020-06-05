@@ -11,6 +11,8 @@
  
  **Economics Program:** https://www.ncf.edu/academics/undergraduate-program/division-of-social-sciences/economics/
 
+This repository is where I keep any assignments for courses that require programming.
+
 ### Courses
 
 - Introduction to Categorical Data Analysis
