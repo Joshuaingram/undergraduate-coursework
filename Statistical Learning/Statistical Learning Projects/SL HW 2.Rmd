@@ -1,0 +1,185 @@
+---
+title: "SL Homework 2"
+author: "Joshua Ingram"
+date: "September 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+```
+
+
+# Problem 1
+
+### 1. Write equivalent while and repeat-loops (like we did in class with N(0,1) distribution) that generate random values from a Binomial(1000,0.90) distribution until you get exactly (!) 900 successes. Make sure to explicitly compare your while and repeat loops for equivalency on 3 distinct random sequences. Avoid repeating your code 3 times though (how?)
+
+While-Loop and Repeat-Loop
+```{r}
+while.trial.counts <- c()
+repeat.trial.counts <- c()
+for (i in 1:3){
+  n.RV.w <- 0
+  n.RV.r <- 0
+  n.succ <- 0
+  
+  set.seed(i)
+  while (n.succ != 900){
+    n.RV.w <- n.RV.w + 1
+    dist <- rbinom(1000, 1, .9)
+    n.succ <- sum(dist)
+  }
+  
+  set.seed(i)
+  repeat{n.RV.r <- n.RV.r + 1; dist <- rbinom(1000, 1, .9); n.succ <- sum(dist); if (n.succ == 900) break;}
+  while.trial.counts <- append(while.trial.counts, n.RV.w)
+  repeat.trial.counts <- append(repeat.trial.counts, n.RV.r)
+}
+
+print("Number of times looped through While-loop until 900 successes observed for 3 random sequences set.seed(1:3)")
+while.trial.counts
+print("Number of times looped through repeat-loop until 900 successes observed for 3 random sequences (set.seed(1:3)")
+repeat.trial.counts
+
+```
+
+
+### 2. How many random value generations did it take to get there, on average? Does it surprise you, given the definition of distribution (proceed to give the definition of what it means for a variable to have a Binomial(1000,0.90) distribution as well)? Why?
+
+For our 3 selected random sequences, our average number random value generations to get 900 successes was equal to:
+```{r}
+mean(while.trial.counts)
+```
+
+This does not surprise me, as it is a relatively low amount of random value generations (rather than a higher average, like 100) to receive our EXPECTED count of successes that is 900 for our binomial(1000, .90) distribution. A random variable with a binomial distribution, binomial(1000, .90), has 1000 observations with a success probability of .90, so our expected count is n$pi$ = 1000 * 0.90 = 900. This is exactly why our average number of random value generations was so low, as a count of 900 is our expected value and occurs most often in the distribution.
+
+
+# Problem 2
+```{r}
+nyc <- read.csv("http://data.insideairbnb.com/united-states/ny/new-york-city/2019-08-06/visualisations/listings.csv")
+```
+
+```{r}
+head(nyc)
+names(nyc)
+levels(nyc$neighbourhood_group)
+```
+
+### 1. Calculate the total number of listings in each NYC burrow. Which burrows appear to have the most? Which one(s) to the contrary?
+
+**Assuming a burrow refers to the "neighborhood_group" variable
+```{r}
+n.bronx <- 0
+n.brooklyn <- 0
+n.manhattan <- 0
+n.queens <- 0
+n.island <- 0
+for (i in 1:nrow(nyc)){
+  if (nyc$neighbourhood_group[i] == "Bronx"){n.bronx <- n.bronx + 1}
+  if (nyc$neighbourhood_group[i] == "Brooklyn"){n.brooklyn <- n.brooklyn + 1}
+  if (nyc$neighbourhood_group[i] == "Manhattan"){n.manhattan <- n.manhattan + 1}
+  if (nyc$neighbourhood_group[i] == "Queens"){n.queens <- n.bronx + 1}
+  if (nyc$neighbourhood_group[i] == "Staten Island"){n.island <- n.island + 1}
+}
+counts.burrows <- c(n.bronx, n.brooklyn, n.manhattan, n.queens, n.island)
+burrows <- levels(nyc$neighbourhood_group)
+
+data.frame("Burrow" = burrows, "counts" = counts.burrows)
+```
+Manhattan has the most listings, whereas Staten Island has the lowest amount of listings.
+
+
+### 2. Calculate the mean and median prices of all NYC burrows. Which burrows appear the most expensive? Which one(s) to the contrary?
+```{r}
+mean.prices <- c()
+for (i in burrows){
+  print(i)
+  print("mean")
+  print(mean(nyc$price[nyc$neighbourhood_group == i]))
+  print("median")
+  print(median(nyc$price[nyc$neighbourhood_group == i]))
+}
+```
+Manhattan seems to have the most expensive places, as it has the highest mean and median prices. Bronx appears the least expensive with both the lowest mean and median prices.
+
+### 3. Provide code that will output the names and average listing price for the Top-10 most expensive neighborhoods in NYC.
+```{r}
+mean.prices <- c()
+neighborhood <- c()
+for (i in levels(nyc$neighbourhood)){
+ 
+  mean <- mean(nyc$price[nyc$neighbourhood == i])
+  neighborhood <- append(neighborhood, i)
+  mean.prices <- append(mean.prices, mean)
+} 
+
+average.prices <- data.frame("neighborhood" = neighborhood,  "average_price"= mean.prices)
+new.order <- average.prices[order(average.prices$average_price, decreasing = TRUE),]
+new.order[1:10, ]
+
+```
+
+
+
+
+# Problem 3
+
+### 1.
+Within this situation, it is an interpretation task because they are looking to see what factors may lead to cancer.
+
+The reponse variable is a categorical variable that indicates whether someone has cancer, or not. It can take on the value of 1 or 0... or "success" (has cancer) or "failure" (does not have cancer)... and so on.
+
+The predictor variables include:
+
+- physical measurements (height, weight, etc)
+- heart rate
+- blood sugar level
+- family history of disease
+(all of these were listed)
+as well as different levels of:
+- exercise
+- eating
+- drinking
+
+### 2.
+This seems to be more of an interpretation task, as we are more interested in understanding which webpage design (A or B) leads to increased sales, not necessarily the magnitude of sales.
+
+Our Response variable would be a numerical variable representing the amount of sales
+
+Our explanatory variable would be the webpage design (A or B... however, it seems that we want to take into account other variables (demographic information and sales history) but holding them constant, so we could use clustering to see how the webpage design affects sales within each cluster
+
+
+### 3.
+This is a prediction task.
+
+The response variable could be a a categorical variable (fraudulent transaction or not a fraudulent transaction.... or 1 or 0).
+
+our explanatory variables would be:
+- timestamp
+- location
+- dollar amount
+
+### 4.
+This is a prediction task because we are interested in forecasting the passenger flow for the upcoming month.
+
+Our response variable would be the passenger flow as a numerical response variable.
+
+Our explanatory variables would be:
+- historical passenger flow
+- season
+
+### For number 3
+
+a.
+Y = $\beta_{0}$ + $\beta_{1}$$X_{1}$ + .... + $\beta_{n}$$X_{n}$ + $\epsilon$
+
+b.
+The function f tries to capture the reationship that the timestamp, location, and dollar amount of transactions have with whether a transaction is fradulent or not.
+
+c.
+The function f can be treeated as a black box because in this situation, we are more interested in prediction as opposed to interpretation, so we do not need to fully understand our model so long as its accurate.
+
+d.
+We are missing information on the place that the transaction took place (i.e. walmart, publix, Exxon, etc.), purchasing habbits, etc. that are not taken into account in the model.
+$\epsilon$ from the general model aims to capture our missing information. 
+

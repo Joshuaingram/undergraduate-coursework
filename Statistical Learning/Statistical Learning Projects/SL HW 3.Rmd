@@ -1,0 +1,222 @@
+---
+title: "SL Homework 3"
+author: "Joshua Ingram"
+date: "September 20, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+advertising <- read.csv("C:/Users/joshi/Downloads/Advertising.csv")
+```
+
+## Problem 1
+
+```{r}
+head(advertising, 6)
+sales <- advertising$sales
+tv <- advertising$TV
+radio <- advertising$radio
+newspaper <- advertising$newspaper
+
+plot(sales ~ tv)
+
+```
+
+#### 1.
+
+$\beta_0$ and $\beta_1$ estimates:
+```{r}
+tv_mean <- mean(tv)
+sales_mean <- mean(sales)
+beta_hat_1 <- 0
+beta_1_numer <- 0
+beta_1_denom <- 0
+
+for (i in 1:length(sales)){
+  beta_1_numer <- beta_1_numer + (tv[i] - tv_mean) * (sales[i] - sales_mean)
+  beta_1_denom <- beta_1_denom + (tv[i] - tv_mean)^2
+}
+
+beta_hat_1 <- (beta_1_numer / beta_1_denom)
+print("beta_1 estimate")
+beta_hat_1
+
+beta_hat_0 <- sales_mean - (beta_hat_1*tv_mean)
+print("beta_0 estimate")
+beta_hat_0
+
+print("Values from lm()")
+lm(sales~tv)
+```
+
+Standard Errors of estimates:
+```{r}
+s_num <- 0
+n <- length(sales)
+
+for (i in 1:length(sales)){
+  s_num <- s_num + (sales[i] - (beta_hat_0 + (beta_hat_1*tv[i])))^2
+}
+
+s <- sqrt(s_num/(n-2))
+
+denom <- 0
+
+for (i in 1:length(sales)){
+  denom <- denom + (tv[i] - tv_mean)^2
+}
+
+se_beta_hat_0 <- s * sqrt((1/n)+(tv_mean^2/denom))
+print("se beta_0")
+se_beta_hat_0
+
+se_beta_hat_1 <- s/sqrt(denom)
+print("se beta_1")
+se_beta_hat_1
+
+print("Values from lm()")
+summary(lm(sales~tv))
+```
+
+
+#### 2.
+```{r}
+plot(sales ~ tv, ylab = "Sales", xlab = "TV", col = "red", pch = 16)
+abline(lm(sales~tv), col = "blue")
+segments(tv, sales, tv, predict(lm(sales~tv)))
+```
+
+
+## Problem 2
+
+```{r}
+set.seed(2)
+
+n.rep <- 1000
+conf_int_b0 <- matrix(0, nrow=n.rep, ncol=2)
+conf_int_b1 <- matrix(0, nrow=n.rep, ncol=2)
+
+for (r in 1:n.rep){
+  X <- rnorm(200, mean=0, sd=1)
+  eps <- rnorm(200, mean=0, sd=4)
+  Y <- 2 + 3*X + eps
+  lm <- lm(Y~X)
+  conf <- confint(lm)
+  conf_int_b0[r,] <- conf[1,]
+  conf_int_b1[r,] <- conf[2,]
+}
+
+
+print(mean(conf_int_b0[,1] < 2 & 2 < conf_int_b0[,2]))
+print(mean(conf_int_b1[,1] < 3 & 3 < conf_int_b1[,2]))
+
+```
+
+These confidence intervals contain our betas roughly 95% of the time, as expected.
+
+
+## Problem 3
+
+#### Sales onto Radio
+```{r}
+lm.radio <- lm(sales~radio)
+summary(lm.radio)
+
+```
+
+1.
+HO: $\beta_{1}$ = 0
+HA: $\beta_{1}$ =/= 0
+$\alpha$ = .05
+```{r}
+summary(lm.radio)
+```
+With alpha at .05, we received a p-value of 2.2e-16 which gives us significant evidence to reject the null hypothesis in favor of the alternative that states that $\beta_{1}$ is not equal to 0. This gives us enough evidence to believe that there is some relationship between the predictor and the response.
+
+2.
+Intercept: 9.31
+Slope: .2025
+Our intercept of 9.31 tells us when there is $0 invested in radio, sales should be at about 9,310 items sold.
+Our slope tells us that for every $1,000 invested in readio, there should be 202.5 more items sold.
+
+3.
+```{r}
+confint(lm.radio)
+```
+We are 95% confident that when spending $1,000 more on radio there will be between 162.24 and 242.74 additional units sold
+
+4.
+```{r}
+prediction.radio <- 9.31 + (.2025 * 20)
+prediction.radio
+pred.frame <- data.frame(radio=seq(min(radio), max(radio), length=100))
+pp <- predict(lm.radio, int="p", newdata=pred.frame)
+pc <- predict(lm.radio, int="c", newdata=pred.frame)
+plot(radio ,sales, main="Fitted Regression Line with Bands.",     
+     ylim=range(sales, pp, na.rm=T))
+matlines(pred.frame$radio, pc, lty=c(1,2,2), col=2)
+matlines(pred.frame$radio, pp, lty=c(1,3,3), col=4)
+legend("topleft",legend = c("Confidence","Prediction"), col=c(2,4), lty=c(2,3))
+```
+Based on our model, if we invested $20,000 into radio we would predict for there to be 13,360 items sold.
+The prediction bands are wider than the confidence bands because the confidence bands are the interval for which the average prediction can be found 95% of the time, whereas the prediction bands are wider because they contain 95% of the values of the observations.
+
+5.
+Residual Standard Error (from summary()): 4.275
+The standard deviation of the residuals is 4.275
+
+6.
+R^2 = .332
+33.2% of variance in sales is explained by radio advertisement spending
+
+#### Sales onto Newspaper
+```{r}
+lm.newspaper <- lm(sales~newspaper)
+summary(lm.newspaper)
+```
+
+1.
+HO: $\beta_{1}$ = 0
+HA: $\beta_{1}$ =/= 0
+$\alpha$ = .05
+```{r}
+summary(lm.newspaper)
+```
+With alpha at .05, we received a p-value of .001148 which gives us significant evidence to reject the null hypothesis in favor of the alternative that states that $\beta_{1}$ is not equal to 0. This gives us enough evidence to believe that there is some relationship between the predictor and the response.
+
+2.
+Intercept: 12.35141
+Slope: .05469
+Our intercept of 12.35141 tells us when there is $0 invested in radio, sales should be at about 12,351 items sold.
+Our slope tells us that for every $1,000 invested in readio, there should be 54.69 more items sold.
+
+3.
+```{r}
+confint(lm.newspaper)
+```
+We are 95% confident that when spending $1,000 more on newspaper there will be between 22 and 83.4 additional units sold
+
+4.
+```{r}
+prediction.newspaper <- 12.3514 + (.05469 * 20)
+prediction.newspaper
+pred.frame <- data.frame(newspaper=seq(min(newspaper), max(newspaper), length=100))
+pp <- predict(lm.newspaper, int="p", newdata=pred.frame)
+pc <- predict(lm.newspaper, int="c", newdata=pred.frame)
+plot(newspaper,sales, main="Fitted Regression Line with Bands.",     
+     ylim=range(sales, pp, na.rm=T))
+matlines(pred.frame$newspaper, pc, lty=c(1,2,2), col=2)
+matlines(pred.frame$newspaper, pp, lty=c(1,3,3), col=4)
+legend("topleft",legend = c("Confidence","Prediction"), col=c(2,4), lty=c(2,3))
+```
+Based on our model, if $20,000 was invested into newspaper we would predict for there to be 13,445 items sold.
+The prediction bands are wider than the confidence bands because the confidence bands are the interval for which the average prediction can be found 95% of the time, whereas the prediction bands are wider because they contain 95% of the values of the observations.
+
+5.
+Residual standard error (from summary()): 5.092
+The standard deviation of the residuals is 5.092
+
+6.
+R^2 = .05212
+5.2% of variance in sales is explained by newspaper advertisement spending

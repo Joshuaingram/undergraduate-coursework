@@ -1,0 +1,355 @@
+---
+title: "LM Homework 2"
+author: "Joshua Ingram"
+date: "2/19/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+library(rgl)
+
+Anscombe <- read.csv("C:/main/projects/Linear-Models-Class/Assigments/Assignment 2/Anscombe.txt", sep='')
+Prestige <- read.csv("C:/main/projects/Linear-Models-Class/Assigments/Assignment 1/Prestige.txt", sep='')
+fl_crime <- read.csv("C:/main/projects/Linear-Models-Class/Labs/Lab 1/fl_crime.csv")
+```
+
+# Problem 1
+
+## 1.
+
+```{r}
+head(Anscombe)
+plot(Anscombe)
+cor(Anscombe)
+```
+income seems to be the variable that has the strongest relationship with education spendings.
+
+## 2.
+
+```{r}
+lm_edu1 <- lm(education ~ income, data = Anscombe)
+summary(lm_edu1)
+```
+
+Equation: $\hat{education_i} = 17.71 + 0.0554(income_i)$
+
+Interpretations:
+
+slope: On average, we predict that there will be a $0.055 increase in per-capita education expenditures for every one dollar increase in per-capita income.
+
+intercept: When per-capita income is 0, we predict, on average, that the per-capita education expenditures will be $17.71. (not sure about the full context of this data, but perhaps this is the per-capita income for a given county, so if a county has close to 0 per-capita income, they may still receive state/federal assistance? That's why I interpretted)
+
+RSE: 34.94 
+
+interpretation: On average, our estimates for education expenditures (per-capita) are off by 34.94 dollars
+
+$R^2:$ 0.4457
+
+intperpretation: 44.57% of the variance in education ependitures per capita is explained by our model
+
+## 3.
+
+### a.
+
+$\hat{education_i} = \hat{\beta_0} + \hat{\beta_1}(income_i) + \hat{\beta_2}(under18_i) + \hat{\beta_3}(urban_i) + \epsilon_i$
+
+### b.
+
+Find that: $\alpha = \bar{y} - \beta_1\bar{x_1} - \beta_2\bar{x_2} -\beta_3\bar{x_3}$
+
+$\frac{\delta}{\delta\alpha} \Sigma( y_i - (\alpha + \beta_1x_1 + \beta_2x_2 + \beta_3x_3))^2$
+
+$= \Sigma \frac{\delta}{\delta\alpha} ( y_i - (\alpha +  \beta_1x_1 -+\beta_2x_2 +\beta_3x_3))^2$
+
+$= \Sigma 2( y_i - (\alpha + - \beta_1x_1 - \beta_2x_2 -\beta_3x_3)(-1)$
+
+$= \Sigma -2( y_i - (\alpha + \beta_1x_1 + \beta_2x_2 +\beta_3x_3) = 0$
+
+$\Sigma ( y_i - (\alpha + \beta_1x_1 + \beta_2x_2 +\beta_3x_3) = 0$
+
+$\Sigma y_i - \Sigma(\alpha + \beta_1x_1 + \beta_2x_2 +\beta_3x_3) = 0$
+
+$\Sigma y_i - \Sigma\alpha - \Sigma\beta_1x_1 - \Sigma\beta_2x_2 - \Sigma\beta_3x_3) = 0$
+
+$\Sigma y_i - n\alpha - \Sigma\beta_1x_1 - \Sigma\beta_2x_2 - \Sigma\beta_3x_3) = 0$
+
+$\Sigma y_i - \Sigma\beta_1x_1 - \Sigma\beta_2x_2 - \Sigma\beta_3x_3) = n\alpha$
+
+$\alpha = \bar{y} - \beta_1\bar{x_1} - \beta_2\bar{x_2} -\beta_3\bar{x_3}$
+
+### c.
+
+```{r}
+lm_edu2 <- lm(education ~ income + under18 + urban, data = Anscombe)
+summary(lm_edu2)
+```
+
+fitted equation: $\hat{education_i} = -0.02868 + 0.08065(income_i) + 0.8173(under18_i)  -.1058(urban_i)$
+
+intercept: doesn't make sense to interpret
+
+income: on average and holding all other variables constant, we predict there will be a 0.08065 dollar increase in education expenditure per capita for every one dollar increase in income per capita
+
+under18: on average and holding all other variables constant, we predict there will be a 0.8173 dollar increase in education expenditure per capita for every 1 person increase in the number of people under 18 per 1000.
+
+urban: on average and holding all other variables constant, we predict there will be a .1058 dollar decrease in education expenditure per capita for every one dollar increase in the number of urban per 1000
+
+
+RSE: 26.69 (On average, our estimates for education expenditures (per-capita) are off by 26.69 dollars)
+
+$R^2:$ 0.6896 (68.96% of the variance in education expenditures per capita is explained by our mdoel)
+
+### d.
+
+```{r}
+r2 <- summary(lm_edu2)$r.squared
+rse <- summary(lm_edu2)$sigma
+
+fitted <- as.vector(lm_edu2$fitted.values)
+response <- Anscombe[,1]
+residuals <- response - fitted
+mean <- mean(response)
+
+rse2 <- sqrt(sum(residuals^2) / (51-4))
+rse2
+
+r2_2 <- 1 - sum(residuals^2)/sum((response - mean)^2)
+r2_2
+```
+
+Both the output from my "hard-code" and summary are the same
+### e.
+
+We could not compare the practical effects of the three explanatory variables because they are not in terms of the same units. We have to standardize them to be in terms of standard deviations to objetively compare the effects of each variable.
+
+```{r}
+scaled_edu <- data.frame(scale(Anscombe))
+lm_edu3 <- lm(education ~ income + under18 + urban, data = scaled_edu)
+summary(lm_edu3)
+```
+
+It seems that income has the greatest practical effect on education expenditures.
+
+# Problem 2
+
+```{r}
+lm_pres1 <- lm(prestige ~ education, data = Prestige)
+lm_pres2 <- lm(prestige ~ education + income, data = Prestige)
+lm_pres3 <- lm(prestige ~ education + income + women, data = Prestige)
+
+summary(lm_pres1)$r.squared
+summary(lm_pres2)$r.squared
+summary(lm_pres3)$r.squared
+```
+
+**Note:** I'll be referring to lm_pres1 (prestige ~ education) as model 1, lm_pres2 (prestige ~ education + income) as model 2, and lm_pres3 (prestige ~ education + income + women) as model 3 from here on
+
+## 1.
+
+model 1 $R^2:$ 0.7228 (72.28% of the variance in prestige is explained by model 1)
+
+model 2 $R^2:$ 0.798 (79.8% of the variance in prestige is explained by model 2)
+
+model 3 $R^2:$ 0.7982 (79.82% of the variance in prestige is explained by model 3)
+
+Our $R^2$ increases as we add more predictors. However, the increase from model 2 to model 3 (adding the women variable) is very small
+
+## 2.
+
+$R^2 = \frac{TSS - RSS}{TSS}$
+
+(**Note:** I want to clarify that I did seek help online to see what a more formal version of this proof looked like, as I did not fully understand it initially. However, I tried to perform this task at my own level on my own after getting a general idea of how this is done... not sure if I still fully understand this? (At least, at a mathematical level))
+
+Given null model:
+
+$\hat{y'} = \alpha'$
+
+TSS is the RSS for the null model: $\Sigma(y_i - \bar{y})^2$
+
+So, as we add more explanatory variables, the least squares regression algorithm seeks to find the equation for $\hat{y}$ that minimizes the RSE and maximizes R^2... meaning each additonal $\beta$'s that are found has to be ones that minimizes the RSS such that it is at least as "good" as the TSS (the RSS for the null model)...
+
+For a non-null model, say:
+
+$\hat{y} = \alpha + \beta_1x_1$
+
+The RSS: $\Sigma(y_i - \hat{y})^2$ is the same or smaller than the TSS since the RSS is minimized... meaning that the $\beta$ estimate is at least 0 
+
+i.e.
+
+
+$\hat{y} = \alpha + (0)x_1$, which is the same as the null model... 
+
+So as the number of explanatory variables increase, the same logic applies where RSS gets smaller or stays the same (but cannot be worse than the null model or the one before since the alogrithm seeks to minimize)
+
+# Problem 3
+
+Prove $E[y_i] = \alpha + \beta x_i$
+
+$E[Y_i] = E[\alpha + \beta x_i + \epsilon_i]$
+
+$= E[\epsilon_i] + E[\alpha + \beta x_i]$
+
+$ = 0 + \alpha + \beta x_i$
+
+Prove $Var[y_i] = \sigma^2$
+
+$Var[Y_i] = Var[\alpha + \beta x_i + \epsilon_i]$
+
+$ = Var[\alpha + \beta x_i] + Var[\epsilon_i]$
+
+$ = 0 + \sigma^2$
+
+Prove $Y-i$ follows a normal distribution with a mean $\mu$
+
+Given the expected value and variance above and that $\epsilon$ follows a normal distribution:
+
+$Y_i \text{~} N(\alpha + \beta x_i, \sigma^2)$
+
+It only sees a shift in the mean, but the normality remains.
+
+Prove Independence
+
+Given $P(\epsilon_i = e_i, \epsilon_j = e_j) = P(\epsilon_i = e_i)*P(\epsilon_j = e_j)$
+
+$P(Y_i = y_i, Y_j=y_j)$
+
+$ = P(\alpha + \beta x_i + \epsilon_i = y_i, \alpha + \beta x_j + \epsilon_j = y_j)$
+
+$ = P(\epsilon_i = y_i - \alpha - \beta x_i, \epsilon_j = y_j - \alpha - \beta x_j)$
+
+$ = P(\epsilon_i = y_i - \alpha - \beta x_i) * P(\epsilon_j = y_j - \alpha - \beta x_j)$
+
+$= P(\alpha + \beta x_i + \epsilon_i = y_i) * P(\alpha + \beta x_j + \epsilon_j = y_j)$
+
+$= P(Y_i = y_i) * P(Y_j = y_j)$
+
+Thus:
+
+$Y_i = \mu + \epsilon_i, \epsilon \text{~} _{i.i.d.} N(0,\sigma^2)$
+
+leads to: $ Y_i \text{~} _{i}N(\mu, \sigma^2)$
+
+(Wouldn't Y_i not be identically distributed since it will have different meaens for different x, but it will still be independently distributed?)
+
+# Problem 4
+
+# Lab 1
+
+## FL Crime Data
+
+## Exploration and Data cleaning
+
+```{r}
+# - Explore the data set.
+head(fl_crime)
+
+# - Clean the column names.
+ls(fl_crime)
+colnames(fl_crime) <- c("county", "crime", "education", "urbanization", "income")
+head(fl_crime)
+```
+
+## Relationship between crime and education
+
+```{r}
+ggplot(data=fl_crime,
+       aes(x=education, y=crime)) + geom_point() + geom_abline()
+
+lm_obj_crime <- lm(crime ~ education, data = fl_crime)
+summary(lm_obj_crime)
+
+plot(lm_obj_crime, 1)
+plot(lm_obj_crime, 2)
+
+```
+
+### Interpretations
+
+Intercept: Doesn't make sense to interpret the intercept because it is negative.
+
+education: On average, for a one percentage point increase in education we expect to see a 1.486 unit increase in crime rate per 1000 people.
+
+## Lurking Variables
+
+```{r}
+plot(fl_crime[,-1])
+cor(fl_crime[,-1])
+```
+
+Urbanization could be this lurking variable as it has a higher correlation between crime and education.
+
+### Adding urbanization as a new variable
+
+```{r}
+lm_obj_crime2 <- lm(crime ~ education + urbanization, data = fl_crime)
+summary(lm_obj_crime2)
+
+plot(lm_obj_crime2, 1)
+plot(lm_obj_crime2, 2)
+```
+
+### Interactive plot
+(commented out due to markdown error)
+```{r}
+
+#plot3d(lm_obj_crime2, size=5, col=1, data = fl_crime)
+
+# - Add the lines showing the residuals (see "Lecture_2.R")
+
+#plot3d(lm_obj_crime2, size=5, col=1, data = fl_crime)
+
+#segments3d(rep(education, each=2), rep(urbanization, each=2), 
+#           z=matrix(t(cbind(crime,predict(lm_obj_crime2))), #nc=1), 
+#           add=T, 
+#           lwd=2, 
+#           col=2)
+```
+
+## Prestige Data
+
+## Data Exploration 
+
+```{r}
+head(Prestige)
+
+plot(Prestige[,c(-5, -6)])
+
+cor(Prestige[,c(-5, -6)])
+```
+
+Census seems to be the odd one out considering the way the values are defined... Otherwise, education and income have the two most pronounced relationships with prestige. The third would be women, though it doesn't follow very closely to the other variables.
+
+## Multiple Linear Regression Model
+
+```{r}
+lm_obj_prest <- lm(prestige ~ education + income + women, data = Prestige)
+summary(lm_obj_prest)
+```
+
+$\hat{prestige_i} = -6.794 + 4.187(education_i) + 0.00131(income_i) - 0.0089(women_i)$
+
+Interpretations:
+
+intercept - doesn't make much sense to interpret
+
+education - on average and holding all other variables constant, for every one year increase in education, we predict the prestige score to increase by 4.187 points.
+
+income - on average and holding all other variables constant, for every one dollar increase in income, we predict the prestige score to increase by 0.0013 points
+
+women - on average and holding all other variables constant, for every one percentage point increase in the number of incumbents who are women, we predict the prestige score to decrease by 0.0089 points
+
+$R^2$ - 79.82% of the variance in prestige is explained by our model
+
+RSE - on average, our predictions are off by 7.846 Ineo-Porter prestige score points
+
+## Standardize slopes
+
+```{r}
+scaled_Prestige <- data.frame(scale(Prestige[,c(-5,-6)]))
+lm_obj_prest2 <- lm(prestige ~ education + income + women, data = scaled_Prestige)
+coef(lm_obj_prest2)
+```
+
+Education has the greatest practical effect on prestige, followed by income.

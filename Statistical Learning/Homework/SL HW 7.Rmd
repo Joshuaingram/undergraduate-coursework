@@ -1,0 +1,159 @@
+---
+title: "SL HW 7"
+author: "Joshua Ingram"
+date: "11/10/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(ISLR)
+library(car)
+library(boot)
+```
+
+# Problem 1
+```{r}
+head(Weekly)
+```
+
+## a.
+```{r}
+round(cor(Weekly[,-9]), 2)
+```
+There is a strong relationship between Year and Volume (correlation of 0.84)
+
+## b.
+```{r}
+glm.obj <- glm(Direction ~ .-Today, family = "binomial", data = Weekly)
+vif(glm.obj)
+summary(glm.obj)
+```
+no variabels had a VIF greater than 5, so our logistic regression model includes all variables to predict direction, except today.
+
+## c.
+(based on summary() from part b)
+only lag2 is signifcant with $\alpha$ = 0.05 and lag1 with $\alpha$ = 0.20
+
+Interpretations:
+
+lag1:
+holding all other variables constant, if we for every one percentage increase of lag1 there will be decrease of 0.041 in the $logit(\hat\pi)$
+
+lag2:
+holding all other variables constant, if we for every one percentage increase of lag2 there will be an increase of 0.059 in the $logit(\hat\pi)$
+
+## d. 
+```{r}
+glm.probs <- predict(glm.obj, type="response")
+glm.pred <- ifelse(glm.probs > 0.50, "Up", "Down")
+
+conf.mat <- table(glm.pred, Weekly$Direction)
+conf.mat
+
+mean(glm.pred == Weekly$Direction)
+```
+
+The overall accuracy of our model is 56.382%. We had 47 false positives and 428 false positives.
+
+## e.
+```{r}
+train <- (Weekly$Year<2009)
+Weekly.Test <- Weekly[!train,]
+dim(Weekly.Test)
+Direction.Test <- Weekly$Direction[!train]
+
+glm.train <- glm(Direction ~ .-Today, family="binomial", data = Weekly, subset = train)
+
+glm.test.prob <- predict(glm.obj, type="response", newdata = Weekly.Test)
+glm.test.pred <- ifelse(glm.test.prob > 0.50, "Up", "Down")
+
+conf.mat <- table(glm.test.pred, Direction.Test)
+conf.mat
+
+mean(glm.test.pred == Direction.Test)
+```
+
+
+## f.
+
+It seems that the accuracy obtained in part (e) would be a more trustworthy value for our model forecasting performance. This is because in part (e) we have a training set and a testing set, so the 61.53% accuracy is with data that the model has not seen before, as opposed to the model in part (d) that used data to both train the model and predicted that same data. 
+
+# Problem 2
+```{r}
+head(Caravan)
+```
+
+## a.
+```{r}
+glm.obj2 <- glm(Purchase ~ ., family="binomial", data = Caravan)
+summary(glm.obj2)
+```
+
+## b.
+```{r}
+glm.prob <- predict(glm.obj2, type="response")
+glm.pred <- ifelse(glm.prob > 0.50, "Yes", "No")
+
+conf.mat <- table(glm.pred, Caravan$Purchase)
+conf.mat
+
+mean(glm.pred == Caravan$Purchase)
+
+prop.table(conf.mat)
+
+mean(Caravan$Purchase == "No")
+```
+We have an overall accuracy of 94.0055% with this model. The false negative rate is 5.9% and the false positive rate is .12%.
+
+If we were to just use a "model" of predicting that all custommers would purchase insurance, we would be have an accuracy of 94.02267%, which is actually more accurate than our model.
+
+## c.
+
+```{r}
+prop.table(conf.mat, 1)
+```
+
+P(obesrveYes | predictYes) = .46666667
+
+# Problem 3
+```{r}
+head(Default)
+```
+
+## a.
+```{r}
+glm.obj3 <- glm(default~., family="binomial", data = Default)
+summary(glm.obj3)
+
+```
+All of the predictors in this model are significant except for income.
+
+## b.
+```{r}
+set.seed(1)
+cv.errors <- cv.glm(Default, glm.obj3, K=10)$delta[1]
+cv.errors
+```
+test error: 0.02138616
+
+If we did not use set.seed(1) we would get different test errors everytime we ran the code due to the random component in k-fold CV
+
+## c.
+```{r}
+set.seed(1)
+glm.obj3.new <- glm(default~.-income, family = "binomial", data = Default)
+cv.errors <- cv.glm(Default, glm.obj3.new, K=10)$delta[1]
+cv.errors
+```
+test error: 0.02136638
+
+This test error is slightly lower with less variables compared to the model above with all the predictors included.
+
+## d.
+```{r}
+# using LOOCV
+#cv.errors <- cv.glm(Default, glm.obj3)$delta[1]
+#cv.errors
+```
+
+We did not use LOOCV and used 10-fold CV because it would take significantly longer to compute the test error using LOOCV. I used the code above to do LOOCV and my computer was performing the function for almost a minute until I halted the execution.

@@ -1,0 +1,140 @@
+---
+title: "SL Homework 5"
+author: "Joshua Ingram"
+date: "10/27/2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+library(ISLR)
+library(dplyr)
+library(car)
+library(ISwR)
+library(MASS)
+```
+
+## Problem 1
+
+### 1.
+$Sales = \beta_0 + \beta_1TV + (\beta_2 + \beta_3TV)radio + \epsilon$
+
+### 2.
+```{r}
+lm(Balance ~ I(Ethnicity == "Asian") + I(Ethnicity == "Caucasian") + I(Ethnicity == "African - American"), data = Credit)
+```
+
+We recieve "NA" for our "African-American" dummy variable because we are fitting a linear model using a categorical explanatory variable with 3 levels, but using 3 dummy variables. Instead, we should be using 2 dummy variables (K-1 categories) and using one of our levels as a baseline category.
+
+### 3.
+```{r}
+plot(mpg ~ horsepower, data = Auto)
+x.grid <- seq(min(Auto$horsepower), max(Auto$horsepower), length = 100)
+for (i in 1:10){
+  lm.fit <- lm(mpg ~ poly(horsepower, i), data = Auto)
+  lines(x=x.grid,y=predict(lm.fit, newdata=data.frame(horsepower=x.grid)), col = i, lwd=1.5)
+}
+
+```
+
+
+
+## Problem 2
+
+### Model without rv and weight
+```{r}
+lm.rv <- lm(pemax ~ sex + height + frc, data = cystfibr)
+summary(lm.rv)
+```
+
+### Model with rv and weight
+```{r}
+lm.rv <- lm(pemax ~ sex + height + frc + weight + rv, data = cystfibr)
+summary(lm.rv)
+```
+
+### a. 
+The SE of frc is .16681 and the SE of height is .33821 in the model without rv and weight, whereas the SE for frc and height are .3231 and .6775, respectively. The SE for both variables increase when more variables are introduced into the model, which suggests that there is collinearity between the variables introduced and frc and height. This is because we have more uncertainty when determining the effects of these varaibles (which collinearity causes).
+
+### b.
+```{r}
+vif(lm(pemax ~., data = cystfibr))
+# remove weight as it has highest VIF
+vif(lm(pemax~.-weight, data =  cystfibr))
+# remove frc as it has highest VIF
+vif(lm(pemax ~ .-weight-frc, data = cystfibr))
+# remove height because it has highest VIF, still above 5
+vif(lm(pemax ~ .-weight-frc-height, data = cystfibr))
+```
+
+First weight is dropped, second frc, followed by height. This is our simplified model that removes any variables with collinearity (or multi-collinearity), which is why we used VIF, so that we could check for any of this. The three removed variables had some relationship with other variables within the model.
+
+## Problem 3
+
+### a.
+
+$\hat{\text{Starting Salary}}$ = $50 + 20(GPA) + 0.07(IQ) - 5(Gender) + 0.01(GPA*IQ) - 10(GPA*Gender)$
+
+### b.
+
+With all other variables held constant, we expect to see, on average, that males will make $5,000 more than females for starting salary.
+
+### c.
+
+Based on our model, if we observe someone is female, we expecct to see, on average, a "decrease" in starting salary by 5 + 10GPA (convert to thousands of dollars). The effect of being female will also be dependent upon GPA.
+
+### d.
+
+With all other variables held constant, we expect, on average, to see an increase in starting salary by $70 for every one point increase in IQ.
+
+### e.
+
+We expect to see, on average, an increase in starting salary by 0.07 + 0.01GPA (in thousands of dollars) for every one point increase in IQ. The size of the effect of IQ on starting salary is dependent on GPA.
+
+### f.
+```{r}
+prediction = 50 + 20*4 + 0.07*110 - 5*1 + 0.01*(4*110) - 10*(4*1)
+prediction
+```
+
+We predict the starting salary to be $97,100.
+
+### g.
+
+False. The evidence for an interaction effect would be seen in the p-value, not the size of the coefficient. There could be significant evidence for a very small interaction effect between two variables, or very little evidence for a very large interaction effect.
+
+## Problem 4
+
+### 1.
+```{r}
+lm.obj <- lm(Sales ~ Income + Advertising + ShelveLoc + Urban, data = Carseats)
+summary(lm.obj)
+plot(lm.obj, 1)
+```
+
+Based on the residuals vs fitted plot, this seems like a good model to use. This is because the variance of the residuals is pretty constant throughout and there does not seem to be an odd shape or trend around the 0.
+
+The ShelvLoc variable is a categorical variable with three levels, good, bad, and medium. By looking at documentation, it seems to deal with the placement of the carseat in the store. Based on our model, we expect to see sales increase, on average, by 4.66 units, with respect to "bad" ShelveLoc value, when ShelveLoc is "Good", where as we will see only an increase of 1.84 when ShelveLoc is "Medium", with all other variables held constant.
+
+### 2.
+```{r}
+lm.obj1 <- lm(medv ~ crim + rm + lstat, data = Boston)
+summary(lm.obj1)
+plot(lm.obj1, 1)
+```
+
+This model is not a good fit for the data, as the residuals follow a non-linear trend.
+
+```{r}
+plot(medv ~ crim, data = Boston)
+plot(medv ~ rm, data = Boston)
+plot(medv ~ lstat, data = Boston)
+```
+
+```{r}
+lm.obj2 <- lm(medv ~ poly(crim, 3) + rm + poly(lstat, 2), data = Boston)
+plot(lm.obj2, 1)
+```
+
+The model above is a better fit than before, where lstat and crim seemed to have a non-linear relationship with medv. adding an exponent to rm seemed to improve fit, but also may be a case of over-fitting, which we want to avoid, so it was kept untouched.

@@ -1,0 +1,24 @@
+---
+title: "Statisticl Learning Chater 1"
+output: pdf_notebook
+---
+
+Statistical Learning - A blend of machine learning and statistics. Uses tools to model and understand complex datasets
+
+Supervised learning -
+
+Unsupervised Learning - 
+
+Predictor Variable -
+
+Response Variable
+
+```{r}
+#to be used for this class
+library(ISLR)
+```
+
+```{r}
+
+```
+

@@ -1,0 +1,324 @@
+---
+title: "LM HW 9"
+author: "Joshua Ingram"
+date: "5/2/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+Prestige <- read.csv("C:/Users/Josh/Downloads/Prestige.txt", sep='')
+Chile <- read.csv("C:/Users/Josh/Downloads/Chile.txt", sep='')
+Women <- read.csv("C:/Users/Josh/Downloads/SLID-women.txt", sep='')
+Ontario <- read.csv("C:/Users/Josh/Downloads/SLID-Ontario.txt", sep='')
+```
+
+# Problem 1
+
+## 1.
+
+```{r}
+prestige_1 <- lm(prestige ~ education + income + type + women, data = Prestige)
+# looking at the summary to see the p-values for each variables... overall model is significant
+summary(prestige_1)
+
+# let's try an incremental F-test comparing a model with all variables to a model without women (highest individual p-value from the t-tests)
+prestige_2 <- lm(prestige ~ education + income + type, data = Prestige)
+# incremental F-test
+anova(prestige_2, prestige_1)
+# incremental F-test does not report a significant p-value... so there is not significant evidence that the coefficient for women is not equal to 0
+
+# incremental F-test (line for "type") to determine if type is significant
+anova(prestige_2)
+
+# final model is prestige_2 since type is significant
+```
+
+After conducting the incremental F-test, we've dropped women but retained all other predictors.
+
+## 2.
+
+```{r}
+plot(prestige_2, 1)
+```
+
+This plot allows us to check the assumption of homoscedasticity. This plot is a bit odd since there is almost a gap around 50-60 in the fitted values, but it seems that there is mostly homoscedasticity. (if we needed to adjust the model if the assumption is broken, we could perform a log transformation or sqrt on the response)
+
+## 3.
+
+We could use a normal q-q plot and a smooth density plot to check the normality assumption.
+
+```{r}
+plot(prestige_2, 2)
+plot(density(rstandard(prestige_2)))
+```
+
+In this case, the normality assumption seems to be noticeably broken. There is a subtle right-skew, as well as a non-smooth density plot... not necessarily bimodal, but there is a "hump" in the curve. It's not necessarily a big deal for inference to be conducted since we have a rather large sample and the Central Limit Theorem covers us.
+
+# Problem 2
+
+## 1.
+
+$$
+Y_i = \beta_0 + \beta_1x_{1,i} + \beta_2x_{2,i} + \beta_3x_{3,i} + \epsilon_i, \epsilon_i \sim_{i.i.d} N(0,\sigma^2)
+$$
+Where $Y_i$ is *compositeHourlyWages*, $x_{1,i}$ is the dummy variable for *sex* (1 if male, 0 if female), $x_{2,i}$ is the variable for *age*, and $x_{3,i}$ is the variable for *yearsEducation*.
+## 2.
+
+```{r}
+ontario_1 <- lm(compositeHourlyWages ~ sex + age + yearsEducation, data = Ontario)
+plot(ontario_1, 1)
+```
+
+There is obviously heteroscedasticity. Let's try a log transformation.
+
+```{r}
+ontario_2 <- lm(log(compositeHourlyWages) ~ sex + age + yearsEducation, data = Ontario)
+plot(ontario_2, 1)
+```
+
+A log transformation on our response seems to fix the non-constant variance problem.
+
+## 3.
+
+```{r}
+plot(ontario_2, 2)
+plot(density(rstandard(ontario_2)))
+```
+
+The normality assumption isn't being followed that well in this example (some left-skewness), but it's not the worst. It's not a big deal if it's broken since we have a large sample. If we needed to fix this, we could use bootstrap sampling to estimate the coefficients or we could add a transformation to our variables.
+
+## 4.
+
+```{r}
+summary(ontario_2)
+```
+
+
+$$
+\hat{log(compositeHourlyWages)} = 1.099 + 0.2245(sex_{male}) + 0.0182(age) + 0.0559(yearsEducation)
+$$
+
+Interpretations:
+
+sex - On average, we expect males to have $e^{0.2245}$ times more dollars in composite hourly wages than females, holding all else constant.
+
+age - On average, for every one year increase in wage, we expect the composite hourly wages to multiply by $e^{0.0182}$, holding all else constant.
+
+yearsEducation - On average, for every one year increase in the number of years of completed education, we expect the composite hourly wages to multiply by $e^{0.0559}$, holding all else constant.
+
+# Problem 3
+
+## 1.
+
+### a.
+
+```{r}
+Chile_subset <- Chile[which(Chile$vote == "Y" | Chile$vote == "N"),]
+Chile_subset <- Chile_subset[which(is.na(Chile_subset$statusquo)==FALSE),]
+```
+
+$$
+Y_i = \beta_0 + \beta_1x_{1,i} + \epsilon_i, \epsilon_i \sim_{i.i.d}N(0,\sigma^2)
+$$
+
+Where $Y_i$ is vote (Y = 1, N = o) and $x_{1,i}$ is statusquo.
+
+```{r}
+chile_num <- as.numeric(Chile_subset$vote)-2
+chile_1 <- lm(chile_num ~ statusquo, 
+             data=Chile_subset)
+summary(chile_1)
+plot(chile_1, 1)
+plot(chile_1,2)
+```
+
+we can already see that vote being a binary response is an issue and we should not us a classic linear regression model. We need to predict the probability of vote being Y or N, meaning our values should only be between 1 and 0. A classical linear regression model would output values betweeen negative and positive infinity. Also, our residual vs. fitted plot shows us that it the variance doesn't follow our assumption of a random "cloud" with no form and the normal q-q plot shows us that the normality assumption is completely broken... Overall, a binary response is just not appropriate for a classical linear regression model.
+
+### b.
+
+$$
+log(\frac{\pi}{1-\pi}) = \beta_0 + \beta_1x_{1,i}, \space 
+Y_i \sim_{ind} bin(1,\pi)
+$$
+
+Where $Y_i$ is vote (Y = 1, N = o) and $x_{1,i}$ is statusquo. $\pi = P(Y_i = Y | x_{1,i})$.
+
+```{r}
+chile_2 <- glm(vote ~ statusquo, data = Chile_subset, family = "binomial")
+summary(chile_2)
+```
+
+$$
+log(\frac{\pi}{1-\pi}) = 0.21531 + 3.20554(statusquo)
+$$
+
+The relationship between statusquo and vote is statistically significant, as we receive a z-value of 22.4 and a p-value of basically 0. 
+
+Interpretations:
+
+odds - For every one unit increase in the scale support of the status-quo, we predict that the odds of voting yes to multiply by 3.21.
+
+simple - As statusquo increases, we expect the probability of voting yes to increase. 
+
+### c.
+
+```{r}
+prob <- predict(chile_2, newdata=data.frame(statusquo=0),
+        type="response")
+prob
+odds <- prob/(1-prob)
+odds
+```
+
+Odds of yes given statusquo = 0: 1.24
+
+probability of yes given statusquo = 0: 0.554
+
+### d.
+
+```{r, error=TRUE}
+chile_prob <- predict(chile_2, type='response')
+chile_predict <- ifelse(chile_prob > 0.50, "Y","N")
+mean(chile_predict == Chile_subset$vote)
+```
+
+We have 92.3% sample prediction accuracy for our sample.
+
+## 2.
+
+### a.
+
+```{r}
+Chile_subset <- Chile_subset[complete.cases(Chile_subset),]
+chile_3 <- glm(vote ~ ., data = Chile_subset, family = "binomial")
+summary(chile_3)
+
+chile_null <- glm(vote ~ 1, data=Chile_subset, family="binomial")
+
+# Test for overall significance of the model
+anova(chile_null, chile_3, test = "LRT")
+```
+
+We received a p-value of basically 0 from our likelihood ratio test, meaning our model with all variables is statistically significant.
+
+### b.
+
+```{r}
+# realized I could've used this function for question 1
+step(chile_3, trace=F)
+```
+
+We ended up dropping region, income, age, and population.
+
+```{r}
+chile_4 <- step(chile_3, trace=F)
+summary(chile_4)
+```
+
+$$
+log(\frac{\pi}{1-\pi}) = \beta_0 + \beta_1x_{1,i} + \beta_2x_{male,i} + \beta_3x_{PS,i} + \beta_3x_{S,i}, \space 
+Y_i \sim_{ind} bin(1,\pi)
+$$
+
+Where $Y_i$ is vote (Y = 1, N = o) and $x_{1,i}$ is statusquo, $x_{male,i}$ is the dummy variable for sex (male = 1, female = 0), $\beta_3x_{PS,i}$ is the dummy variable for when education = PS, $\beta_3x_{S,i}$ is the dummy variable for when education = S. $\pi = P(Y_i = Y | x_{1,i},x_{male,i},x_{PS,i},x_{S,i})$.
+
+$$
+log(\frac{\pi}{1-\pi}) = 1.0153 + 3.1689x_{1,i}- 0.5742x_{male,i} - 1.1074x_{PS,i} - 0.06828x_{S,i}
+$$
+
+### c.
+
+educationPS and statusquo are the most statistic predictors.
+
+Interpretations:
+
+Odds:
+
+EducationPS - We expect the odds of someone to vote Yes with a Post-secondary education to be $e^{-1.1074}$ times lower than that of people with a Primary education, holding all else constant.
+
+statusquo - We expect the odds of voting yes to multiply by $e^{3.1689}$ for every one unit increase in the scale of support for the status-quo, holding all else constant.
+
+Simple:
+
+EducationPS - We expect the probability of voting yes to be less for someone with post-secondary education than someone with Primary education, holding all else constant.
+
+statusquo - We expect the probability of voting yes to increase as statusquo increases, holding all else constant.
+
+### d.
+
+```{r}
+summary(Chile_subset)
+
+```
+```{r}
+prob <- predict(chile_4, newdata=data.frame(statusquo=-0.18511, sex="F", education = "S"),
+        type="response")
+prob
+odds <- prob/(1-prob)
+odds
+```
+
+Odds of yes: 0.776
+
+probability of yes: 0.427
+
+
+### e.
+
+```{r, error=TRUE}
+chile_prob <- predict(chile_4, type='response')
+chile_predict <- ifelse(chile_prob > 0.50, "Y","N")
+mean(chile_predict == Chile_subset$vote)
+
+chile_prob <- predict(chile_3, type='response')
+chile_predict <- ifelse(chile_prob > 0.50, "Y","N")
+mean(chile_predict == Chile_subset$vote)
+```
+
+We have 92.83% sample prediction accuracy for our sample for our reduced model and 92.71% for the full model. It seems that the reduced model is better at predictions of our sample data.
+
+
+# Problem 4
+
+## 1.
+
+```{r}
+women_1 <- glm(working ~ ., data = Women, family = "binomial")
+summary(women_1)
+
+women_null <- glm(working ~ 1, data=Women, family="binomial")
+
+# Test for overall significance of the model
+anova(women_null, women_1, test = "LRT")
+```
+
+Given a p-value of basically 0 from the likelihood ratio test, we have evidence that our mode is statistically significant.
+
+## 2.
+
+Kids0509Yes and education are the two most significant predictors. 
+
+Interpretation:
+
+Odds:
+
+Kids0509Yes - We expect the odds of a women being in the labor force with kids from 5 to 9 years old to be $e^{-0.389064}$ time less than women without kids from 5 to 9 years old, holding all else constant.
+
+Education - For every one year increase in the number of years of education, we expect the odds of a woman being in the labor force to multiply by $e^{0.2167}$, holding all else constant.
+
+Simple:
+
+Kids0509Yes - We expect the probability of a woman being in the labor force with kids from 5 to 9 years old to be less than that of a woman without kids from 5 to 9 years old, holding all else constant.
+
+Education - We expect the probability of a woman being in the labor force to increase as the number of years of her education increase, holding all else constant.
+
+## 3.
+
+```{r}
+women_prob <- predict(women_1, type='response')
+women_predict <- ifelse(women_prob > 0.50, TRUE,FALSE)
+mean(women_predict == Women$working)
+```
+
+Our model has a sample accuracy of 79.12%

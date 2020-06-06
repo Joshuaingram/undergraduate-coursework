@@ -1,0 +1,89 @@
+---
+title: "CDA Homework 3"
+author: "Joshua Ingram"
+date: "September 23, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+```
+
+## 1. Inference for a Proportion
+
+### a)
+
+1.8
+
+a.
+```{r}
+n <- 1374
+count <- 486
+prop <- count/n
+
+lower <- prop - 2.576 * sqrt((prop * (1-prop))/n)
+upper <- prop + 2.576 * sqrt((prop * (1-prop))/n)
+
+lower
+upper
+```
+We are 99% confident that the true population proportion of people in the US in 2010 that would be willing to accept cuts in their standard of living to protect the environment is between .3205 and .3869.
+
+b.
+HO: $\hat{\pi}$ = .50
+HA: $\hat{\pi}$ =/= .50
+$\alpha$ = .01
+```{r}
+z <- (prop - .50) / sqrt((prop * (1-prop))/n)
+z
+
+pnorm(z) * 2
+```
+With $\alpha$ at .01, we received a p-value of 8.187032e-30, so we have significant evidence to reject the null hypthesis, that half of the population would be willing to take cuts, in favor of the alternative hypothesis, that a minority or majority of the population would be willing to take cuts in their standard of living to protect the environment. Basedo on our confidence interval, we can see that it is likely a 
+
+### b) 
+
+1.8
+(same hypothesis test as in in the last part)
+```{r}
+prop.test(486, 1374, alternative = "two.sided", conf.level = .99)
+```
+a.
+We are 99% confident that the true population proportion of people in the US in 2010 that would be willing to accept cuts in their standard of living to protect the environment is between .3209 and .3879
+
+b.
+With $\alpha$ at .01, we received a p-value of 2.2e-16, so we have significant evidence to reject the null hypthesis, that a half of the population would be willing to take cuts, in favor of the alternative hypothesis, that either a minority or majority of the population would be willing to take cuts in their standard of living to protect the environment. Based on our confidence interval, we can see that we have significant evidence to believe that a minoirty of the population would be willing to take these cuts.
+
+
+## 2. Likelihood Inference for a single observation from a Poisson Distribution
+
+### a)
+P(Y = y) = ($\lambda^y$ * $e^{-\lambda}$) / y!
+
+### b)
+l($\lambda$; y) = P(Y = y) = ($\lambda^y$ * $e^{-\lambda}$) / y!
+
+### c)
+L($\lambda$; y) = log[($\lambda^y$ * $e^{-\lambda}$) / y!]
+
+### d)
+```{r}
+likelihoods <- c()
+for (i in 1:15){
+  like <- log((i^4 * 2.71828^(-i))/24)
+      likelihoods <- append(likelihoods, like)
+}
+likelihoods
+plot(likelihoods~c(1:15), xlab = "lambda")
+```
+
+
+### e)
+(after chain rule and product rule)
+
+the derivative of our original function is:
+
+(24/($\lambda^4$  e^-$\lambda$)) * ((1/6) $\lambda^3$ e^-$\lambda$ - (1/24) e^-$\lambda$ $\lambda^4$)
+
+setting this equal to 0, we find where the maximum is... which is at $\lambda$ = 4
+the MLE of $\lambda$ would be 4

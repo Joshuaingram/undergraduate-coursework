@@ -1,0 +1,111 @@
+---
+title: "CDA HW 4"
+author: "Joshua Ingram"
+date: "October 2, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+```
+
+
+# 1. Likelihood for a random sample of size n from a Poisson distribution
+
+a.
+L(λ;y1,...,yn) = $\prod_{i=1}^n$ ($\lambda^{y_i}$ $e^{-\lambda}$)/$y_i$!
+
+b.
+l(λ;y1,...,yn) = $\sum_{i=1}^n$ $y_i$log($\lambda$) $-\lambda$ - log($y_i$!)
+
+c.
+```{r}
+lambda <- c(seq(0,25,0.01))
+yi <- c(3, 0, 4, 3, 2, 4, 1, 5)
+likelihood <- c()
+logs <- c()
+n <- length(yi)
+
+for (i in lambda){
+  sum <- 0
+  logs <- c()
+  for (j in 1:8){
+    sum <- (yi[j]*log(i)) -i - log(factorial(yi[j]))
+    logs <- append(logs, sum)
+  }
+  likelihood <- append(likelihood, sum(logs))
+}
+plot(likelihood~lambda)
+
+```
+
+
+d.
+```{r}
+mle<-lambda[match(max(likelihood, na.rm = TRUE), likelihood)]
+mle
+```
+
+MLE is 2.75
+
+# 2. Statistical Inference about the Poisson mean λ.
+
+a. 
+.....
+
+b.
+For a large sample size n, the MLE follows a normal distribution with a mean of lambda and SD of sqrt(lambda/n)
+
+c.
+```{r}
+null <- 2
+z.wald <- (mle - null) / sqrt(mle/n)
+z.wald
+pnorm(mean = null, sd = sqrt(null/n), q = z.wald) * 2
+```
+test statistic = 1.2792
+p-value = .1494
+
+d.
+```{r}
+z.score <- (mle - null) / sqrt(null/n)
+z.score
+pnorm(mean = null, sd = sqrt(null/n), q = z.score) * 2
+```
+test statistic = 1.5
+p-value = .317
+
+e.
+```{r}
+yi <- c(3, 0, 4, 3, 2, 4, 1, 5)
+logs1 <- c()
+sum <- 0
+
+for (i in yi){
+  sum <- (yi[i]*log(2.75)) -2.75 - log(factorial(yi[i]))
+  logs1 <- append(logs1, sum)
+}
+
+logs0 <- c()
+sum <- 0
+
+for (i in yi){
+  sum <- (yi[i]*log(2)) -2 - log(factorial(yi[i]))
+  logs0 <- append(logs0, sum)
+}
+
+l1 <- sum(logs1)
+l0 <- sum(logs0)
+ratio <- 2 * (l1 - l0)
+ratio
+pnorm(mean = null, sd = sqrt(null/n), q = ratio) * 2
+```
+likelihood ratio test statistic = 1.601
+p-value = .425
+
+f.
+```{r}
+conf.int <- mle + c(-1,1) * (1.96 * sqrt(mle/n))
+conf.int
+```
+confidence interval: (1.6, 3.899)

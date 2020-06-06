@@ -1,0 +1,120 @@
+---
+title: "CDA Project Background Research, Methods, and Data Summaries"
+author: "Joshua Ingram"
+date: "11/30/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+library(RColorBrewer)
+library(vcd)
+library(VGAM)
+lc.loans <- read.csv("C:\\Users\\joshi\\Documents\\CDA Final Project Loan Data\\loan.csv")
+```
+
+# Numerical and Graphical Data Summaries
+
+First, let's take a look at what exactly we are working with:
+
+```{r}
+head(lc.loans)
+ls(lc.loans)
+nrow(lc.loans)
+ncol(lc.loans)
+```
+
+We have:
+
+145 variables and 2,260,668 observations (loans) from 2007-2018
+
+Let's see the possible categories for the loan grade:
+```{r}
+levels(lc.loans$grade)
+```
+
+Here's a table that has the counts for all the loan grades:
+```{r}
+grade.counts.table <- table(lc.loans$grade)
+grade.counts.table
+grade.prop.long <- as.data.frame(as.table(prop.table(grade.counts.table)))
+colnames(grade.prop.long) <- c("Grade", "Proportion")
+sum(grade.counts.table)
+```
+
+Just to make sure there are no missing values for loan grades, I summed the counts up and it equals the row count... good!
+
+Proportions of grades:
+```{r}
+prop.table(grade.counts.table)
+```
+
+The average loan amount requested($):
+```{r}
+boxplot(lc.loans$loan_amnt)
+hist(lc.loans$loan_amnt)
+mean(lc.loans$loan_amnt)
+```
+
+Let's look at the distribution of loan grades:
+```{r}
+ggplot(data = grade.prop.long, aes(x = Grade, y = Proportion, fill = Grade)) + geom_bar(stat = "identity", width = .8) + geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + labs(y = "Proportion", title = "Distribution of Loan Grades") + scale_fill_manual(name = "Grade", values = brewer.pal(7, "Reds")[1:7])
+```
+
+
+
+First let's see if there is any difference in the proprotion of loan grades give an application type:
+
+The number of single borrower loans and joint loans
+```{r}
+nrow(lc.loans[which(lc.loans$application_type == "Individual"),])
+nrow(lc.loans[which(lc.loans$application_type == "Joint App"),])
+```
+
+```{r}
+grades.apptype.table <- table(lc.loans$application_type, lc.loans$grade)
+grades.apptype.matrix <- as.matrix(grades.apptype.table)
+grades.apptype.prop <- prop.table(grades.apptype.table, 1)
+grades.apptype.long <- as.data.frame(as.table(grades.apptype.prop))
+colnames(grades.apptype.long) <- c("Type", "Grade", "Proportion")
+
+ggplot(data = grades.apptype.long, aes(x = Type, y = Proportion, fill = Grade)) + geom_bar(stat = "identity", width = .8) + geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + labs(y = "Proportion", title = "Conditional Distribution of Loan Grades by Application Type") + scale_fill_manual(name = "Grade", values = brewer.pal(7, "Reds")[1:7])
+```
+
+```{r}
+apptype.test <- chisq.test(grades.apptype.matrix)
+
+apptype.test$expected
+grades.apptype.matrix
+st.resid <- round(apptype.test$stdres, 3)
+st.resid
+```
+
+
+Now that we looked at the application types and its effects on loan grades, let's take a look at homeownership status and loan grades
+```{r}
+lc.loans$home_ownership <- factor(lc.loans$home_ownership, levels = c("OWN", "MORTGAGE", "RENT", "OTHER", "ANY", "NONE"))
+grades.ownership.table <- table(lc.loans$home_ownership, lc.loans$grade)
+grades.ownership.table
+
+grades.ownership.matrix <- as.matrix(grades.ownership.table)
+
+grades.ownership.prop <- prop.table(grades.ownership.table, 1)
+grades.ownership.prop
+
+grades.ownership.long <- as.data.frame(as.table(grades.ownership.prop))
+colnames(grades.ownership.long) <- c("Ownership", "Grade", "Proportion")
+
+ggplot(data = grades.ownership.long, aes(x = Ownership, y = Proportion, fill = Grade)) + geom_bar(stat = "identity", width = .8) + geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + labs(y = "Proportion", title = "Conditional Distribution of Loan Grades by Home Ownership") + scale_fill_manual(name = "Grade", values = brewer.pal(7, "Reds")[1:7])
+```
+
+
+```{r}
+ownership.test <- chisq.test(grades.ownership.matrix)
+ownership.test
+
+round(ownership.test$stdres,3)
+```
+

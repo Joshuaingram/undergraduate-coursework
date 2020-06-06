@@ -1,0 +1,86 @@
+---
+title: "CDA HW 6"
+author: "Joshua Ingram"
+date: "10/28/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+yawn <- read_csv("C:/Users/joshi/Downloads/Yawn.csv")
+```
+
+# Yawn Study
+
+## a.
+
+$logit(\pi_i) = log(\frac{\pi_i}{1 - \pi_i}) = \alpha + \beta x_i$
+
+$\frac{\pi_i}{1 - \pi_i} = e^{\alpha + \beta x_i}$
+
+$(1-\pi_i)e^{\alpha + \beta x_i} = \pi_i$
+
+$e^{\alpha + \beta x_i} - \pi_ie^{\alpha + \beta x_i} = \pi_i$
+
+$e^{\alpha + \beta x_i} = \pi_i(1 + e^{\alpha + \beta x_i})$
+
+$\pi_i= \frac{e^{\alpha + \beta x_i}}{1 + e^{\alpha + \beta x_i}}$
+
+## b.
+
+$\pi_i= \frac{e^{\alpha + \beta x_i}}{1 + e^{\alpha + \beta x_i}}$
+
+$\pi_i = \frac{e^{\alpha + \beta x_i}}{e^{\alpha + \beta x_i}(\frac{1}{e^{\alpha + \beta x_i} + 1})}$
+
+$\pi_i = \frac{1}{1 + e^{-\alpha - \beta x_i}}$
+
+## c.
+
+$logit(\pi_i) = \alpha + \beta$
+
+$\pi_i= \frac{e^{\alpha + \beta}}{1 + e^{\alpha + \beta}}$
+
+## d.
+
+$logit(\pi_i) = \alpha$
+
+$\pi_i= \frac{e^{\alpha}}{1 + e^{\alpha}}$
+
+## e.
+
+```{r}
+head(yawn)
+glm.obj <- glm(Yawn ~ Age, family = binomial, data = yawn)
+summary(glm.obj)
+```
+
+
+## f.
+
+MLE of \alpha = 2.20772
+
+MLE of \beta = -0.04418
+
+## g.
+
+```{r}
+2.20772 - 0.04418*22
+```
+
+log-odds = 1.23576
+
+## h.
+
+```{r}
+2.71828^(2.20772 - 0.04418*22)
+```
+
+odds = 3.44099
+
+## i.
+
+```{r}
+1/(1 + 2.71828^(-2.20772 + 0.04418*22))
+```
+
+probability = 0.774825

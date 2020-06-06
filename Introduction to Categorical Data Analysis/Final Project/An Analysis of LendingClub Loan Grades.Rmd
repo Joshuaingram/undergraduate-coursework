@@ -1,0 +1,341 @@
+---
+output: 
+  pdf_document:
+    citation_package: natbib
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm-latex-ms.tex
+title: "An Analysis of LendingClub Loan Grades"
+thanks:
+author: 
+- name: Joshua D. Ingram
+  affiliation: New College of Florida
+abstract: "This document contains an overview of LendingClub loans from the year 2007 to 2018 and a discussion on the valuability of understanding the grading process. I perform an analysis on the loan grades by fitting a cumulative logistic regression model, followed by interpretting the effects of each variable.[^1]"
+keywords: "LendingClub, loans, loan grade, cumulative logistic regression model"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+# spacing: double
+bibliography: ""
+biblio-style: apsr
+---
+
+```{r, include = FALSE, set.seed(1)}
+knitr::opts_chunk$set(cache = T)
+library(tidyverse)
+library(RColorBrewer)
+library(vcd)
+library(plyr)
+library(VGAM)
+library(car)
+library(knitr)
+
+lc.loans <- read.csv("C:/Users/Josh/Documents/CDA Final Project Loan Data/loan.csv")
+
+# combining grade catgories E-G
+a.grades <- c("A")
+b.grades <- c("B")
+c.grades <- c("C")
+d.grades <- c("D")
+e.less.grades <- c("E", "F", "G")
+
+lc.loans <- mutate(lc.loans, grade = factor(case_when(grade %in% a.grades ~ "A",
+                                                grade %in% b.grades ~ "B",
+                                                grade %in% c.grades ~ "C",
+                                                grade %in% d.grades ~ "D",
+                                                grade %in% e.less.grades ~ "E-G")))
+
+# removing "ANY" category from home_ownership becuase it is unclear and seems to be NA
+any.subset <- subset(lc.loans, home_ownership != "ANY")
+any.subset
+lc.loans <- droplevels(any.subset)
+
+# selecting variables of interest
+loans.selection <- data.frame(lc.loans$grade, lc.loans$annual_inc, lc.loans$application_type, lc.loans$dti,
+                    lc.loans$home_ownership, lc.loans$loan_amnt,  lc.loans$mort_acc)
+
+# removing NA's from loans data
+loans <- na.omit(loans.selection)
+
+# renaming columns
+colnames(loans) <- c("Grade", "Annual_Income", "Application_Type", "Debt_to_Income",
+                                 "Home_Ownership", "Loan_Amount", "Mortgage_Accounts")
+
+# ordering grades for the cumulative logistic regression model
+loans$Grade <- factor(loans$Grade, ordered = TRUE)
+
+# random sample from the loans data to be used for model fitting
+loans.sample <- loans[sample(nrow(loans), 20000, replace = FALSE),]
+```
+
+[^1]: For access to the dataset, source code, and other files, go to https://github.com/joshuaingram
+
+# LendingClub
+
+LendingClub is a peer-to-peer lending platform that enables borrowers to have quick access to funds of up to $40,000. By partially funding loans, lenders are able to create diversified portfolios made up of any number of loans that are in accordance with their desired risk level. Lenders are able to assess the risk of each loan by accessing information filled out by the potential borrower in the application, as well as additional information provided by LendingClub. One way a lender can assess risk is through the loan grades calculated and given by the LendingClub platform.
+
+Each loan is given a grade from A to G, A being the least risky and G being the riskiest. However, the method for loan grade selection is not explicitly stated by LendingClub. This automatically causes lenders to put trust in the platform to provide reliable and unbiased grades. Understanding some of the variables that can accurately predict loan grades gives lenders a better understanding of the grading process, as well the ability to make more informed decisions on their investments.
+
+# LendingClub Loan Dataset
+
+To better understand how loans may be graded, as well as the loans on the platform in general, the LendingClub loan dataset from [kaggle.com](https://www.kaggle.com/wendykan/lending-club-loan-data) was selected. This dataset contains information on every loan issued from 2007 to 2018 and is sourced from the LendingClub itself. There are 2.26 million observations and 145 variables, as well as an accompanying data dictionary.
+
+
+The .csv file containg the loan data was 1.16 GB in size upon download and 23.84% of the values were missing. After observation of the variables, 7 were selected for analysis. Here are the variables and their descriptions, as defined by the data dictionary:
+
+## **Response Variable**
+
+- *Grade* ~ LendingClub assigned loan grade (A, B, C, D, E, F, G)
+
+
+## **Predictor Variables**
+
+- *Annual_Income* ~ the self-reported annual income provided by the borrower during registration
+
+- *Application_Type* ~ indicates whether the loan is an individual application or a joint application with two co-borrowers (Individual, Joint App)
+
+- *Debt_to_Income* ~ (debt-to-income ratio) a ratio calculated using the borrower’s total monthly debt payments on the total debt obligations, excluding mortgage and the requested LendingClub loan, divided by the borrower’s self-reported income
+
+- *Home_Ownership* ~ the home ownership status provided by the borrower during registration (Rent, Own, Mortgage, Own, Other)
+
+- *Loan_Amount* ~ the listed amount of the loan applied for by the borrower
+
+- *Mortgage_Accounts* ~ the number of mortgage accounts
+
+Limiting the data to containing only these variables reduced the proportion of missing values to .33%. 
+
+# Data Wrangling
+
+Since limiting the amount of variables down to 7 reduced the amount of missing values by 23.51 percenatage points, it was reasonable to outright remove the remaining NA values from the data. This new data is referred to as *loans* (in italics) from this point forward. Only 8.31% of the LendingClub loans were given grades from E to G, so to make the data more interpretable and better to work with, those grades were combined into a new category, *E-G*. Finally, due to the size of the data and limited computing power, a new subset of the data called *loans.sample* was created. This subset of the data is a random sample of size 20,000 from the *loans* data. This subset of data is only used for model fitting. This is because with the *loans* data, containing over 2 million observations, the fit functions outputted data that was too large (over 12 GB). All graphs not dealing with model fits are made with the full *loans* data.
+
+# Data Summaries
+
+Before fitting any models, it is a good idea to look at the data we are working with through visualizations and summary statistics. Below is the distribution of loan grades in our data. The greatest proportion of our loans are give grades B and C, while the smallest proportion of loans are given grades E-G. It suggests that most of the borrowers granted loans are given a level of moderate risk, while very few are relatively high risk borrowers.
+
+```{r, tidy = TRUE, echo = FALSE}
+# proportion of loan grades
+grade.counts.table <- table(loans$Grade)
+grade.prop.long <- as.data.frame(as.table(prop.table(grade.counts.table)))
+colnames(grade.prop.long) <- c("Grade", "Proportion")
+grade.prop.table <- prop.table(grade.counts.table)
+
+ggplot(data = grade.prop.long, aes(x = Grade, y = Proportion, fill = Grade)) + 
+  geom_bar(stat = "identity", width = .8) + 
+  geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + 
+  labs(y = "Proportion", title = "Distribution of Loan Grades") + 
+  scale_fill_manual(name = "Grade", values = brewer.pal(5, "Reds")[1:5])
+
+#kable(grade.prop.table, col.names = c("Grade", "Proportion"))
+```
+
+The conditional distribution of loan grades by application type isn't too telling. The proportion of loan grades for individual applicants is about the same as that for joint applicants.
+
+```{r, tidy = TRUE, echo= FALSE}
+# conditional distribution of loan grades by plication type
+grades.apptype.table <- table(loans$Application_Type, loans$Grade)
+grades.apptype.matrix <- as.matrix(grades.apptype.table)
+grades.apptype.prop <- prop.table(grades.apptype.table, 1)
+grades.apptype.long <- as.data.frame(as.table(grades.apptype.prop))
+colnames(grades.apptype.long) <- c("Type", "Grade", "Proportion")
+
+ggplot(data = grades.apptype.long, aes(x = Type, y = Proportion, fill = Grade)) + 
+  geom_bar(stat = "identity", width = .8) + 
+  geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + 
+  labs(y = "Proportion", title = "Conditional Distribution of Loan Grades by Application Type") + 
+  scale_fill_manual(name = "Grade", values = brewer.pal(5, "Reds")[1:5])
+
+kable(grades.apptype.prop)
+```
+
+The conditional distribution of loan grades by home ownership reveals a bit more about the data. Specifcally, we can see a noticeable difference in the distribution of grades for the "OTHER" category compared to the remaining home ownership categories.
+
+```{r, tidy = TRUE, echo= FALSE}
+# conditional distribution of loan grades by home ownership
+loans$Home_Ownership <- factor(loans$Home_Ownership, levels = c("OWN", "MORTGAGE", "RENT", "OTHER", "NONE"))
+grades.ownership.table <- table(loans$Home_Ownership, loans$Grade)
+grades.ownership.matrix <- as.matrix(grades.ownership.table)
+grades.ownership.prop <- prop.table(grades.ownership.table, 1)
+grades.ownership.long <- as.data.frame(as.table(grades.ownership.prop))
+colnames(grades.ownership.long) <- c("Ownership", "Grade", "Proportion")
+
+ggplot(data = grades.ownership.long, aes(x = Ownership, y = Proportion, fill = Grade)) + 
+  geom_bar(stat = "identity", width = .8) + 
+  geom_bar(stat = "identity", width = .8, color = "black", show.legend = F, alpha = 1) + 
+  labs(y = "Proportion", title = "Conditional Distribution of Loan Grades by Home Ownership") + 
+  scale_fill_manual(name = "Grade", values = brewer.pal(5, "Reds")[1:5])
+
+kable(grades.ownership.prop)
+```
+
+Looking at the mean loan amounts by grade, as the loans are graded as riskier the means get larger.
+
+```{r, tidy = TRUE, echo= FALSE}
+# table of loan averages by grade
+a.mean <- mean(loans[which(loans$Grade == "A"),]$Loan_Amount)
+b.mean <- mean(loans[which(loans$Grade == "B"),]$Loan_Amount)
+c.mean <- mean(loans[which(loans$Grade == "C"),]$Loan_Amount)
+d.mean <- mean(loans[which(loans$Grade == "D"),]$Loan_Amount)
+etog.mean <- mean(loans[which(loans$Grade == "E-G"),]$Loan_Amount)
+
+mean.loans.df <- data.frame(a.mean, b.mean, c.mean, d.mean, etog.mean)
+rownames(mean.loans.df) <- c("Average Loan Amount ($)")
+colnames(mean.loans.df) <- c("A", "B", "C", "D", "E-F")
+
+kable(mean.loans.df)
+```
+
+Breaking it up by loan grade, we can look at the density of the loans. For grades A, B, and C, the distributions are right noticeably right-skewed, with most of the loans be around \$10,000. For grades D and E-G, the distributions of the amounts are still right skewed, but not as pronounced. This shows that the riskier graded loans have a greater spread of loan amounts, with a greater amount being closer to \$40,000.
+
+```{r, tidy = TRUE, echo= FALSE}
+# desntiy of loan amounts given loan grade
+ggplot(loans, aes(x=Loan_Amount, fill = Grade)) + 
+  geom_density(stat = "density", adjust = 3, alpha = .4) + 
+  facet_wrap(vars(Grade)) + 
+  scale_fill_manual(name = "Grade", values = brewer.pal(5, "Reds")[1:5]) +
+  labs(y = "Density", x = "Loan Amount", title = "Density of Loan Amounts by Grade")
+```
+
+Looking at the densities divided by application type, the joint applications have a wider spread of loan amounts, whereas the individual applications are more right skewed.
+
+```{r, tidy = TRUE, echo= FALSE}
+# mean loan amount
+mean.loans <- mean(loans$Loan_Amount)
+
+# density of loan amounts given application type
+ggplot(loans, aes(x=Loan_Amount, fill = Application_Type)) + 
+  geom_density(stat = "density", adjust = 3, alpha = .4) + 
+  scale_fill_manual(name = "Grade", values = brewer.pal(3, "Reds")) +
+  labs(y = "Density", x = "Loan Amount", title = "Density of Loan Amounts by Application Type")
+```
+
+
+
+# Model Selection
+
+After looking at some summary statistics and visualizations, it's time to use a multiple cumulative logistic regression model to predict loan grades and understand which variables from our *loans* data are significant. The loan grades will be treated as ordinal. First, a model with all of the predictor variables will be created to model the cumulative probabilities for loan grades. Then alternative models with less predictors will be compared to select the best model. After that, we'll look at the significance of the different predictors and look at their effects. 
+
+Below is the coefficient table for the model with Annual_Income, Application_Type, Debt_to_Income, Home_Ownership, Loan_Amount, and Mortgage Accounts. Every variable except some of the home ownership dummy variables are significant in predicting the cumulative probabilities.
+
+```{r, tidy=TRUE, echo=FALSE}
+# model fits (maybe include outputs and or code or part of outputs)
+fit <- vglm(Grade~., family = cumulative(parallel = TRUE), data = loans.sample)
+fit.summary <- summary(fit)
+kable(coef(fit.summary))
+
+```
+
+Below is the coefficient table with the Home_Ownership variable removed.
+
+```{r, tidy=TRUE, echo=FALSE}
+
+fit2 <- vglm(Grade ~.-Home_Ownership, family = cumulative(parallel = TRUE), data = loans.sample)
+fit2.summary <- summary(fit2)
+kable(coef(fit2.summary))
+```
+
+Next, the AICs for the two models were compared and the model with Home_Ownership recieved a better score of 59,616.99, compared to 59,657.1 for the model without the Home_Ownership variable.
+
+```{r, tidy = TRUE, echo= FALSE}
+# Model comparison
+fit.aic <- AIC(fit)
+fit2.aic <- AIC(fit2)
+fit.dif <- fit.aic - fit2.aic
+
+```
+
+The analysis of deviance output below doesn't show that any predictors are not needed in the model.
+
+```{r, tidy=TRUE, echo=FALSE}
+# Significance of variables in model 1
+kable(anova(fit))
+```
+
+Below is the final model coefficient table for the cumulative probabilities of the loan grades.
+
+```{r, tidy = TRUE, echo= FALSE}
+# final model and coefficient outputs
+kable(coef(fit.summary))
+```
+
+# Model Interpretation and Visualiation
+
+Now that we selected the best model, it's important to visualize the effects of the variables on the probability of being given a certain loan grade and to interpret the effects.
+
+***Model Formula***
+
+A = 1, B = 2, C = 3, D = 4, E-G = 5
+
+Below is the formula for the logit([Y<=J]) where J is some number from 1-4, standing for the loan grades as shown above. $J_1$, $J_2$, $J_3$, and $J_4$ are binary and depend upon J.
+
+$$logit({[Y<=J]}) = -0.6868569(J_1) + 0.7285327(J_2) +2.0833608(J_3) + 3.2860989(J_4) +\\ + 0.0000024(AnnualIncome) -0.0287011(DebtToIncome)\\ - 0.0000285(LoanAmount) + 0.0549374(MortgageAccounts) + 0.32860989I(JointApp)\\ - 0.0287011I(MORTGAGE) - 0.0245795I(OWN) - 0.271375I(RENT)$$
+
+Below is the formula for the odds of being Y<=J. 
+
+$$odds({[Y<=J]}) = e^{-0.6868569(J_1) + 0.7285327(J_2) + 2.0833608(J_3) + 3.2860989(J_4)} *\\ e^{0.0000024(AnnualIncome) - 0.0287011(DebtToIncome)} *\\ e^{- 0.0000285(LoanAmount) + 0.0549374(MortgageAccounts) + 0.32860989I(JointApp)} *\\ e^{- 0.0287011I(MORTGAGE) - 0.0245795I(OWN) - 0.271375I(RENT)}$$
+
+***Interpretations***
+
+Below are formal interpretations of two of the variables used in the model.
+
+Debt_to_Income effects:
+
+"For a 1 unit increase in the debt-to-income ratio, the odds of falling at or below a grade X decrease by 3%"
+
+Application_Type effects:
+
+"If an application is joint, then the odds of falling at or below grade X increases by 38.9% from that of the individual application baseline."
+
+
+***Model Visualizations***
+
+Below are four graphs. For the first two, they visualize the cumulative probabilities of loan grades as the debt to income ratio increases for individual applications and joint applications. For both of these graphs, the home ownership is held constant at "MORTGAGE", the number of mortgage accounts held constant at the mean 1.56, loan amount at the mean \$15,125.61, and income held constant at the mean \$78,257.95.
+
+```{r, tidy = TRUE, echo= FALSE}
+# graphs of cumulative probabilties by app type and interpretation of model
+dti.seq <- seq(0, 35, length.out = 100)
+income.seq <- mean(loans$Annual_Income)
+amount.seq <- mean(loans$Loan_Amount)
+accounts.seq <- mean(loans$Mortgage_Accounts)
+app.type1 <- "Individual"
+app.type0 <- "Joint App"
+house.type <- "MORTGAGE"
+
+
+expand.grid.type1 <- expand.grid(income.seq, app.type1, dti.seq, house.type, amount.seq, accounts.seq)
+colnames(expand.grid.type1) <- c("Annual_Income", "Application_Type", "Debt_to_Income", "Home_Ownership", "Loan_Amount", "Mortgage_Accounts")
+
+expand.grid.type0 <- expand.grid(income.seq, app.type0, dti.seq, house.type, amount.seq, accounts.seq)
+colnames(expand.grid.type0) <- c("Annual_Income", "Application_Type", "Debt_to_Income", "Home_Ownership", "Loan_Amount", "Mortgage_Accounts")
+
+fit.logit.indv <- predict(fit, newdata = expand.grid.type1, untransform = TRUE)
+fit.logit.joint <- predict(fit, newdata = expand.grid.type0, untransform = TRUE)
+
+expanded.predicted1 <- cbind(expand.grid.type1, fit.logit.indv)
+expanded.predicted0 <-cbind(expand.grid.type0, fit.logit.joint)
+
+predicted.indv <- pivot_longer(expanded.predicted1, cols = c("P[Y<=1]", "P[Y<=2]", "P[Y<=3]", "P[Y<=4]"), names_to = "Type", values_to = "cumProb")
+predicted.joint <- pivot_longer(expanded.predicted0, cols = c("P[Y<=1]", "P[Y<=2]", "P[Y<=3]", "P[Y<=4]"), names_to = "Type", values_to = "cumProb")
+
+ggplot(predicted.indv, aes(x = Debt_to_Income, y = cumProb, color = Type)) + geom_line() + labs(x = "Debt to Income Ratio", y = "Cumulative Probability", title = "Cummulative Probabilties for Individual Applications")
+ggplot(predicted.joint, aes(x = Debt_to_Income, y = cumProb, color = Type)) + geom_line() + labs(x = "Debt to Income Ratio", y = "Cumulative Probability", title = "Cummulative Probabilties for Joint Applications")
+
+
+```
+
+The last two visualize the probabilities of a loan receiving different grades for joint and individual applicants as the debt to income ratio increases. Again, for both of these graphs, the home ownership is held constant at "MORTGAGE", the number of mortgage accounts held constant at the mean 1.56, loan amount at the mean \$15,125.61, and income held constant at the mean \$78,257.95.
+
+```{r, tidy = TRUE, echo= FALSE}
+# graphs of category probabilties and interprestation
+fit.probs.indv <- predict(fit, newdata = expand.grid.type1, type = "response")
+fit.probs.joint <- predict(fit, newdata = expand.grid.type0, type = "response")
+
+expanded.predicted1.probs <- cbind(expand.grid.type1, fit.probs.indv)
+expanded.predicted0.probs <-cbind(expand.grid.type0, fit.probs.joint)
+predicted.probs.indv <- pivot_longer(expanded.predicted1.probs, cols = c("A", "B", "C", "D", "E-G"), names_to = "Grades", values_to = "Probability")
+predicted.probs.joint <- pivot_longer(expanded.predicted0.probs, cols = c("A", "B", "C", "D", "E-G"), names_to = "Grades", values_to = "Probability")
+
+ggplot(predicted.probs.indv, aes(x = Debt_to_Income, y = Probability, color = Grades)) + geom_line() + labs(x = "Debt to Income Ratio", y = "Probability", title = "Probabilties for Individual Applications")
+ggplot(predicted.probs.joint, aes(x = Debt_to_Income, y = Probability, color = Grades)) + geom_line() + labs(x = "Debt to Income Ratio", y = "Probability", title = "Probabilties for Joint Applications")
+```

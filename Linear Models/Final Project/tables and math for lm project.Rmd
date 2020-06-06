@@ -1,0 +1,21 @@
+---
+title: "Tables and Math for LM Project"
+author: "Joshua Ingram"
+date: "5/14/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r pressure}
+kable(cbind(sum_log_final$coefficients, confint.default(log_final)))
+
+kable(anova(log_null, log_1, test = "LRT"))
+```
+
+$$
+
+$$

@@ -1,0 +1,1009 @@
+---
+output: 
+  pdf_document:
+    citation_package: natbib
+    keep_tex: true
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm-latex-ms.tex
+title: "An Analysis of Suicides Around the World"
+thanks:
+author: 
+- name: Joshua D. Ingram
+  affiliation: New College of Florida
+abstract: "This document contains an overview of suicides around the world with both demographic and the aggregate analysis."
+keywords: "Suicides, multiple regression, bootsrapping"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontfamily: mathpazo
+fontsize: 11pt
+# spacing: double
+bibliography: ""
+biblio-style: apsr
+---
+
+```{r setup, include=FALSE, tidy=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(knitr)
+library(tidyverse)
+library(RColorBrewer)
+library(car)
+library(pscl)
+library(boot)
+library(bootstrap)
+library(MASS)
+library(pscl)
+
+############ Working with and cleaning dataset #################
+suicide.data <- read.csv("C:/Users/joshi/Downloads/suicide-rates-overview-1985-to-2016 (3)/master.csv")
+
+# Overview of the dataset
+head(suicide.data)
+ls(suicide.data)
+nrow(suicide.data)
+ncol(suicide.data)
+
+# changing the variables to the appropriate classes
+suicide.data$sex <- as.factor(suicide.data$sex)
+suicide.data$country <- as.factor(suicide.data$ï..country)
+suicide.data$generation <- as.factor(suicide.data$generation)
+suicide.data$age <- as.factor(suicide.data$age)
+suicide.data$suicides_no <- as.numeric(suicide.data$suicides_no)
+suicide.data$population <- as.numeric(suicide.data$population)
+suicide.data$suicides.100k.pop <- as.numeric(suicide.data$suicides.100k.pop)
+suicide.data$HDI.for.year <- as.numeric(suicide.data$HDI.for.year)
+suicide.data$gdp_per_capita <- as.numeric(suicide.data$gdp_per_capita....)
+suicide.data$gdp_for_year <- suicide.data$gdp_for_year....
+
+# removing variables that won't be used in the dataset
+suicide.data$country.year<- NULL
+suicide.data$ï..country <- NULL
+suicide.data$gdp_for_year.... <- NULL
+suicide.data$gdp_per_capita.... <- NULL
+
+
+
+# creating a variable to break countries up into 8 regions (as defined by US Department of Homeland Security)
+
+# lists of countries in each region
+Africa <- c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cameroon",
+            "Cape Verde", "Cental African Republic", "Chad", "Comoros", "Cote d'lvoire", "Democratic Republic of the Congo",
+            "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Ethiopia", "Gabon",
+            "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Kenya", "Lesotho", "Liberia",
+            "Libya", "Madagascar", "Malawi", "Mali", "Mali", "Mauritania", "Mauritius", "Morocco",
+            "Mozambique", "Namibia", "Niger", "Nigeria", "Republic of the Congo", "Reunion", "Rwanda",
+            "Saint Helena", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan",
+            "Sudan", "Swaziland", "Tanzania", "Togo", "Tunisia", "Uganda", "Western Sahara", "Zambia", "Zimbabwe")
+Asia <- c("Afghanistan", "Armenia", "Azerbaijan", "Bahrain", "Bangladesh", "Bhutan", "Brunei", "Burma",
+          "Cambodia", "China", "Cyprus", "East Timor", "Georgia", "Hong Kong", "India", "Indonesia",
+          "Iran", "Iraq", "Israel", "Japan", "Jordan", "Kazakhstan", "Kuwwait", "Kyrgyzstan", "Laos",
+          "Lebanon", "Macau", "Malaysia", "Maldives", "Mongolia", "Nepal", "North Korea", "Oman",
+          "Pakistan", "Philippines", "Qatar", "Saudi Arabia", "Singapore", "South Korea", "Sri Lanka", "Syria",
+          "Taiwan", "Tajikistan", "Thailand", "Turkey", "Turkmenistan", "United Arab Emirates",
+          "Uzbekistan", "Yemen")
+Caribbean <- c("Anguilla", "Antigua and Barbuda", "Aruba", "Bahamas", "Barbados",
+               "Bermuda", "British Virgin Islands", "Cayman Islands", "Cuba", "Dominica",
+               "Dominican Republic", "Grenada", "Guadeloupe", "Haiti", "Jamaica", "Martinique",
+               "Montserrat", "Netherlands Antilles", "Puerto Rico", "Saint Kitts and Nevis", "Saint Lucia",
+               "Saint Vincent and the Grenadines", "Trinidad and Tobago", "Turks and Caicos Islands",
+               "U.S. Virgin Islands")
+Central.America <- c("Belize", "Costa Rica", "El Salvador", "Guatemala", "Honduras", "Nicaragua",
+                     "Panama")
+Europe <- c("Albania", "Andorra", "Austria", "Belarus", "Belgium", "Bosnia and Herzegovina", "Bulgaria", "Croatia",
+            "Czech Republic", "Denmark", "Estonia", "Finland", "France", "Germany", "Gibraltar", "Greece",
+            "Holy See", "Hungary", "Iceland", "Ireland", "Italy", "Kosovo", "Latvia", "Liechtenstein", 
+            "Lithuania", "Luxembourg", "Macedonia", "Malta", "Moldova", "Monaco", "Montenegro", "Netherlands",
+            "Norway", "Poland", "Portugal", "Romania", "Russia", "San Marino", "Slovak Republic", "Slovenia",
+            "Spain", "Serbia", "Serbia and Montenegro", "Sweden", "Switzerland", "Ukraine", "United Kingdom")
+North.America <- c("Canada", "Greenland", "Mexico", "Saint Pierre and Miquelon", "United States")
+Oceania <- c("American Samoa", "Australia", "Christmas Island", "Cocos Islands", "Cook Islands",
+             "Federated States of Micronesia", "Fiji", "French Polynesia", "Guam", "Kiribati",
+             "Marshall Islands", "Nauru", "New Caledonia", "New Zealand", "Niue", "Northern Mariana Islands",
+             "Palau", "Papua New Guinea", "Pitcairn Islands", "Samoa", "Solomon Islands", "Tokelau", "Tonga",
+             "Tuvalu", "Vanuatu", "Wallis and Futuna Islands")
+South.America <- c("Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador", "Falkland Islands",
+                   "French Guiana", "Guyana", "Paraguay", "Peru", "Suriname", "Uruguay", "Venezuela")
+
+# new region variable created with 8 levels (as shown above)
+suicide.data.mutated1 <- mutate(suicide.data, Region = factor(case_when(country %in% Africa ~ "Africa",
+                                                                                country %in% Asia ~ "Asia",
+                                                                                country %in% Caribbean ~ "Caribbean",
+                                                                                country %in% Central.America ~ "Central America",
+                                                                                country %in% Europe ~ "Europe",
+                                                                                country %in% North.America ~ "North America",
+                                                                                country %in% Oceania ~ "Oceania",
+                                                                                country %in% South.America ~ "South America",
+                                                                                TRUE ~ NA_character_)))
+
+
+# 5.81% of the values in our new data are missing
+mean(is.na(suicide.data.mutated1))
+
+# 69,93% of HDI's are missing values
+mean(is.na(suicide.data.mutated1$HDI.for.year))
+
+# since we have a significant amount of our developement values misisng, an "unknown" category will be created because this could provide some
+# predictive value
+
+# Creating four categories for HDI index: high development (.8-1), medium 
+# development (.6-.799), low or very low development (0 - .599), unknown (missing)
+
+# new development variable created with 4 factors (shown above)
+suicide.data.mutated2 <- mutate(suicide.data.mutated1, Development = factor(case_when(HDI.for.year >= .8 ~ "high",
+                                                                             HDI.for.year >= .6 & HDI.for.year <= .799 ~ "medium",
+                                                                             HDI.for.year <= .599 ~ "low or very low",
+                                                                             is.na(HDI.for.year) == T ~ "unknown",
+                                                                             TRUE ~ NA_character_)))
+
+# removed all years before 1990 since the hdi was not created until 1990
+suicide.data.mutated3 <- suicide.data.mutated2[which(suicide.data.mutated2$year >= 1990),]
+
+### Final demographic dataset ###
+demographic.suicides <- suicide.data.mutated3
+
+
+# removing demographic information from the data to look at aggregate suicides in the second part of analysis (separate dataset)
+years.list <- seq(1990, 2016, 1)
+country.list <- levels(demographic.suicides$country)
+
+colnames(demographic.suicides)
+
+# lists for new data to be placed
+aggregate.suicides <- c()
+aggregate.population <- c()
+aggregate.per100 <- c()
+new.years <- c()
+new.countries <- c()
+new.development <- c()
+new.region <- c()
+new.gdp.capita <- c()
+
+# for loop that combines demographic info into an aggregate variable for each country and year
+for (j in country.list){
+  for (i in years.list){
+    selected.rows <- suicide.data.mutated3[suicide.data.mutated3$year == i & suicide.data.mutated3$country == j,]
+    
+    if (nrow(selected.rows) != 0){
+      total.suicides <- sum(selected.rows$suicides_no)
+      
+      aggregate.suicides <- append(aggregate.suicides, total.suicides)
+      
+      total.population <- sum(selected.rows$population)
+      
+      aggregate.population <- append(aggregate.population, total.population)
+      
+      per100 <- total.suicides / (total.population/100000)
+      aggregate.per100 <- append(aggregate.per100, per100)
+      
+      new.years <- append(new.years, i)
+      new.countries <- append(new.countries, j)
+      new.development <- append(new.development, selected.rows$Development[1])
+      new.region <- append(new.region, selected.rows$Region[1])
+      new.gdp.capita <- append(new.gdp.capita, selected.rows$gdp_per_capita[1])
+    }
+    selected.rows <- NULL
+  }
+}
+
+# combining the lists
+new.suicide.data <- data.frame(new.years, new.countries, new.region, new.development, 
+                               new.gdp.capita, aggregate.population, aggregate.suicides,  aggregate.per100)
+
+colnames(new.suicide.data) <- c("Year", "Country", "Region", "Development", "GDP.per.capita", "Population", "Suicides", "Suicides.per100")
+
+# Development level
+new.suicide.data <- mutate(new.suicide.data, Development = factor(case_when(Development == 1 ~ "high",
+                                                                            Development == 3 ~ "medium",
+                                                                            Development == 2 ~ "low or very low",
+                                                                            Development == 4 ~ "unknown",
+                                                                            TRUE ~ NA_character_)))
+
+# Regions
+new.suicide.data <- mutate(new.suicide.data, Region = factor(case_when(Region == 1 ~ "Africa",
+                                                                       Region == 3 ~ "Asia",
+                                                                       Region == 2 ~ "Caribbean",
+                                                                       Region == 4 ~ "Central America",
+                                                                       Region == 5 ~ "Europe",
+                                                                       Region == 6 ~ "North America",
+                                                                       Region == 7 ~ "Oceania",
+                                                                       Region == 8 ~ "South America",
+                                                                       TRUE ~ NA_character_)))
+
+### final dataset for aggregate suicides ###
+aggregate.suicides <- new.suicide.data
+
+
+### Dataset to be used for final models that removes all observations that have zero suicides ### (due to log transformations)
+
+## Demographic data subset ##
+demo.subset.rm <- demographic.suicides[demographic.suicides$suicides.100k.pop != 0,]
+
+# number of rows with observations of 0 suicides per 100k
+nrow(demographic.suicides[demographic.suicides$suicides.100k.pop == 0,])
+
+# proportion of observations with 0 suicides... 15.04%
+nrow(demographic.suicides[demographic.suicides$suicides.100k.pop == 0,]) / nrow(demographic.suicides)
+
+## Aggregate data subset ##
+# removing 0s for log transformation
+agg.subset.rm <- aggregate.suicides[aggregate.suicides$Suicides.per100 != 0,]
+
+# number of rows with observations of 0 suicides per 100k
+nrow(aggregate.suicides[aggregate.suicides$Suicides.per100 == 0,])
+
+# proportion of observations with 0 suicides... 2.7%
+nrow(aggregate.suicides[aggregate.suicides$Suicides.per100 == 0,]) / nrow(aggregate.suicides)
+
+
+# overview of the two datasets with zeros
+head(demographic.suicides)
+head(aggregate.suicides)
+
+# overview of the two datasets without zeros
+head(demo.subset.rm)
+head(agg.subset.rm)
+```
+
+# Data Wrangling
+
+After removing some variables that will not be used in the analysis, 5.81% of our values our missing. Of this, HDI has 69.93% missing values in the column.
+
+I created 2 new categorical variables, Region and Development. Region is split up into 8 regions around the world (as determined by Homeland Security): Africa, Asia, Caribbean, Central America, Europe, North America, Oceania, South America. Development has 4 ordered levels: high (HDI >= .8), medium ( .6 <= HDI <= .799), low or very low (HDI <= .599) and unknown (HDI is missing). An unknown category was created because there is the potential that there could be some relationship with HDI being unkown and the development level for a country... especially considering the amount of missing data in HDI. Since HDI wasn't invented until 1990, I removed the years 1985-1989. So the data only contains information on the years 1990-2016.
+
+The data was then split up into two subsets. One contains suicide information broken up by demographics (demographic.suicides), while the other combines all the demograpic information and each row is a country and a given year with the total amount of suicides, as well as some other variables (aggregate.suicides).
+
+What will be seen in the analysis is that a log transformation was used, but because there were observations with 0 suicides, log(y+1) had to be used. However, this models a different response than that of log(y) and was compared to a model based off of data with the o observations with 0 suicides removed. The latter performed much better nad gave realistic suicide values based on the data. In the demographic.suicides data, 15.04% of the observations had rows with 0 suicides. These rows were removed for analysis and this should be considered. For the aggregate model, the same transformations were compared and the log(y) with the 0s removed was better. Only 2.7% of rows had 0 suicides observed, so this amount being removed is more reasonable. Before continuing, it should be acknowledged that a zero-inflated model would prove more sufficient with modeling the data, but was unable to be used for the scope of this class.
+
+# Data Overview and Visualizations
+
+```{r, tidy = TRUE, echo = FALSE}
+######## Dataset Overview and Visualizations ########
+
+# visualizaions of suicides in the US from 1990 to 2015 (first total then per 100k)
+ggplot(aggregate.suicides[aggregate.suicides$Country == "United States",], aes(x = Year, y = Suicides)) + 
+  geom_line(size = 2, color = "Red") + 
+  ylim(0, 50000) + 
+  labs(title="Number of Suicides in the U.S. from 1990 to 2015") +
+  theme_classic()
+
+ggplot(aggregate.suicides[aggregate.suicides$Country == "United States",], aes(x = Year, y = Suicides.per100)) + 
+  geom_line(size = 2, color = "Red") + 
+  ylim(0, 16) + 
+  labs(title="Number of Suicides per 100,000 in the U.S. from 1990 to 2015", y = "Suicides per 100,000") +
+  theme_classic()
+
+# percent change of total suicides from 1990 to 2015 in the US... 43.03%
+(aggregate.suicides[aggregate.suicides$Year == 2015 & aggregate.suicides$Country == "United States",]$Suicides - 
+    aggregate.suicides[aggregate.suicides$Year == 1990 & aggregate.suicides$Country == "United States",]$Suicides) /
+  aggregate.suicides[aggregate.suicides$Year == 1990 & aggregate.suicides$Country == "United States",]$Suicides * 100
+
+# number of suicides in the UK (total then per 100k), for comparison
+ggplot(aggregate.suicides[aggregate.suicides$Country == "United Kingdom",], aes(x = Year, y = Suicides)) + 
+  geom_line(size = 2, color = "Red") + 
+  ylim(0, 8000) + 
+  labs(title="Number of Suicides in the U.K. from 1990 to 2015") +
+  theme_classic()
+
+ggplot(aggregate.suicides[aggregate.suicides$Country == "United Kingdom",], aes(x = Year, y = Suicides.per100)) + 
+  geom_line(size = 2, color = "Red") + 
+  ylim(0, 12) + 
+  labs(title="Number of Suicides in the U.K. from 1990 to 2015") +
+  theme_classic()
+
+# mean number of suicides per 100k from our dataset
+mean(aggregate.suicides$Suicides.per100)
+
+# distribution of suicides per 100k divided by age group
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "5-14 years",]) + geom_histogram()
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "15-24 years",]) + geom_histogram()
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "25-34 years",]) + geom_histogram()
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "35-54 years",]) + geom_histogram()
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "55-74 years",]) + geom_histogram()
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides[demographic.suicides$age == "75+ years",]) + geom_histogram()
+# All of these distributions by age groups shows that they are right skewed... a majority of the suicides per 100k are zero
+
+# overall distributon of suicides.... very right skewed...
+ggplot(aes(x = suicides.100k.pop), data = demographic.suicides) + geom_histogram()
+
+# distribution of suicides in North America... right skewed
+ggplot(aes(x= suicides.100k.pop), data = demographic.suicides[demographic.suicides$Region == "North America",]) + geom_histogram()
+
+
+# Mean suicides per 100k by region
+regs <- levels(aggregate.suicides$Region)
+means.regions <- c()
+for (i in regs){
+  mean <- mean(aggregate.suicides[aggregate.suicides$Region == i,]$Suicides.per100, na.rm = TRUE)
+  means.regions <- append(means.regions, mean)
+}
+
+region.suicides.means <- data.frame(regs, means.regions)
+colnames(region.suicides.means) <- c("Region", "Mean.suicides")
+kable(region.suicides.means)
+
+```
+
+
+# Demographic Data Model Selection
+```{r, tidy = TRUE}
+ls(demographic.suicides)
+
+## Demographic Model with all relevant predictors (no transformations)
+demo.fit.all1 <- lm(suicides.100k.pop  ~ Region + Development + age + gdp_per_capita + population + sex + year, data = demographic.suicides)
+
+# the model has a significant p-value and R^2 of .3605.... most variable are significant.... but first we should check the normality and constant variance assumptions
+summary(demo.fit.all1)
+
+# there is heteroskedasticity and the residuals are not normally distributed.... we should not use the p-values from the summary above
+plot(demo.fit.all1, 1)
+plot(demo.fit.all1, 2)
+
+
+## Demographic Model with log(y + 1) transformation
+# log transformation might get rid of heteroskedasticity (log(X + 1) because some observations have 0 suicides)
+demo.fit.all2 <- lm(log(suicides.100k.pop + 1) ~ Region + Development + age + gdp_per_capita + population + sex + year, data = demographic.suicides)
+
+# R^2 of 0.5271 and a very small p-value... let's check our assumptions
+summary(demo.fit.all2)
+
+# both of our assumptions are roughly met (normality more-so)... considering the shape of the residual variance we should be cautious with inference
+# perhaps a zero-infalted model would be better but we can still gain some insightful information from our model
+plot(demo.fit.all2, 1)
+plot(demo.fit.all2, 2)
+
+## Demographic Model with log(y) transformation and observations with 0 suicides are removed
+demo.fit.all3 <- lm(log(suicides.100k.pop) ~ Region + Development + age + gdp_per_capita + population + sex + year, data = demo.subset.rm)
+
+# R^2 of .6568 and and very significant p-value... let's look at residual diagnostics
+summary(demo.fit.all3)
+
+# q-q plot is fine... not perfect but good enough considering our sample size. Residuals vs. fitted is much better than the model of log(y+1)...
+# likely because zeros were removed
+plot(demo.fit.all3, 1)
+plot(demo.fit.all3, 2)
+
+
+## before choosing a model, we should look at the practicality of the models for predicting... especially since log(y+1) is modeling a different response
+
+# prediction plot for log + 1
+mean.pop <- mean(aggregate.suicides[aggregate.suicides$Region == "North America" & aggregate.suicides$Year == 2015,]$Population, na.rm = TRUE)
+year.pred <- 2015
+age.pred <- "25-34 years"
+region.pred <- "North America"
+develop.pred <- "high"
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+sex.pred <- c("male", "female")
+
+expand.grid.demo <- expand.grid(region.pred, develop.pred, age.pred, gdp.seq, mean.pop, sex.pred, year.pred)
+colnames(expand.grid.demo) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year")
+
+demo.expand.pred <- predict(demo.fit.all2, newdata = expand.grid.demo)
+
+demo.pred.data <- cbind(expand.grid.demo, demo.expand.pred)
+colnames(demo.pred.data) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year", "suicides.100k.pop")
+
+ggplot(demo.pred.data, aes(x = gdp_per_capita, y = exp(suicides.100k.pop)-1, color = sex)) + 
+  geom_line() + 
+  labs(x = "GDP per capita", y = "Predicted Suicides per 100k", title = "Predicted Suicides for Males and Females") +
+  lims(x = c(0, 10000), y = c(0, 100))
+
+# this model is not predicting properly... at all... this is because it is modeling a totally different response log(y +1) not log(y)
+mean(aggregate.suicides[aggregate.suicides$Year == 2015 & aggregate.suicides$Region == "North America",]$Suicides.per100, na.rm = TRUE)
+
+# plot for removed 0s
+mean.pop <- mean(aggregate.suicides[aggregate.suicides$Region == "North America" & aggregate.suicides$Year == 2015,]$Population, na.rm = TRUE)
+year.pred <- 2015
+age.pred <- "25-34 years"
+region.pred <- "North America"
+develop.pred <- "high"
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+sex.pred <- c("male", "female")
+
+expand.grid.demo <- expand.grid(region.pred, develop.pred, age.pred, gdp.seq, mean.pop, sex.pred, year.pred)
+colnames(expand.grid.demo) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year")
+
+demo.expand.pred <- predict(demo.fit.all3, newdata = expand.grid.demo)
+
+demo.pred.data <- cbind(expand.grid.demo, demo.expand.pred)
+colnames(demo.pred.data) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year", "suicides.100k.pop")
+
+ggplot(demo.pred.data, aes(x = gdp_per_capita, y = exp(suicides.100k.pop), color = sex)) + 
+  geom_line() + 
+  labs(x = "GDP per capita", y = "Predicted Suicides per 100k", title = "Predicted Suicides for Males and Females") +
+  lims(x = c(0, 100000), y = c(0, 6))
+
+# this model does much better at predicting realistic values... although a zero inflated model would be much prefferred.... I'm going with 
+# removing 0s for the rest of the project
+mean(aggregate.suicides[aggregate.suicides$Year == 2015 & aggregate.suicides$Region == "North America",]$Suicides.per100, na.rm = TRUE)
+
+```
+
+I have decided to remove all the observations with 0 suicides due to the transformation of log(y + 1) being poor in practical predictions. 
+
+## Final Model for Demographic Data
+
+```{r}
+# summary output for the final model log(y)
+summary(demo.fit.all3)
+
+# residual diagnostics
+plot(demo.fit.all3, 1)
+plot(demo.fit.all3, 2)
+```
+
+
+## Model Interpretation and Visualization
+```{r}
+# coefficients
+kable(coef(summary(demo.fit.all3)))
+
+# graphing predictions with GDP changing and sex (male or female)
+mean.pop <- mean(aggregate.suicides[aggregate.suicides$Region == "North America" & aggregate.suicides$Year == 2015,]$Population, na.rm = TRUE)
+year.pred <- 2015
+age.pred <- "25-34 years"
+region.pred <- "North America"
+develop.pred <- "high"
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+sex.pred <- c("male", "female")
+
+expand.grid.demo <- expand.grid(region.pred, develop.pred, age.pred, gdp.seq, mean.pop, sex.pred, year.pred)
+colnames(expand.grid.demo) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year")
+
+demo.expand.pred <- predict(demo.fit.all3, newdata = expand.grid.demo)
+
+demo.pred.data <- cbind(expand.grid.demo, demo.expand.pred)
+colnames(demo.pred.data) <- c("Region", "Development", "age", "gdp_per_capita", "population", "sex", "year", "suicides.100k.pop")
+
+ggplot(demo.pred.data, aes(x = gdp_per_capita, y = exp(suicides.100k.pop), color = sex)) + 
+  geom_line() + 
+  labs(x = "GDP per capita", y = "Predicted Suicides per 100k", title = "Predicted Suicides for Males and Females") +
+  lims(x = c(0, 100000), y = c(0, 4.5))
+```
+
+Interpretation of GDP per capita and sex:
+
+GDP: for every $1,000 increase in GDP per capita, holding all other variables constant, we predict, on average, that the number of suicides per 100k will decrease by 0.02% (or multiply by e^-.0002) (this variable is not very significant in the model)
+
+Sex: holding all other variables constant, on average, we predict that the number of suicides per 100k will be 3.324 times greater for males than that of females
+
+
+
+# Aggregate Data Model Selection (without interaction)
+```{r}
+# first let's look at the correlations between our numerical predictors... no significant correlations
+cor(subset(aggregate.suicides, select = c(Year, GDP.per.capita, Population, Suicides.per100)))
+
+
+## Model with no transformations
+agg.fit1 <- lm(Suicides.per100 ~ Development + Region + GDP.per.capita + Population + Year, data = aggregate.suicides)
+summary(agg.fit1)
+
+# there is heteroskedasticity and residuals are not normally distributed
+plot(agg.fit1, 1)
+plot(agg.fit1, 2)
+
+## Model with log(y+1) transformation
+agg.fit2 <- lm(log(Suicides.per100 + 1) ~ Development + Region + GDP.per.capita + Population + Year, data = aggregate.suicides)
+agg.fit2.sum <- summary(agg.fit2)
+
+# heteroskedasticity is fixed, but residuals are not normally distributed
+plot(agg.fit2, 1)
+plot(agg.fit2, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(aggregate.suicides)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:14){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100 + 1) ~ Development + Region + GDP.per.capita + Population + Year,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = aggregate.suicides,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100 + 1) ~ Development + Region + GDP.per.capita + Population + Year,
+                        data=aggregate.suicides))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info2 <- data.frame( beta.estimates, p.values)
+colnames(boot.info2) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info2
+
+# dataframe with old and new p-values
+p.val.compare2 <- data.frame(beta.estimates, agg.fit2.sum$coefficients[2:14,4], p.values)
+colnames(p.val.compare2) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare2
+
+AIC(agg.fit2)
+
+```
+
+
+```{r}
+## Model with log(y) transformation but observations with 0 suicides are removed
+agg.fit3 <- lm(log(Suicides.per100) ~ Development + Region + GDP.per.capita + Population + Year, data = agg.subset.rm)
+agg.fit3.sum <- summary(agg.fit3)
+
+# heteroskedasticity is mosly fixed, but residuals are not normally distributed
+plot(agg.fit3, 1)
+plot(agg.fit3, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(agg.subset.rm)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:14){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100) ~ Development + Region + GDP.per.capita + Population + Year,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = agg.subset.rm,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100) ~ Development + Region + GDP.per.capita + Population + Year,
+                        data=agg.subset.rm))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info3 <- data.frame( beta.estimates, p.values)
+colnames(boot.info3) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info3
+
+# dataframe with old and new p-values
+p.val.compare3 <- data.frame(beta.estimates, agg.fit3.sum$coefficients[2:14,4], p.values)
+colnames(p.val.compare3) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare3
+
+AIC(agg.fit3)
+```
+
+Considering the more practical performance of the model that removed the observations with 0 suicides, I am doing the same with aggregate suicide data... there is even less missing data. The R^2 is much better for the log(y) model as compared to the log(y+1) model too. Again, log(y+1) is modeling a different response than that of log(y) and the results are poor. The predicted amount of suicides are often much larger than what they should actually be due to the transformation
+
+```{r}
+## Removing insignificant predictors and making a new model
+# development seems to add too much complication to the model and may not be significant enough... population is insignificant as well
+## Model with log(y) transformation but observations with 0 suicides are removed
+agg.fit4 <- lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year, data = agg.subset.rm)
+agg.fit4.sum <- summary(agg.fit4)
+
+# heteroskedasticity is mosly fixed, but residuals are not normally distributed
+plot(agg.fit4, 1)
+plot(agg.fit4, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(agg.subset.rm)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:10){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = agg.subset.rm,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year,
+                        data=agg.subset.rm))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info4 <- data.frame( beta.estimates, p.values)
+colnames(boot.info4) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info4
+
+# dataframe with old and new p-values
+p.val.compare4 <- data.frame(beta.estimates, agg.fit4.sum$coefficients[2:10,4], p.values)
+colnames(p.val.compare4) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare4
+
+AIC(agg.fit4)
+
+```
+
+AIC of this model is marginally better that the one with population and development, but it may setup for a good interaction effect. R^2 is about the same.
+
+## Final Model without interaction
+
+```{r}
+agg.fit4.sum
+p.val.compare4
+AIC(agg.fit4)
+```
+
+
+# Aggregate Data Model Selection (with interaction)
+```{r}
+## Interaction between GDP and Region
+agg.fit5 <- lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region, data = agg.subset.rm)
+agg.fit5.sum <- summary(agg.fit5)
+
+# heteroskedasticity is mosly fixed, but residuals are not normally distributed
+plot(agg.fit5, 1)
+plot(agg.fit5, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(agg.subset.rm)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:17){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = agg.subset.rm,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region,
+                        data=agg.subset.rm))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info5 <- data.frame( beta.estimates, p.values)
+colnames(boot.info5) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info5
+
+# dataframe with old and new p-values
+p.val.compare5 <- data.frame(beta.estimates, agg.fit5.sum$coefficients[2:17,4], p.values)
+colnames(p.val.compare5) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare5
+
+AIC(agg.fit5)
+```
+
+```{r}
+## Interaction between Year and Region
+agg.fit6 <- lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + Year:Region, data = agg.subset.rm)
+agg.fit6.sum <- summary(agg.fit6)
+
+# heteroskedasticity is mosly fixed, but residuals are not normally distributed
+plot(agg.fit6, 1)
+plot(agg.fit6, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(agg.subset.rm)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:17){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + Year:Region,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = agg.subset.rm,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + Year:Region,
+                        data=agg.subset.rm))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info6 <- data.frame( beta.estimates, p.values)
+colnames(boot.info6) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info6
+
+# dataframe with old and new p-values
+p.val.compare6 <- data.frame(beta.estimates, agg.fit6.sum$coefficients[2:17,4], p.values)
+colnames(p.val.compare6) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare6
+
+AIC(agg.fit6)
+```
+
+```{r}
+## Interaction between Year/Region and GDP/Region
+## Interaction between GDP and Region
+agg.fit7 <- lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region + Year:Region, data = agg.subset.rm)
+agg.fit7.sum <- summary(agg.fit7)
+
+# heteroskedasticity is mosly fixed, but residuals are not normally distributed
+plot(agg.fit7, 1)
+plot(agg.fit7, 2)
+
+# since the normality assumption is broken, we should do bootstrapping for betas
+n <- nrow(agg.subset.rm)
+i <- sample(1:n, n, replace=T)
+set.seed(12)
+p.values <- c()
+confidence.lower <- c()
+confidence.upper <- c()
+beta.estimates <- c()
+
+for (index in 2:24){
+  beta1 <- function(x,i) { coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region+ Year:Region,
+                                   data = x,
+                                   subset = i))[index]}
+  
+  
+  res <- boot(data = agg.subset.rm,
+              statistic = beta1,
+              R = 1000)
+  
+  beta1.full <- coef(lm(log(Suicides.per100) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region + Year:Region,
+                        data=agg.subset.rm))[index]
+  
+  bias <- mean(res$t) - beta1.full
+  
+  unbiased.est <- res$t - bias
+  
+  conf.low <- quantile(unbiased.est, 0.025)
+  conf.up <- quantile(unbiased.est, 0.975)
+  
+  beta.H0 <-res$t - mean(res$t) + bias
+  
+  p.val <- mean(abs(beta.H0) >= abs(beta1.full))
+  
+  beta.estimates <- append(beta.estimates, beta1.full)
+  p.values <- append(p.values, p.val)
+  confidence.lower <- append(confidence.lower, conf.low)
+  confidence.upper <- append(confidence.upper, conf.up)
+  
+  
+}
+
+boot.info7 <- data.frame( beta.estimates, p.values)
+colnames(boot.info7) <- c( "Estimates", "P.value")
+# more accurate p-values
+boot.info7
+
+# dataframe with old and new p-values
+p.val.compare7 <- data.frame(beta.estimates, agg.fit7.sum$coefficients[2:24,4], p.values)
+colnames(p.val.compare7) <- c("estimates", "lm() p-values", "bootstrap p-values")
+
+p.val.compare7
+
+AIC(agg.fit7)
+```
+This model has a much better AIC and the R^2 increased quite a bit, but it seems to be getting into the realm of overfitting. Considering this, I am going to remain more conservative and use the simpler model with the interaction between GDP and Region. This will be easier to interpret and can be quite a bit insightful, while not being overfit to the data.
+
+
+## Final Model for Aggregate Data
+```{r}
+## interaction between GDP and Region
+agg.fit5.sum
+p.val.compare5
+AIC(agg.fit5)
+```
+
+
+## Model Interpretation and Visualization
+```{r}
+# interpretation of ceofficients
+kable(coef(agg.fit5.sum))
+
+# visualizations of suicides with region and GDP changing, while year is held constant at 2015
+year.pred <- 2015
+region.pred <- levels(agg.subset.rm$Region)
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+
+expand.grid.demo1 <- expand.grid(region.pred, gdp.seq, year.pred)
+colnames(expand.grid.demo1) <- c("Region", "GDP.per.capita", "Year")
+
+######################################################
+region.dat <- levels(agg.subset.rm$Region)
+for (i in 1:8){
+  expand.grid.demo1 <- expand.grid.demo1[expand.grid.demo1$GDP.per.capita <= (max(agg.subset.rm$GDP.per.capita)*.90) &
+                                         expand.grid.demo1$GDP.per.capita >= (min(agg.subset.rm$GDP.per.capita)*1.10) & expand.grid.demo1$Region 
+                                         == region.dat[i],]}
+########################################################
+
+demo.expand.pred1 <- predict(agg.fit5, newdata = expand.grid.demo1)
+
+demo.pred.data1 <- cbind(expand.grid.demo1, demo.expand.pred1)
+colnames(demo.pred.data1) <- c("Region", "GDP.per.capita", "Year", "Suicides.per100")
+
+ggplot(demo.pred.data1, aes(x = GDP.per.capita, y = exp(Suicides.per100), color = Region)) + 
+  geom_line() + 
+  labs(x = "GDP per capita", y = "Predicted Suicides per 100k", title = "Predicted Suicides by Region") +
+  lims(x = c(0, 100000), y = c(0, 50))
+
+##################################################################################
+# 3d plot with year and GDP changing, region held constant at North America
+year.pred <- seq(1990, 2016,1)
+region.pred <- "North America"
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+
+expand.grid.demo3 <- expand.grid(region.pred, gdp.seq, year.pred)
+colnames(expand.grid.demo3) <- c("Region", "GDP.per.capita", "Year")
+
+demo.expand.pred3 <- predict(agg.fit5, newdata = expand.grid.demo3)
+
+demo.pred.data3 <- cbind(expand.grid.demo3, demo.expand.pred3)
+colnames(demo.pred.data3) <- c("Region", "GDP.per.capita", "Year", "Suicides.per100")
+x=demo.pred.data3$GDP.per.capita
+y=demo.pred.data3$Year
+z=demo.pred.data3$Suicides.per100
+
+#persp(x, y, z., theta = 50, phi = 0, 
+      #col = "yellow", expand = 0.5, xlab = "GDP per capita", ylab = "Year", zlab = "Suicides per 100k")
+#################################################################################
+```
+
+Interpretation of GDP:
+
+
+
+Interpretation of Region:
+
+
+
+
+## Comparison of trends of suicides over the years by region
+```{r}
+agg.fit8 <- lm(log(Suicides.per100) ~ Region + Year + Year:Region, data = agg.subset.rm)
+agg.fit8.sum <- summary(agg.fit8)
+
+# visualizations of suicides with region and year changing
+year.pred <- seq(1990, 2016, 1)
+region.pred <- levels(aggregate.suicides$Region)
+
+expand.grid.demo2 <- expand.grid(region.pred, year.pred)
+colnames(expand.grid.demo2) <- c("Region", "Year")
+
+demo.expand.pred2 <- predict(agg.fit8, newdata = expand.grid.demo2)
+
+demo.pred.data2 <- cbind(expand.grid.demo2, demo.expand.pred2)
+colnames(demo.pred.data2) <- c("Region", "Year", "Suicides.per100")
+
+ggplot(demo.pred.data2, aes(x = Year, y = exp(Suicides.per100) , color = Region)) + 
+  geom_line() + 
+  labs(x = "Year", y = "Predicted Suicides per 100k", title = "Trends of Suicides by Region and Year") +
+  lims(x = c(1990, 2016))
+```
+
+# Other
+
+```{r}
+# What if I did the same thing above but with a log(y+1) transformation without removing the zeros?
+agg.fit9 <- lm(log(Suicides.per100 + 1) ~ Region + GDP.per.capita + Year + GDP.per.capita:Region, data = aggregate.suicides)
+agg.fit9.sum <- summary(agg.fit9)
+
+# visualizations of suicides with region and GDP changing, while year is held constant at 2015
+year.pred <- 2015
+region.pred <- levels(aggregate.suicides$Region)
+gdp.seq <- seq(min(aggregate.suicides$GDP.per.capita), max(aggregate.suicides$GDP.per.capita), length.out = 1000)
+
+expand.grid.demo1 <- expand.grid(region.pred, gdp.seq, year.pred)
+colnames(expand.grid.demo1) <- c("Region", "GDP.per.capita", "Year")
+
+demo.expand.pred1 <- predict(agg.fit9, newdata = expand.grid.demo1)
+
+demo.pred.data1 <- cbind(expand.grid.demo1, demo.expand.pred1)
+colnames(demo.pred.data1) <- c("Region", "GDP.per.capita", "Year", "Suicides.per100")
+
+ggplot(demo.pred.data1, aes(x = GDP.per.capita, y = exp(Suicides.per100) -1, color = Region)) + 
+  geom_line() + 
+  labs(x = "GDP per capita", y = "Predicted Suicides per 100k", title = "Predicted Suicides by Region") +
+  lims(x = c(0, 100000), y = c(0, 50))
+```

@@ -1,0 +1,171 @@
+---
+title: "SL HW 6"
+author: "Joshua Ingram"
+date: "11/1/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(MASS)
+library(boot)
+library(ISLR)
+```
+
+# Problem 1
+```{r}
+head(Boston)
+```
+
+## a.
+```{r}
+mu.hat <- mean(Boston$medv)
+mu.hat
+```
+$\hat\mu = 22.53281$
+
+## b.
+```{r}
+se <- sd(Boston$medv)/sqrt(length(Boston$medv))
+se
+```
+The standard error for $\hat\mu$ is 0.409, which tells us the typical sampled value of $\hat\mu$ will fall within 0.409 units away from the population value.
+
+## c.
+```{r}
+set.seed(1)
+x.mean <- function(x,i) { mean(x[i,14]) }
+boot.sim1 <- boot(data = Boston, statistic = x.mean, R = 1000)
+sd.boot <- sd(boot.sim1$t)
+sd.boot
+```
+This standard error estimate is very close to the se found in the thereotical approach, being .002 units greater.
+
+## d.
+```{r}
+t.test(Boston$medv)
+mu.hat + (c(-1, 1) * 1.96 * sd.boot)
+```
+The bootstrap confidence interval, (21.73, 23.34), is basically indentical to the interval found using t.test, (21.73, 23.34).
+
+## e.
+```{r}
+median(Boston$medv)
+```
+$\hat\mu_{med} = 21.2$
+
+## f.
+```{r}
+set.seed(1)
+x.median <- function(x,i) { median(x[i,14]) }
+boot.sim2 <- boot(data = Boston, statistic = x.median, R = 1000)
+sd.boot2 <- sd(boot.sim2$t)
+sd.boot2
+```
+standard error estimate using bootstrap simulation: 0.379
+
+## g.
+```{r}
+quantile(Boston$medv, .90)
+```
+$\hat\mu_{0.1} = 34.8$
+
+## h.
+```{r}
+set.seed(1)
+x.quantile <- function(x,i) { quantile(x[i,14], .90) }
+boot.sim3 <- boot(data = Boston, statistic = x.quantile, R = 1000)
+sd.boot3 <- sd(boot.sim3$t)
+sd.boot3
+```
+standard error estimate of $\hat\mu_{0.1} = 1.15$
+
+# Problem 2
+
+## a.
+```{r}
+plot(medv ~ age, data = Boston)
+lm.obj <- lm(medv~age, data = Boston)
+plot(lm.obj, which = 2)
+```
+Based on the plot of the model, there does not seem to be constant variance throughout, Focusing on the QQ-plot, the standardized residuals do not follow the "expected" values that should be along the dotted line. It is very clear that the normality assumption is not satisfied.
+
+## b.
+```{r}
+sum.lm <- summary(lm.obj)
+sum.lm
+CI <- -0.12316 + (c(-1, 1) *(1.96 * 0.01348))
+CI
+```
+95% confidence interval: -0.1496, -0.0967
+
+## c.
+```{r}
+set.seed(1)
+x.beta <- function(x,i) { coef(lm(medv~age, data=Boston, subset = i))[2] }
+boot.sim4 <- boot(data = Boston, statistic = x.beta, R = 1000)
+x.betafull <- coef(lm(medv~age, data = Boston,))[2]
+bias <- mean(boot.sim4$t) - x.betafull
+unbiased.est <- boot.sim4$t - bias
+c(quantile(unbiased.est, 0.025), quantile(unbiased.est, 0.975))
+```
+This confidence interval is nearly the same as the "classical" approach using the standard error given in the summary.
+
+## d.
+
+It would generally be best to trust the bootstrap confidence interval more, especially when we have a lack of normality in our residuals (as seen here). Under the classical appraoch, like a Walk Confidence Interval, we assume normality.
+
+# Problem 3
+
+## 1.
+
+### a.
+$\pi_A = \text{probability of receiving an A}$
+$\pi_A = \frac{e^{-6 + 0.05(hoursstudied) + (undergradGPA)}}{1 + e^{-6 + 0.05(hoursstudied) + (undergradGPA)}}$
+
+### b.
+```{r}
+pi.1 = exp(-6 + (.05*40) + 3.5)/(1 + exp(-6 + (.05*40) + 3.5))
+pi.1
+```
+
+### c.
+
+derived algebraiclly by hand by solving for $X_1$ in the logistic regression model
+
+$X_1$ = 50 hours
+
+## 2.
+
+### a.
+Solving for $\pi$ in the odds ratio
+$\pi_{default}$ = .27
+
+### b.
+$\frac{.19}{1-.19}$ = odds of defaulting: .235
+
+# Problem 4
+
+## a.
+```{r}
+Auto$mpg01 <- ifelse(Auto$mpg> median(Auto$mpg), 1, 0)
+Auto$mpg <- NULL
+log.reg <- glm(mpg01 ~ .-name, family = binomial, data = Auto)
+summary(log.reg)
+```
+
+
+## b.
+
+year and weight are the most significant predictors.
+
+odds interpretation:
+
+year - for every one year increase, we expect the odds of having high gas mileage will increase by a factor of $e^{0.429}$
+
+weight - for every one pound increase, we expect the odds of having high gas mileage will increase by a factor of $e^{-0.004315}$
+
+"simple" interpretation:
+
+year - for every one year increase, we expect the probability of having high gas mileage will increase
+
+weight - for every one pound increase in weight, we expect the probability of having high gas mileage to decrease

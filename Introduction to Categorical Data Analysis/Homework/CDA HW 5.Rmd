@@ -1,0 +1,137 @@
+---
+title: "CDA HW 5"
+author: "Joshua Ingram"
+date: "October 8, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(PropCIs)
+museums <- read.csv("C:/Users/joshi/Downloads/ArtistDiversityPublicMuseums.csv")
+library(tidyverse)
+```
+
+# 1.
+```{r}
+vector <- c(255,871,128,2614)
+police.counts.matrix <- matrix(vector, ncol = 2, nrow = 2)
+police.counts.matrix
+```
+
+
+### a.
+Multinomail sampling was used because the groups of interest, blacks and whites, were not given fixed row counts.
+
+### b.
+```{r}
+addmargins(police.counts.matrix)
+pos.black <- 128
+pos.white <- 2614
+pos.black.cond <- pos.black/383
+pos.white.cond <- pos.white/3485
+pos.black.cond
+pos.white.cond
+diff.prop <- pos.white.cond - pos.black.cond
+diff.prop
+```
+$\hat\pi_1$ = estimated proportion of white people that have positive views of local police
+$\hat\pi_2$ = estimated proportion of black people that have positive views of local police
+
+$\hat\pi_1$ - $\hat\pi_2$ = .4159
+
+We estimate that the proportion of white people that have a positive view of local police is 41.59 percentage points greater than the proportion of blacks that have positive views of the local police.
+
+
+### c.
+```{r}
+diffscoreci(x1 = 2614, n1 = 3485, x2 = 128, n2 = 383, conf.level = .95)
+```
+We are 95% confident that the true proportion of white people that have a positive view of local police is between 36.51 and 46.35 percentage points greater than the proportion of blacks that have positive view of the local police.
+
+### d.
+$\pi_1$ = proportion of white people that have positive views of local police
+$\pi_2$ = proportion of black people that have positive views of local police
+
+H0: $\pi_1$ - $\pi_2$ = 0
+
+Ha: $\pi_1$ - $\pi_2$ =/= 0
+
+$\alpha$ = .05
+
+```{r}
+prop.test(c(2614, 128), c(3485, 383), conf.level = .95, correct = FALSE)
+```
+p-value = 2.2e-16
+
+With a p-value of 2.2e-16 and $\alpha$ = .05, we have significance evidence to reject the null hypothesis, that the proportions of white and black students that have positive views of their local police are equal, in favor of the alternative, that the proportions are not equal.
+
+### e.
+It refers to the relative risk ratio.
+
+```{r}
+rr <- pos.black.cond/pos.white.cond
+rr
+```
+relative risk ratio value: .45
+
+### f.
+```{r}
+riskscoreci(x1 = 2614, n1 = 3485, x2 = 128, n2 = 383, conf.level = .95)
+```
+We are 95% confident that whites are between 1.96 and 2.60 times more likely that blacks to have a positive view of their local police.
+
+### g.
+```{r}
+orscoreci(x1 = 2614, n1 = 3485, x2 = 128, n2 = 383, conf.level = .95)
+```
+We are 95% confident that the odds of being white and having a positive view of local police are between 4.77 and 7.50 times greater than the odds of being black and having a positive view of local police.
+
+
+# 2.
+```{r}
+head(museums)
+```
+
+### a.
+```{r}
+museum.counts <- table(museums$museum, museums$ethnicity)
+museum.props <- prop.table(museum.counts)
+addmargins(museum.counts)
+```
+
+
+### b.
+```{r}
+museum.cond <- prop.table(museum.counts, 1)
+museum.cond
+barplot(museum.cond, beside = TRUE, space = c(0.2, 1), ylim = c(0, 
+    1), col = c("red", "blue", "green"), main = "Ethnicities in Museums", 
+    xlab = "Museums", ylab = "Proportion", legend = TRUE, 
+    args.legend = list(x = "top", ncol =1))
+```
+
+
+### c.
+```{r}
+chi = chisq.test(museum.counts)
+chi$expected
+```
+
+
+### d.
+```{r}
+chi
+```
+$X^2$ = 127.48
+df = 8
+p-value = 2.2e-16
+
+### e.
+With $\X^2$ = 127.48 and df = 8, we received a p-value of 2.2e-16, which gives us significant evidence to suggest that there is not independence between ethinicity and the meusum. This means that there is significant evidence to believe that the distribution of artist ethnicity differs among the three museums.
+
+### f.
+```{r}
+chi$stdres
+```
+
+Based upon our standardized residuals and graph of conditional proportions, we can see that there is a noticeably different distribution of artists' ethnicities at the Los Angeles County Museum of Art. We have a residual of 9.932 and can see a higher proportion of artists in the LA Museum that are Asian compared to any other ethnicities in any museums, thus this seems to be the most responsible for the found association.

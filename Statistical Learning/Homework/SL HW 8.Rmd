@@ -1,0 +1,147 @@
+---
+title: "SL HW 8"
+author: "Joshua Ingram"
+date: "11/20/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(ISLR)
+library(ISwR)
+library(car)
+library(tree)
+library(boot)
+```
+
+# Problem 1
+```{r}
+total.error <- 0
+for (i in 1:nrow(Auto)){
+  test.data <- Auto[i,]
+  train.data <- Auto[-i,]
+  lm.train <- lm(mpg~horsepower, data = train.data)
+  prediction <- predict(lm.train, newdata = test.data)
+  squared.error <- (test.data$mpg - prediction)^2
+  total.error <- total.error + squared.error
+}
+test.error.estimate <- sum(total.error) / nrow(Auto)
+print("Coded LOOCV Output")
+test.error.estimate
+
+glm.obj <- glm(mpg~horsepower, data = Auto)
+print("cv.glm Output")
+cv.glm(Auto, glm.obj)$delta[1]
+```
+
+
+# Problem 2
+
+## a.
+
+See Figure 1
+
+![Corresponding Tree](C:/Users/joshi/Pictures/Capture1.png)
+
+## b.
+
+See Figure 2
+
+![Corresponding Diagram](C:/Users/joshi/Pictures/Capture2.png)
+
+# Problem 3
+
+## a.
+```{r}
+fit.lm1 <- lm(Sales~., data = Carseats)
+correlations <- round(cor(model.matrix(fit.lm1)[,2:12]), 2)
+ifelse(abs(correlations) > 0.75, abs(correlations),0)
+```
+
+There does not seem to be any collinearity by looking through a correlation matrix. (no correlations are greater than 0.75)
+
+```{r}
+vif(fit.lm1)
+```
+Checked for multi-collinearity using the Variance Inflation Factor. No variables have a VIF greater than 5.
+
+## b.
+We should use regression trees for our approach since sales is a quantitative response
+
+```{r}
+tree.obj1 <- tree(Sales~., data = Carseats)
+plot(tree.obj1)
+text(tree.obj1, pretty = T)
+summary(tree.obj1)
+```
+"ShelveLoc," "Price," "Age," "Income," "Population," and "Advertising" are the only variables used in the tree out of the 12 in the dataset. The most used appear to be "Income" and "ShelveLoc."
+
+## c.
+```{r}
+set.seed(1)
+cv.obj <- cv.tree(tree.obj1, K=nrow(Carseats))
+cv.obj
+cv.obj$size[which.min(cv.obj$dev)]
+
+prune.sizes <- prune.tree(tree.obj1)$size
+subtree.obj <- prune.tree(tree.obj1, best=prune.sizes[13])
+summary(subtree.obj)
+
+plot(subtree.obj)
+text(subtree.obj, pretty = T)
+
+MSE = 1989.914/nrow(Carseats)
+MSE
+```
+optimal subtree: 10 nodes
+
+test error: SSE = 1989.914, MSE = 4.974785
+
+most important predictors "ShelveLoc" and "Price"
+
+## d.
+```{r}
+subtree.obj
+```
+"15) Advertising > 13.5 9 15.2700 11.920"
+The "9" is the number of observations between the two outcomes. 15.27 is the sum of square errors for an advertising value above 13.5 and 11.92 is the average sale value for an advertising value above 13.5
+
+# Problem 4
+
+## a.
+Classification tree seems to be most appropriate here since the response is categorical.
+
+```{r}
+tree.obj2 <- tree(Purchase~., data = OJ)
+summary(tree.obj2)
+plot(tree.obj2)
+text(tree.obj2, pretty = T)
+```
+
+## b.
+```{r}
+set.seed(1)
+cv.obj2 <- cv.tree(tree.obj2, FUN = prune.misclass, K = nrow(OJ))
+cv.obj2
+
+subtree.obj2 <- prune.misclass(tree.obj2, best = 6)
+summary(subtree.obj2)
+plot(subtree.obj2)
+text(subtree.obj2, pretty = T)
+miss.class.rate <- 208 / nrow(OJ)
+miss.class.rate
+```
+Trees with 8 nodes and 6 nodes has the same missclassification rate, so decided to select the 6 node subtree for the optimal size to avoid over-fitting. 
+
+test missclasification error rate: .1943925
+
+"LoyalCH" and "PriceDiff" are the most important predictors
+
+## c.
+```{r}
+subtree.obj2
+```
+
+Node 7): there are 350 observations within this region and there is an entropy value of 123.8 (95.7% CH response) and the response will be predicted to be "CH"
+
+## d.
+Within in the 6 node tree there are no splits that lead to the same predicted class, but the original tree, tree.obj2, has two splits that have the same predicted class. These splits are made because in the creation of a tree, the algorithm attempts to minimize the overall entropy (and lead towards node purity). When splits with the same predictions are made, there is a decrease in entropy by creating new regions as there is an improved node purity for at least one of the new nodes which means there is more certainty in the prediction.

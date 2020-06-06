@@ -1,0 +1,111 @@
+---
+title: "CDA HW 7"
+author: "Joshua Ingram"
+date: "11/18/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+crab <-read.table("http://sites.williams.edu/bklingen/files/2012/02/crab.txt",header = TRUE)
+crab$sat <-as.numeric(crab$satellite>0)
+crab$weight <- crab$weight/1000
+```
+
+# Problem 1: Beetles
+```{r}
+dose <-c(1.691, 1.724, 1.755, 1.784, 1.811, 1.837, 1.861, 1.884)
+exposed <-c(59, 60, 62, 56, 63, 59, 62, 60)
+killed <-c(6, 13, 18, 28, 52, 53, 61, 60)
+beetles <-data.frame(dose = dose, exposed = exposed, killed = killed)
+beetles
+```
+
+## a.
+```{r}
+beetles$prop <- beetles$killed / beetles$exposed
+plot(prop~dose, data=beetles)
+```
+There seems to be a non-linear relationship between dose and the proportion of beetles killed, it is s-shaped.
+
+## b.
+```{r}
+beetles$odds <- (beetles$killed/beetles$exposed)/((beetles$exposed - beetles$killed) / beetles$exposed)
+beetles$logodds <- log(beetles$odds)
+plot(logodds ~ dose, data = beetles)
+```
+If logistic regression is appropriate, the log-odds plot should be roughly linear. It seems the plot of the log-odds is more linear than the proportion plot and follows a roughly linear trend.
+
+## c.
+```{r}
+fit.logit <-glm(cbind(killed, exposed-killed)~dose, family = binomial,data = beetles)
+summary(fit.logit)
+```
+
+## d.
+```{r}
+anova(fit.logit, test = "LRT")
+```
+We receive a p-value of 2.2e-16, which yeilds signicant evidence to suggest that dose has an effect on the probability of a beetle being killed.
+
+## e.
+Based on our model fit, for every .1 unit increase in dose, we predict the odds of beetle being killed to increase by a factor of $e^{3.4286}$
+
+## f.
+```{r}
+predict(fit.logit, type = "response", newdata = (dose = 1.8))
+```
+The predicted probability of a beetle being killed at dosage 1.8 is 72.6%
+
+## g.
+```{r}
+pred.plot.data <- seq(min(beetles$dose), max(beetles$dose), by = .001)
+prediction.prob <- predict(fit.logit, newdata = data.frame(dose = pred.plot.data), type = "response")
+plot(prop~dose, data=beetles, col = "red")
+lines(prediction.prob~pred.plot.data, data = beetles, col = "blue", lwd = 2)
+```
+
+
+# Problem 2: Crabs
+```{r}
+head(crab)
+```
+
+## a.
+```{r}
+crab.glm.fit <- glm(sat ~ width, family="binomial", data = crab)
+summary(crab.glm.fit)
+confint(crab.glm.fit, level = 0.95)
+```
+Based on our model, for every 1 unit increase in the width of the shell the odds of a female crab having a satellite increases by a factor of $e^{0.4972}$
+We are 95% confident that the true effect of a 1 unit increase in the width of a shell on the odds of a female crab having at least one satellite is an increase by factor between $e^{0.3083806}$ and $e^{0.7090167}$
+
+## b.
+```{r}
+crab$col <-as.numeric(crab$color>2)
+crab.glm.fit2 <- glm(sat~width+col, family = "binomial", data = crab)
+summary(crab.glm.fit2)
+anova(crab.glm.fit2, test="LRT")
+```
+we expect the odds of a female crab having a satellite to be $e^{-0.6531}$ times less for a dark colored crab than a light colored crab.
+
+After performing a likelihood ratio test using the anova() command, the effects of width are very signifcant but col is borderline with a p-value of 0.06785. Being so close to .05, it seems that it may be worth keeping in the model.
+
+## c.
+```{r}
+crab.glm.fit3 <- glm(sat~width+col+width:col, family="binomial", data = crab)
+summary(crab.glm.fit3)
+
+width.new <- seq(min(crab$width), max(crab$width), .001)
+fit.light <- predict(crab.glm.fit3, type = "response", newdata=data.frame(width = width.new, col = 0))
+fit.dark <- predict(crab.glm.fit3, type = "response", newdata=data.frame(width=width.new, col = 1))
+plot(fit.light~width.new, col = "black", xlab= "width", ylab="est. prob. of satellite", ylim=c(0,1), type="l", lwd=4)
+lines(fit.dark~width.new, col = "gray", lwd = 4)
+legend("bottomright", legend=c("dark", "light"), lwd=c(4,4), col= c("black", "gray"))
+```
+
+
+## d.
+```{r}
+anova(crab.glm.fit3, test = "LRT")
+```
+The interaction effect is not needed, as we receive a p-value of 0.36929 which is not very significant.

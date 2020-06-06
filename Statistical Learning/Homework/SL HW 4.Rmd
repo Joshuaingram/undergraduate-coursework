@@ -1,0 +1,128 @@
+---
+title: "SL Homework 4"
+author: "Joshua Ingram"
+date: "October 1, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ISLR)
+advertising <- read.csv("C:/Users/joshi/Downloads/Advertising.csv")
+```
+
+## Problem 1
+```{r}
+head(Auto)
+```
+
+### a)
+```{r}
+lm.horse <- lm(mpg ~ horsepower, data = Auto)
+summary(lm.horse)
+```
+
+#### i)
+With $\alpha$ at .05, we have an f-statistic of 599.7 (with 390 df) that gives us a p-value of 2.2e-16. This gives us significant evidence that there is a significant relationship between horsepower as the predictor and mpg as the response.
+
+$\beta_0$ = 39.94 and $\beta_1$ = -0.158. With $\beta_0$ = 39.94, we would expect a vehicle to have 39.94 mpg if horsepower was = 0 (which makes no sense, as it is not possible). With $\beta_1$ = -0.158, for every 1 unit increase in horsepower, we would expect mpg to decrease by .158.
+#### ii)
+```{r}
+prediction <- -.158 * 98 + 39.94
+print("95% prediction interval")
+predict(lm.horse, newdata = data.frame(horsepower = 98), interval = "p", level = .05)
+print("95% confidence interval")
+predict(lm.horse, newdata = data.frame(horsepower = 98), interval = "c", level = .05)
+print(paste("predicted mpg when horsepower = 98:", prediction))
+```
+Prediction interval: We are 95% confident that all predicted values of mpg within our model when horsepower = 98 will be between 24.15885 and 24.7753 mpg
+Confidence interval: We are 95% confident that on average, the value of mpg within our model when horsepower = 98 will be between 24.45131 and 24.48284 mpg
+
+#### iii)
+RSE = 4.906
+The typical deviation of residuals from our model is +/- 4.906
+
+R^2 = 60.59%
+60.59% of variance of mpg is explained by the horsepower of the vehicle.
+
+### b)
+```{r}
+plot(mpg~horsepower, data = Auto)
+abline(lm.horse)
+```
+
+
+## Problem 2
+
+### a)
+```{r}
+plot(~., data = Auto)
+```
+
+### b)
+```{r}
+Auto2 <- subset(Auto, select = -name)
+cor_matrix <- round(cor(Auto2),3)
+cor_matrix
+```
+Pairs with correlation greater than .90 (but less than 1 to exclude pairs of self): (cylinders, displacement) and (weight, displacement)
+
+### c)
+```{r}
+auto2.lm <- lm(mpg~., data = Auto2)
+auto2.lm
+summary(auto2.lm)
+```
+
+#### i)
+$\beta_1$ = coefficient for cyclinders, $\beta_2$ = coefficient for displacement, $\beta_3$ = coefficient for horespower, $\beta_4$ = coefficient for weight, $\beta_5$ = coefficient for acceleration, $\beta_6$ = coefficient for year, $\beta_7$ = coefficient for origin
+
+H0: $\beta_1$ = $\beta_2$ = $\beta_3$ = $\beta_4$ = $\beta_5$ = $\beta_6$ = $\beta_7$ = 0
+Ha: At least one $\beta$ coefficient is not equal to 0
+
+$\alpha$ = .05
+
+The F-statistic and p-value received as a result is the test statistic for the hypothesis tests. This model is statistically significant as we receive a p-value of 2.2e-16 which less than $\alpha$.
+
+#### ii)
+displacement, weight, year, and origin have statistically significant relationships with the response (if all other varaibles are held constant).
+
+#### iii)
+2 most significant predictors: weight and year
+
+(for year) With all other predictors held constant, we predict an increase of .75 mpg for every one year increase from the base year (modulo 100 for year).
+
+(for weight) with all other predictors held constant, we predict a decrease of -.0064 mpg for every 1 lb increase in weight of the vehicle.
+
+#### iv)
+weight has the most significant relationship with mpg compared to all other predictors, although its absolute value of $\beta$ coefficient is the smallest. This could be a result of the fact that it has correlations with other predictors and it is not entirely independent. 
+
+### d)
+```{r}
+step(auto2.lm)
+```
+step() is used to perform the backward approach. The only variable dropped (initially removing name) was acceleration. The final fromula for the fitted model is:
+
+mpg-hat = -15.56 - .507(cylinders) + .193(displacement) - .024(horsepower) - .0062(weight) + .748(year) + 1.428(origin)
+
+## Problem 3
+```{r}
+lm.tv <- lm(sales ~ TV, data = advertising)
+lm.tv.rad  <- lm(sales~ TV + radio, data = advertising)
+lm.tv.rad.news <- lm(sales ~ TV + radio + newspaper, data = advertising)
+
+summary(lm.tv)
+summary(lm.tv.rad)
+summary(lm.tv.rad.news)
+```
+Sales~TV: R^2 = .6119, RSE = 3.259
+Sales~TV + radio: R^2 = .8972, RSE = 1.681
+Sales~TV + radio + newspaper: R^2 = .8972, RSE = 1.686
+
+### a)
+The R^2 never decreased as the number of varaibles increased, however, it stayed the same after adding newspaper (probably due to rounding). This increase in R^2 as the numbers of variables increase is due to the least sum squares and the way the formula works. As more variables are added, the model becomes better "fit" to the data, so the difference in y and y-hat will decrease (or in some special cases, stay the same), but it will never increase, thus decreasing the value of the denominator for the R^2 formula which will make R^2 larger.
+
+### b)
+The RSE decreased when radio was added, but slightly increased when newspaper was added as a third variable. This is because the rate at which the value of the numerator for RSE increased is greater than that of the rate at which the denominator increased, thus RSE increased when newspaper was added.
+
+### C)
+Radio appears to be more important than newspaper, as the R^2 increased significantly when radio was added (and RSE decreased), but when newspaper was added the RSE increased slightly and R^2 stayed basically the same. This could be as a result of radio and newspaper interacting, where radio may explain much of what newspaper explains and more. This increase in R^2 points to radio being the more important predictor relative to newspaper.

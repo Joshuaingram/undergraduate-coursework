@@ -1,0 +1,175 @@
+---
+title: "Statistical Learning Chapter 1-2/R Review Notes"
+output: html_notebook
+---
+
+Supervised Learning Formula:
+
+Let Y = predictor, X = predictor.
+In supervised learning we assume the following general formula:
+
+Y = f(X) + $\epsilon$
+
+where:
+- f(X) is sstematic information about Y provided by X (their true relationship)
+- while $\epsilon$ describes information about Y not captured by X (random quantity centered around 0, E[$\epsilon$] = 0, also referred to as model error)
+
+- there is an sub_i that is implicit in this formula
+
+- Within our general equation, we may have multiple predictors, X
+
+*Do not over-fit to your data*
+
+
+
+Why estimate function f such that Y approximately = f(X)?
+Two reasons:
+
+- Prediction
+- Interpretation
+
+Both are goals of statistical learning:
+
+prediction - come up with estimate f-hat that produces best possible predictions of y-hat = f-hat(x) of unobserved cases
+
+interpretation - attempt to infer the relationship between X and f
+
+Examples: 
+Where PREDICTION is prioritized:
+
+- when we wish to predict whether a patient with a particular gene expression makeup will have an adverse reaction to a treatment
+- based on stock price dynamics in p days, we wish to forecast whether stocks go up or down today
+- give characteristics of a house (size, location, etc) we wish to predict the price of a house
+
+in these situations, we still use the general equation to model, but when we are trying to predict f, we use the model f-hat(x):
+
+Y-hat = f-hat(X)
+
+since error term $\epsilon$ averages to zero
+
+in prediction, f-hat is treated as a black box:
+- we aren't concerned with the exact form of f-hat
+- given that it is flexible enough to yield accurate predictions for Y
+
+SIDE NOTE:
+
+Most prolific black box models in machine & statistical learning:
+
+- Artificial Neural Networks
+- Support vector machines
+- Random forests
+
+
+
+For INTERPRETATION, we aim to understand the way that response Y is affected by change in predictors X_1, ..., X_n
+
+General questions of interpretation:
+
+- Which predictors are associated with the response?
+- What is the relationship between the response and each predictor? 
+- Can the relationship be captured linearly? Non-linear?
+
+
+We still use the general equation, however, our main goal is to:
+
+- interpret the relationship between reponse Y and precitors X_n...
+- rather than just making best possible predictions for Y
+
+Within interpretation, the estimate f-hat cannot be treated as a black box. We need to know exactly how each predictor affects the response.
+
+Examples of interpretation:
+
+- How does more advertisement affect my sales?
+- Which form of advertisement causes the greatest growth in sales?
+
+Lots of questions may be answered using multiple linear regression:
+
+Y = f(X) + $\epsilon$ = $\beta$_0 + $\beta$_1 (X_1) + ...
+
+SIDE NOTE: 
+
+Popular models for interpretation:
+
+- linear/logistic regression
+- LASSO regression
+- Decision Trees 
+
+
+Once we have estimated f with f-hat, one commits two types of errors:
+
+1. reducible errors:
+
+f(X) - f-hat(X)
+
+can be reduced via better statistical learning techniques
+
+2. irreducible error:
+
+Y- f(X) = $\epsilon$
+
+can NOT be reduced,
+
+Y - Y-hat = (f(X) + $\epsilon$) - f-hat(X) = $\epsilon$
+
+Why this irreducible error?
+
+- unmeasured variables (ones not among X_1... X_n)
+- umeasurable natural varation - charactersitics that are tough to keep track of & account for in systematic part of the model
+
+Linear Regression
+
+- it is a useful too for predicting/explaining a quantitative response based on one or more predictors
+
+
+Simple Linear Regression Equation:
+
+Y = $\beta$_0 + $\beta$_1*(X_1) + $\epsilon$, $\epsilon$ ~ N(0, sigma^2) (residuals should be about bell shaped and symmetric)
+
+$\beta$_0 and $\beta$_1 are model parameters, but are unknown.. we must estimate them ($\beta$-hat)
+
+y-hat = beta_0-hat + beta_i-hat*(X_i)
+
+We should minimuze the residuals when finding betas
+
+we do this using an optimization task: LEAST SQUARES
+
+Speaking visually, we find a line such that it is closest to the data points
+
+
+Conduct Statistical Inference technique, such as hypothesis testing, to determine the accuracy of your model (actual vs. predicted) and to determine a relationship
+
+
+In statistical inference, we use sample estimates to infer about the population parameters
+
+USe Least Squares Regression to create the estimate line for a linear relationship
+
+
+unbiased estimates - many samples can be taken that give us different estimates, but overall we can find the "average" estimate that will be closer and closer to the population value... meaning it will be more unbiased as it is closer and closer to the population value
+
+
+
+Standard Error: Sample Mean
+
+Sample mean - using sample mean X-bar as the estimate for population mean $\mu$ , what was its standard error?
+
+Derived from the central limit thereom:
+(for large n) x-bar ~ N($\mu$, $\sigma^2$/n), E[x-bar] = $\mu$, Var[x-bar] = $\sigma^2$/n
+
+SE[x-bar] = $\sigma$ / $\sqrt {x-bar}$
+
+But, given that $\sigma$ value of population variance was unknown, we estimated is via sample standard deviation s, which led to:
+(x-bar - $\mu$)/(s/$\sqrt n$) ~ $\t_{(n-1)}$), E[x-bar] = $\mu$, Var[x-bar] = $s^2$ /n
+
+SE(x-bar) = $s^2$/$\sqrt n$
+
+
+Standard Errors are explicitly used in formulas for confidence intervals.
+
+95% confidence interval for parameter $\beta$ is such interval (c,d) that
+
+P($\b$ = (c,d)) = 0.95
+
+
+
+####Multiple Linear Regression
+

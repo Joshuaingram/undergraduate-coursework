@@ -1,0 +1,362 @@
+---
+title: "Linear Models Assignment 7"
+author: "Joshua Ingram"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ISLR)
+davis <- read.csv("C:/Users/joshi/Downloads/Davis.txt", sep="")
+davis <- subset(davis, height>= 60)
+```
+
+# Problem 1.
+
+## 1.
+
+## Test for Association
+```{r}
+lm_davis1 <- lm(weight ~ sex, data = davis)
+summary(lm_davis1)
+```
+
+## Test for Interaction
+
+```{r, echo=FALSE}
+ggplot(data=davis, 
+       aes(x=weight, y=height, col=sex)) +
+  geom_point() + 
+  geom_smooth(method=lm, 
+              se = F, 
+              fullrange = T)
+```
+
+```{r}
+lm_davis2 <- lm(height ~ weight + sex + weight:sex, data = davis)
+summary(lm_davis2)$coefficients
+```
+
+## Comments
+
+The association between weight and sex is statistically signficant according to our F-statistic and p-value for the overall model significance. The interaction between weight and sex in predicting height seems possible visiually, but to further study if there is significant interaction we can look at the interaction term's t-statistic and corresponding p-value. After doing so, we recieve an t-statistic of -1.548 and p-value of .1233, showing that the interaction is not statistically significant. These two differences show that association between two variables does not infer interaction between the same two in predicting a response variable.
+
+
+## 2.
+
+I couldn't find a dataset where there was no significant association but a significant interaction between two independent variables (after looking for several hours), so rather than giving up, I attempted to make a theoretical example. My apologies.
+
+```{r}
+# theoretical setup
+x_1 <- runif(1500, 1, 50)
+x_2 <- rbinom(1500, 1, .1)
+x_2 <- as.logical(x_2)
+eps <- rnorm(1500, 0, 150)
+y <-  500 + (3 * x_1) + (59*x_2) + (25 * x_1 * x_2) + eps
+df_theor <- data.frame(y, x_1, x_2)
+```
+
+## Test for Association
+
+```{r}
+lm_theor1 <- lm(x_1 ~ x_2, data = df_theor)
+summary(lm_theor1)
+```
+
+
+## Test for Interaction
+
+```{r, echo=FALSE}
+ggplot(data=df_theor, 
+       aes(x=x_1, y=y, col=x_2)) +
+  geom_point() +
+  geom_smooth(method = lm,
+              se = F,)
+```
+
+```{r}
+lm_theor2 <- lm(y ~ x_1 + x_2 + x_1:x_2)
+summary(lm_theor2)
+```
+
+## Comments
+
+Clearly (by setup) there is no relationship between x_1 and x_2 (unless by random chance). However, there is a clear relationship between y and x_1, x_2, and the interaction between x_1 and x_2. We checked the association between x_1 and x_2 above, where we recieved an f-statistic of 2.594 and p-value of .1075. This association is statistically insignificant. However, when looking at the interaction between x_1 and x_2 in predicting y, we see that there is a significant interaction. We recieve a t-value of 26.949 and p-value of basically 0. Here we observe that interaction does not infer association.
+
+# Problem 2.
+
+## 1. 
+
+### a.
+
+$$
+\left[\begin{array}
+{ccc}
+1 & 2 & 0\\
+1 & 1 & 1\\
+1 & 1 & 2\\
+1 & 0 & 1
+\end{array}\right]'
+= 
+\left[\begin{array}
+{cccc}
+1 & 1 & 1 & 1\\
+2 & 1 & 1 & 0\\
+0 & 1 & 2 & 1
+\end{array}\right]
+$$
+
+### b.
+
+$$
+\left[\begin{array}
+{ccc}
+1 & 3 & 1\\
+2 & 2 & 5
+\end{array}\right]
+\times
+\left[\begin{array}
+{ccc}
+0 & 2 & 0\\
+1 & 1 & 1\\
+3 & 1 & 2
+\end{array}\right]
+=
+\left[\begin{array}
+{ccc}
+6 & 6 & 5\\
+17 & 11 & 12
+\end{array}\right]
+$$
+
+### c.
+
+$$
+\left[\begin{array}
+{ccc}
+1 & 2 & 0\\
+1 & 1 & 1\\
+1 & 1 & 2\\
+1 & 0 & 1
+\end{array}\right]
+\times
+\left[\begin{array}
+{c}
+\beta_0\\
+\beta_1\\
+\beta_2
+\end{array}\right]
++
+\left[\begin{array}
+{c}
+\epsilon_1\\
+\epsilon_2\\
+\epsilon_3\\
+\epsilon_4
+\end{array}\right]
+=
+\left[\begin{array}
+{c}
+\beta_0 + 2\beta_1 + \epsilon_1\\
+\beta_0 + \beta_1 + \beta_2 + \epsilon_2\\
+\beta_0 + \beta_1 + 2\beta_2 + \epsilon_3\\
+\beta_0 + \beta_2 + \epsilon_4
+\end{array}\right]
+$$
+
+## 2.
+
+### a.
+
+```{r}
+A <- matrix(c(1, 4, 2, 5, 3, 6), 2, 3)
+B <- matrix(c(-5, 3, 1, 0, 2, -4), 2, 3)
+
+# Matrix Addition
+A + B
+
+# Matrix Subtraction
+A - B
+
+# Multiplication by scalar -1
+-B
+```
+
+### b.
+
+```{r}
+a <- t(c(2, 0, 1, 3))
+b <- c(-1, 6, 0, 9)
+a %*% b
+```
+
+### c.
+
+```{r}
+# p.1
+A <- matrix(c(1, 3, 2, 4), 2, 2)
+B <- matrix(c(0, 2, 3, 1), 2, 2)
+A%*%B
+
+# p.2
+A <- matrix(c(2, 0, 0, 3), 2, 2)
+B <- matrix(c((1/2), 0, 0, (1/3)), 2, 2)
+A%*%B
+
+```
+
+### d.
+
+```{r}
+A <- matrix(c(1, 2, 3, 4), 2, 2)
+B <- matrix(c(5, 6, 7, 8), 2, 2)
+A
+B
+
+# results of the matrix multiplications below are not equal
+A%*%B
+B%*%A
+```
+
+### e.
+
+```{r}
+A_trans <- t(A%*%B)
+
+B_trans <- t(B)%*%t(A)
+
+# two matrices below are equal, verifying that (AB)' = B'A'
+A_trans
+B_trans
+```
+
+### f.
+
+```{r}
+A <- matrix(c(0, 2, 3, 1), 2, 2)
+A_square <- A%*%A
+A_cube <- A%*%A_square
+A_square
+A_cube
+```
+
+### g.
+
+```{r}
+A <- matrix(c(2, 1, 5, 3), 2, 2)
+# inverse of A
+A_inverse <- solve(A)
+A_inverse
+
+b <- c(4, 5)
+x <- A_inverse%*%b
+x
+```
+
+### h.
+
+```{r}
+A <- matrix(c(1, 3, 2, 5), 2, 2)
+b <- c(7, 2)
+
+x <- solve(A)%*%b
+x
+```
+
+### i.
+
+```{r}
+A <- matrix(c(1, 3, 2, 6), 2, 2)
+b <- c(7, 2)
+
+#x <- solve(A)%*%b
+#x
+```
+
+R gives an error, stating that the system is singular. This system of equations has no solution.
+
+# Problem 3.
+
+## 1.
+
+## Matrix transpose function
+
+```{r}
+my.transpose <- function(A){
+  dims <- dim(A)
+  A_trans <- c()
+  for (i in 1:dims[1]){
+    vect <- A[i,]
+    A_trans <- c(A_trans, vect)
+  }
+  A_trans <- matrix(A_trans, dims[2], dims[1])
+  return(A_trans)
+}
+```
+
+## Matrix multiplication function
+
+```{r}
+my.product <- function(A, B){
+  dims_A <- dim(A)
+  dims_B <- dim(B)
+  vect <- c()
+  for (i in 1:dims_B[2]){
+    for (j in 1:dims_A[1]){
+      dot_prod <- sum(A[j,] * B[,i])
+      vect <- c(vect, dot_prod)
+    }
+  }
+  AB <- matrix(vect, dims_A[1], dims_B[2])
+  return(AB)
+}
+```
+
+## Functionality checks
+
+```{r}
+# checking my.transpose()
+A <- matrix(c(1, 1, 1, 1, 2, 1, 1, 0, 0, 1, 2, 1), 4, 3)
+# my function output
+my.transpose(A)
+# t() output
+t(A)
+
+# checking my.product()
+B <- matrix(c(1, 2, 3, 2, 1, 5), 2, 3)
+C <- matrix(c(0, 1, 3, 2, 1, 1, 0, 1, 2), 3, 3)
+# my function output
+my.product(B,C)
+# %*% operator output
+B%*%C
+```
+
+## 2.
+
+```{r}
+my.is.symm <- function(A){
+  transpose <- my.transpose(A)
+  dims <- dim(A)
+  n_entries <- dims[1] * dims[2]
+  for (i in 1:n_entries){
+    if (A[i] != transpose[i]){
+      bool <- FALSE
+      break
+    } else{
+      bool <- TRUE
+    }
+  }
+  return(bool)
+}
+```
+
+## Functionality Checks
+
+```{r}
+B <- matrix(c(-5, 2, 7, 1, 2, 3, 3, 6, -4), 3, 3)
+C <- matrix(c(-5, 1, 3, 1, 2, 6, 3, 6, -4), 3, 3)
+# results from my.is.symm()
+my.is.symm(B)
+my.is.symm(C)
+```
+

@@ -1,0 +1,46 @@
+---
+title: 'Intro to Categorical: Homework 1'
+author: "Joshua Ingram"
+date: "August 29, 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(qcc)
+
+alligator.data <- read.csv("https://sites.williams.edu/bklingen/files/2018/09/alligatorfood.csv")
+```
+
+# 2. Alligator Food Choice
+
+### a. Frequency Table
+
+```{r}
+gator.table <- summary(alligator.data$food)
+gator.table
+```
+
+
+### b. Bar Chart
+```{r}
+barplot(gator.table, main = "Alligator Food Choice", ylim = c(0, 100), xlab = "Food Choice", ylab = "Count", col = c("green1", "blue1", "green3", "blue3", "green4"))
+```
+
+
+### c. Pareto Chart
+```{r}
+pareto.chart(gator.table, ylab = "Counts", main = "Alligator Food Choice")
+```
+
+### d. Pie Chart
+```{r}
+pie(gator.table, main = "Alligator Food Choice")
+```
+
+### e. Distribution Explanation
+
+Based on the distribution of food choices from this dataset, alligators seemed to have eaten more fish than any other category (43% of the total counts), followed by invertebrate (28% of the counts). Birds were the least common choice, being only 6% of the total counts of food choices.

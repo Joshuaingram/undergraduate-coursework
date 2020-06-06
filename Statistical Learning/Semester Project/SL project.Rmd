@@ -1,0 +1,24 @@
+---
+title: "SL Project"
+author: "Joshua Ingram"
+date: "11/2/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+master <- read_csv("C:/Users/joshi/OneDrive/Education/New College of Florida/By-Year Folders/Fall 2019/Statistical Learning/Statistical Learning Projects/master.csv")
+```
+
+
+```{r}
+nrow(master)
+head(master)
+```
+```{r}
+lapply(master, class)
+
+levels(as.factor(master$country))
+```
+

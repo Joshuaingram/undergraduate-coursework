@@ -1,0 +1,270 @@
+---
+title: "HW1"
+author: "Joshua Ingram"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ISwR)
+```
+
+# DUE: Wednesday, September 11th, at 5pm via Canvas Submission.
+
+
+ 
+
+# Problem #1
+
+Indicate whether each scenario is a classification or regression problem, and how many variables are used to describe an observation.
+    
+  1. Predicting if a student is going to SAT the college-level introductory statistics course based on their overall high school GPA, their algebra grade and their geometry grade.
+  
+  Answer: Classification problem with 3 variables used to describe the observation.
+  
+  2. Same as before, only now predicting the letter grade (A,B,C,D,F).
+  
+  Answer: Classification problem with 3 variables used to describe the observation.
+  
+  3. Predicting score differential in a football game between **two opponents**. We assume that it is mid-season, and obtain the data on the games completed by then, studying such variables as: yards (gained & allowed), touchdowns (scored & allowed), turnovers (committed & forced), whether it rains or not.
+  
+  Answer: Regression problem with 4 variables used to describe the observation.
+  
+  4. Forecasting the total number of items sold by a Walmart supermarket based on the day of the week, location and store size.
+
+  Answer: Regression problem with 3 variables used to describe the observation.
+
+# Problem #2
+
+In data set $cystfibr$ of $ISwR$ package, proceed to:
+
+```{r}
+head(cystfibr)
+```
+
+
+1. Use a looping construct to loop through each variable and calculate mean and standard deviation *without* using $R$'s customized functions like $mean(), sd()$.
+
+
+
+Mean and SD
+```{r}
+
+for (var in 1:ncol(cystfibr)){
+  
+  name <- colnames(cystfibr[var])
+  len <- length(cystfibr[[name]])
+  mean <- sum(cystfibr[[name]]) / len
+  
+  print(name)
+  print(paste("Mean =", mean))
+    
+  sum1 <- 0
+    
+  for (i in cystfibr[[name]]){
+      
+    sum1 <- sum1 + (i - mean)^2
+      
+  }
+    
+  sd <- sqrt(sum1/(len-1))
+  print(paste("Standard Deviation =", sd))
+
+}
+  
+```
+
+
+2. Create a matrix with rows corresponding to variables, columns - to calculated summaries (mean, sd), and fill it out with the results of the previous step accordingly. Please assign appropriate row  and column names as well.
+
+```{r}
+
+matrix1 <- matrix(c("name", "mean", "sd"), ncol = 3)
+
+for (var in 1:ncol(cystfibr)){
+  
+  vec <- c()
+  
+  name <- colnames(cystfibr[var])
+  len <- length(cystfibr[[name]])
+  mean <- sum(cystfibr[[name]]) / len
+  
+  vec[1] <- name
+  vec[2] <- mean
+    
+  sum1 <- 0
+  
+  for (i in cystfibr[[name]]){
+      
+    sum1 <- sum1 + (i - mean)^2
+      
+  }
+    
+  sd <- sqrt(sum1/(len-1))
+  
+  vec[3] <- sd
+  
+  matrix1 <- rbind(matrix1, vec)
+
+}
+
+matrix1
+```
+
+
+3. Proceed to:
+    a. Extract all information on first $10$ observations.
+```{r}
+head(cystfibr, 10)
+```
+    
+    b. Extract all information on observations $\# 5,10 \ \& \ 15$.
+```{r}
+cystfibr[c(5, 10, 15),]
+```
+
+    c. Extract all information on last $10$ observations.
+```{r}
+tail(cystfibr, 10)
+```
+
+    d. Extract all information on the first *variable*.
+```{r}
+cystfibr[,1]
+```
+
+    e. Extract information on the first *variable* for observations $\# 5,10,15$.
+```{r}
+cystfibr[c(5, 10, 15), 1]
+```
+
+    f. Extract all information on the patients of above-average height.
+```{r}
+hmean <- mean(cystfibr$height)
+subset(cystfibr, height > hmean, select = height)
+```
+    
+4. Show all the information on 5 oldest patients.
+```{r}
+cystfibr[tail(order(cystfibr$age), 5),]
+```
+
+
+5. Using a $subset()$ function, only select the observations that have above-average values for both $weight$ and $height$.
+```{r}
+subset(cystfibr, weight > mean(cystfibr$weight) & height > mean(cystfibr$height))
+```
+
+
+6. Make a scatterplot for an arbitrary pair of quantitative variables, comment on the relationship.
+```{r}
+plot(tlc ~ weight, data = cystfibr)
+```
+
+Plotting weight and total lung capacity, with TLC as the response, there may be a slightly noticeable relationship, with tlc decreasing as weight increases. However, it may not be a very strong relationship.
+
+# Problem #3
+
+Define your own function in $R$ and demonstrate its functionality:
+
+   1. Function needs to contain:
+      a. at least one assignment operation ('<-')
+      b. at least one $required$ argument (without a default value)
+      c. at least one argument with a default value
+      d. at least one conditional $if$-expression
+   2. Demonstrate:
+      a. 3 calls to show that function works properly on various $required$ inputs}
+      b. a call in which you specify a non-default value
+
+Function idea examples:  check if a string/sequence has a certain property, or make a cyclic algebraic calculation,  or provide various plots for inputted sequence/data... 
+
+**Example**: Function $is.increasing()$ allows to check if a sequence of numbers is monotonically increasing (returns TRUE) or not (returns FALSE). Upon user's request, it can also print out the consecutive differences.
+
+```{r}
+is.increasing <- function(x,printout=FALSE){
+  n <- length(x)
+  dif.vec <- x[2:n]-x[1:(n-1)]
+  if (printout == TRUE) print(dif.vec)
+  if (sum(dif.vec<=0) != 0) return(F)  # Important note: function stops after executing the
+  return(T)                            # first 'return' statement it gets to
+}
+
+x <- c(1:10)
+is.increasing(x)
+
+y <- c(5,5,5)
+is.increasing(y)
+
+z <- c(1,5,3,7,9)
+is.increasing(z)
+
+is.increasing(z,printout=T)   # The call where you specify the non-default value
+```
+
+
+My Function (gives the user the mean and/or standard deviation of a vector of numbers... func = 1 gives mean, func = 2 gives sd, func = 3 gives both sd and mean):
+```{r}
+sd.mean <- function(vector, func = 3){
+    length <- length(vector)
+    mean <- sum(vector)/length
+      
+    sum <- 0
+      
+    for (i in vector){
+      sum <- sum + (i - mean)^2
+    }
+    
+    sd <- sqrt(sum/(length-1))
+      
+  if (func == 1) print(paste("Mean =", mean))
+    
+  if (func == 2) print(paste("Standard Deviation =", sd))
+    
+  if (func == 3) print(paste("Mean =", mean, "Standard Deviation =", sd))
+  
+}
+
+sd.mean(c(1,4,5,6,12,9))
+
+sd.mean(c(93,123,45,199,33,55))
+
+sd.mean(c(55,66,223,44,6,22))
+
+sd.mean(c(1,2,4,6,2,7,8), func = 1)
+```
+
+# Problem #4
+
+Count the total number of boys in data set $juul$ (from package $ISwR$), who have insulin-like growth factor greater than 400, in three different ways (make sure the output is the same though):
+```{r}
+head(juul, 15)
+```
+
+* Using for-loop
+```{r}
+count <- 0
+
+for (i in 1:nrow(juul)){
+  if (juul$sex[i] == 1 & is.na(juul$sex[i]) != TRUE) {
+    if (juul$igf1[i] > 400 & is.na(juul$igf1[i]) != TRUE){
+      count = count + 1
+    }
+  }
+}
+  
+print(count)
+
+```
+
+* Using vectorized operations (can be done in one line)
+```{r}
+length(which(juul$igf1 > 400 & juul$sex == 1))
+```
+
+* Using data frame subsetting (can be done in one line)
+```{r} 
+nrow(juul[juul$sex == 1 & is.na(juul$sex) != TRUE & is.na(juul$igf1) != TRUE & juul$igf1 > 400,])
+```
+
+
