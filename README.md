@@ -19,9 +19,6 @@ This repository is where I keep any assignments for courses that require program
 - Statistical Learning
 - Linear Models
 - Statistical Estimation and Inference
-- Intermediate Python
-- Statistical Inference for Data Science I (Grad)
-- Data Munging and Exploratory Data Analysis (Grad)
 
 ## Descriptions
 
