@@ -40,15 +40,3 @@ Linear models represent the cornerstone family of statistical modeling approache
 ### Statistical Estimation and Inference
 
 This course will introduce students to advanced mathematical and inferential procedures for a deeper understanding of statistical estimation and inference. Many topics from introductory statistics classes, such as random variables, the central limit theorem, statistical estimation and hypotheses testing will be revisited and put on a more rigorous mathematical footing. The course starts with a review of random variables (both discrete and continuous) and an extension to random vectors. Basic properties of random samples and statistics such as the sample mean and sample standard deviation are discussed, followed by a discussion of sampling distributions, including bootstrap and permutation approaches. Deriving and evaluating point estimators, with a focus on maximum likelihood and Bayes estimation is thoroughly covered, followed by principles of interval estimation and some discussion of hypothesis testing, including likelihood ratio tests. Although the course will use the R programming language, it will feel more theoretical because it explains the concepts and ideas behind the procedures underlying applied data analysis.
-
-### Intermediate Python
-
-This course is an accelerated, project-driven introduction to computational thinking: how we can describe and solve interdisciplinary problems with computers. We will use the Python 3 programming language to generate physics-based simulations, model ecological systems, and develop video games. This course is intended for students with some programming experience (in any language), and is a good fit for first- or second-year students who are looking for something faster than the Introduction to Programming course.
-
-### Statistical Inference for Data Science I
-
-A rapid review of probability followed by an introduction to R. Fundamentals of statistical inference including parameter estimation and maximum likelihood, hypothesis testing, regression, and linear models with a focus on working with large data sets. An introduction to resampling and nonparametric methods.
-
-### Data Munging and Exploratory Data Analysis
-
-Exploratory data analysis in the context of knowledge discovery, including the use of data visualization software. Inference, prediction and causal relationships. Multivariate models and independence. Resampling methods and nonparametric statistics with a focus on application to real data.
