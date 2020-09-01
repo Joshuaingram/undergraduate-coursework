@@ -1,0 +1,93 @@
+---
+title: "Homework 1"
+author: "Joshua Ingram"
+date: "8/30/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nnet)
+library(car)
+
+chile <- read.csv("D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Chile.txt", sep = "")
+```
+
+# Problem 1
+
+```{R, include=FALSE}
+head(chile)
+ncol(chile)
+nrow(chile)
+levels(chile[,8])
+```
+
+## 1.
+
+```{r}
+fit1_chile <- multinom(vote ~ age + sex + region + statusquo, data = chile)
+summary(fit1_chile)
+```
+
+"will abstain" is the baseline category.
+
+## 2.
+
+$$
+Y_i\sim_{ind.} Multinomial(p_{i,1}, p_{i,2}, p_{i,3}, p_{i,4}) \\
+
+\text{Where, 1 = "will vote no", 2 = "undecided", 3 = "will vote yes", 4 = "will abstain"} \\
+
+log(\frac{p_{i,j}}{p_{i,4}}) = \beta_{0,j} + \beta_{1,j}age_i + \beta_{2,j}sex_{i} + \beta_{3,j}region_i + \beta_{4,j}statusquo_i, \; j = 1, 2, 3 \\
+
+p_{i,4} =  1 - \sum^{3}_{j=1} p_{i,j}
+$$
+
+## 3.
+
+We use the Likelihood Ratio Test (LRT)/Analysis of Deviance to test each predictor "as a whole."
+
+Example of hypothesis test with age ($\beta_1$): 
+
+$H_0 \; : \; \beta_{1,1} = \beta_{1,2} = \beta_{1,3} =\beta_{1,4} = 0$
+
+$H_A \; : \; \{\exists \; \beta_{1,j} \neq 0\}, \; j = 1, 2, 3, 4$
+
+```{r}
+Anova(fit1_chile)
+```
+
+
+
+## 4.
+
+### a.
+
+### b.
+
+### c.
+
+### d.
+
+## 5.
+
+# Problem 2
+
+## 1.
+
+## 2.
+
+## 3.
+
+## 4.
+
+## 5.
+
+# Problem 3
+
+## 1.
+
+## 2.
+
+## 3.
