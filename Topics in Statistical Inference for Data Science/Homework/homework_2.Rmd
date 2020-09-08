@@ -1,0 +1,129 @@
+---
+title: "Homework 1"
+author: "Joshua Ingram"
+date: "8/30/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nnet)
+library(car)
+library(effects)
+library(AER)
+
+ornstein <- read.csv("D:/main/projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Ornstein.txt", sep="")
+nmse <- NMES1988
+```
+
+# Problem 1
+
+## 1.
+
+```{r}
+seq_vals <- seq(0, 30, 1)
+plamb_2 <- dpois(seq_vals, 2)
+plamb_4 <- dpois(seq_vals, 4)
+plamb_8 <- dpois(seq_vals, 8)
+plamb_16 <- dpois(seq_vals, 16)
+layout(matrix(c(1,2,3, 4),ncol=2), ) 
+plot(seq_vals, plamb_2, pch=20, main=expression(paste("(c) ", mu, " = 2")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_2)
+plot(seq_vals, plamb_8, pch=20, main=expression(paste("(e) ", mu, " = 8")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_8)
+plot(seq_vals, plamb_4, pch=20, main=expression(paste("(d) ", mu, " = 4")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_4)
+plot(seq_vals, plamb_16, pch=20, main=expression(paste("(f) ", mu, " = 16")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_16)
+```
+
+**Note: I was able to make the graps have 1x1 aspect ratios like in the slides, but the graphs were too small in the pdf output for some reason. If you would like to see the code so they are exactly the same (besides the size), I will be happy to provide it.**
+
+## 2.
+
+```{r}
+# mu = 2
+ppois(10, 2, lower.tail = TRUE) - ppois(5,2, lower.tail = TRUE) 
+
+# mu = 4
+ppois(10, 4, lower.tail = TRUE) - ppois(5,4, lower.tail = TRUE) 
+
+# mu = 8
+ppois(10, 8, lower.tail = TRUE) - ppois(5,8, lower.tail = TRUE) 
+
+# mu = 16
+ppois(10, 16, lower.tail = TRUE) - ppois(5,16, lower.tail = TRUE) 
+```
+
+$P(X \in [5,10])$, where $X \sim Pois(2)$, is 0.0166
+
+$P(X \in [5,10])$, where $X \sim Pois(4)$, is 0.212
+
+$P(X \in [5,10])$, where $X \sim Pois(8)$, is 0.625
+
+$P(X \in [5,10])$, where $X \sim Pois(16)$, is 0.076
+
+## 3.
+
+We are working with count data for the number of interlocks. Clearly right-skewed.
+```{r, message=FALSE}
+plot(table(Ornstein$interlocks), xlab="Number of Interlocks", ylab="Frequency")
+```
+
+Since we want to find $\hat{\mu}$ using MLE, we need to find the value of $\mu$ that maximizes the likelihood of observing our distribution. We can get an idea by looking at the the density plot.
+
+```{r}
+ggplot(data = ornstein, aes(x=interlocks, y = ..density..))+
+  geom_density( col = "blue", size = 1.3) +
+  geom_histogram(bins = 100)
+```
+
+Now, we could estimate $\mu$ by simply finding the mean of the distribution as it is the value where our data would be most likely to occur. That value would be: 13.58065
+
+```{r}
+mean(ornstein$interlocks)
+```
+
+We can then plot the poisson distribution given $\hat{\mu}$ (notice the scale for y-axis).
+
+```{r}
+seq_vals <- seq(0, 100)
+estimates <- dpois(seq_vals, 13.58065)
+df <- data.frame(seq_vals, estimates)
+colnames(df) <- c("values", "estimates")
+
+plot(table(Ornstein$interlocks)/length(Ornstein$interlocks), xlab="Number of Interlocks", ylab="Frequency")
+lines(df$values, df$estimates, col ="blue")
+```
+
+This doesn't seem like a great way to estimate the marginal distribution, as there is a lot more data closer to 0 and the distribution is right-skewed, meaning the mean rate of our data is highly affected by the skew. Zero-inflated model or a power-law?!
+
+# Problem 2
+
+## 1.
+
+```{r}
+plot(table(nmse$chronic), xlab="Number of Chronic Conditions", ylab="Frequency")
+```
+
+
+## 2.
+
+## 3. 
+
+## 4.
+
+## 5.
+
+## 6.
+
+## 7.
+
+### a.
+
+### b.
