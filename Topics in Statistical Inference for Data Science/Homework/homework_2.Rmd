@@ -13,8 +13,9 @@ library(car)
 library(effects)
 library(AER)
 
-ornstein <- read.csv("D:/main/projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Ornstein.txt", sep="")
-nmse <- NMES1988
+data("NMES1988")
+ornstein <- read.csv("c:/main/projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Ornstein.txt", sep="")
+nmes <- NMES1988
 ```
 
 # Problem 1
@@ -42,7 +43,7 @@ plot(seq_vals, plamb_16, pch=20, main=expression(paste("(f) ", mu, " = 16")),
 segments(seq_vals, 0, seq_vals, plamb_16)
 ```
 
-**Note: I was able to make the graps have 1x1 aspect ratios like in the slides, but the graphs were too small in the pdf output for some reason. If you would like to see the code so they are exactly the same (besides the size), I will be happy to provide it.**
+**Note: I was able to make the graphs have 1x1 aspect ratios like in the slides, but the graphs were too small in the pdf output for some reason. If you would like to see the code so they are exactly the same (besides the size), I will be happy to provide it.**
 
 ## 2.
 
@@ -108,22 +109,104 @@ This doesn't seem like a great way to estimate the marginal distribution, as the
 ## 1.
 
 ```{r}
-plot(table(nmse$chronic), xlab="Number of Chronic Conditions", ylab="Frequency")
+plot(table(nmes$visits), xlab="Number of Physician Visits", ylab="Frequency")
 ```
 
+The most common number of visits is 0 with the counts reaching numbers as high as 68 and 89. Right-skewed. Zeros seem to be overrepresented.
 
 ## 2.
 
+$$
+(Y|x =chronic_i, age_i,gender_i,income_i,insurance_i) \sim_{ind.} Pois(\mu_i), i = 1,2...,4406
+$$
+
+$$
+log(\mu_i) = \beta_0 + \beta_1chronic_i + \beta_2age_i + \beta_3I_{gender,i} + \beta_4income_i + \beta_5I_{insurance,i}
+$$
+
+$$
+I_{chronic} \in \{0=female, 1=male\}, \; I_{insurance} \in \{0=no, 1=yes\}
+$$
+
 ## 3. 
+
+```{r}
+nmes_fit <- glm(visits ~ chronic + age + gender + income + insurance, family=poisson, data=nmes)
+summary(nmes_fit)
+```
+
+We use the Likelihood Ratio Test to test the full model significance.
+
+$H_0: \; \beta_1 = \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0$
+
+$H_A: \; \{\exists \; \beta_{j} \neq 0 \; | \;  j = 1,...,5\}$
+
+$\alpha = 0.05$
+
+Null Model: $Y_i \sim_{ind.} Pois(\mu_i), \;log(\mu_i) = \beta_0$
+
+LRT statistic = $2log(\frac{L_1}{L_0} ) = G^2_0 \sim \chi^2_{5-1}$
+
+p-value: $P(\chi^2_{5-1} \geq G^2_0)$
+
+```{r}
+nmes_null <- glm(visits ~ 1,
+                 family=poisson, data=nmes)
+anova(nmes_null, nmes_fit, test = "LRT")
+```
+
+Based on the LRT, we receive a p-value of basically 0. This gives us significant evidence to reject the null hypothesis and our overall model is statistically significant.
 
 ## 4.
 
+```{r}
+Anova(nmes_fit)
+```
+
+Income is not statistically significant.
+
 ## 5.
 
+```{r}
+nmes_fit2 <- glm(visits ~ chronic + age + gender + insurance, family=poisson, data=nmes)
+summary(nmes_fit2)
+```
+
+$$
+log(\mu_i) = 1.5 + 0.2chronic_i - 0.03age_i -.12gendermale_i + 0.25insuranceyes_i
+$$
+
 ## 6.
+
+```{r}
+summary_fit2 <- summary(nmes_fit2)
+1- summary_fit2$deviance/summary_fit2$null.deviance
+```
+
+9.3% of the variation in our data is explained by the model.
 
 ## 7.
 
 ### a.
 
+chronic:
+
+For every 1 additional chronic condition, the number of physician office visits will increase by a factor of $e^{0.2}$, on average, ceteris paribus. (or "will multiply by $e^{0.2}$")
+
+insurance:
+
+For people with insurance, the number of physician office visits are ${e^0.25}$ times greater than those without insurance, on average, ceteris paribus.
+
 ### b.
+
+```{r}
+round(confint(nmes_fit2),3)
+```
+
+chronic:
+
+For every 1 additional chronic condition, we are 95% confident that the number of physician office visits will increase by between a factor of $e^{0.196}$ and $e^{0.212}$, on average, ceteris paribus. (or "will multiply by between $e^{0.196}$ and $e^{0.212}$")
+
+insurance:
+
+For people with insurance, we are 95% confident that the number of physician office visits are between $e^{0.215}$ and $e^{0.278}$ times greater than those without insurance, on average, ceteris paribus.
