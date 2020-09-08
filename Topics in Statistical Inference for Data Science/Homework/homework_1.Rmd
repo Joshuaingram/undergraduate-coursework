@@ -10,8 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(nnet)
 library(car)
+library(effects)
 
-chile <- read.csv("D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Chile.txt", sep = "")
+chile <- read.csv("C:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Chile.txt", sep = "")
+ornstein <- read.csv("C:/main/projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Ornstein.txt", sep="")
 ```
 
 # Problem 1
@@ -27,7 +29,7 @@ levels(chile[,8])
 
 ```{r}
 fit1_chile <- multinom(vote ~ age + sex + region + statusquo, data = chile)
-summary(fit1_chile)
+fit1_chile
 ```
 
 "will abstain" is the baseline category.
@@ -35,59 +37,234 @@ summary(fit1_chile)
 ## 2.
 
 $$
-Y_i\sim_{ind.} Multinomial(p_{i,1}, p_{i,2}, p_{i,3}, p_{i,4}) \\
-
-\text{Where, 1 = "will vote no", 2 = "undecided", 3 = "will vote yes", 4 = "will abstain"} \\
-
-log(\frac{p_{i,j}}{p_{i,4}}) = \beta_{0,j} + \beta_{1,j}age_i + \beta_{2,j}sex_{i} + \beta_{3,j}region_i + \beta_{4,j}statusquo_i, \; j = 1, 2, 3 \\
-
+Y_i\sim_{ind.} Multinomial(p_{i,1}, p_{i,2}, p_{i,3}, p_{i,4})
+$$
+$$
+\text{Where 1 = "will vote no", 2 = "undecided", 3 = "will vote yes", 4 = "will abstain"} 
+$$
+$$
+log(\frac{p_{i,j}}{p_{i,4}}) = \beta_{0,j} + \beta_{1,j}age_i + \beta_{2,j}sex_{i} + \beta_{3,j}region_i + \beta_{4,j}statusquo_i, \; j = 1, 2, 3
+$$
+$$
 p_{i,4} =  1 - \sum^{3}_{j=1} p_{i,j}
 $$
 
 ## 3.
 
-We use the Likelihood Ratio Test (LRT)/Analysis of Deviance to test each predictor "as a whole."
+We use the Likelihood Ratio Test (LRT) to test each predictor "as a whole."
 
-Example of hypothesis test with age ($\beta_1$): 
+Example of hypothesis test for the variable age age ($\beta_1$): 
 
-$H_0 \; : \; \beta_{1,1} = \beta_{1,2} = \beta_{1,3} =\beta_{1,4} = 0$
+$H_0 \; : \; \beta_{1,1} = \beta_{1,2} = \beta_{1,3} = 0$
 
-$H_A \; : \; \{\exists \; \beta_{1,j} \neq 0\}, \; j = 1, 2, 3, 4$
+$H_A \; : \; \{\exists \; \beta_{1,j} \neq 0 \; | \;  j = 1, 2, 3\}$
 
 ```{r}
 Anova(fit1_chile)
 ```
 
-
+All of our predictor variables are statistically significant according to the Likelihood Ratio Test. 
 
 ## 4.
 
 ### a.
 
+$$
+log(\frac{\hat{p}_{yes}}{\hat{p}_{abstain}}) = -0.388 + 0.025age_i  - 0.104I_{sexM,i} + 1.51I_{regionM,i} + 0.08I_{regionN,i} + 0.41I_{regionS,i} + 0.23I_{regionSA,i} + 1.88stquo_i
+$$
+$$
+\; where \; I_{sexM} \in \{0 = female,1=male\} \; and \; I_{regionK} \in \{0 = \text{not in region K} ,1= \text{in region K}\}, \; K = M, N, S, SA
+$$
+
 ### b.
+
+```{r}
+z <- summary(fit1_chile)$coefficients/summary(fit1_chile)$standard.errors
+p_val <- (1 - pnorm(abs(z), 0, 1)) * 2
+round(p_val,8)
+```
 
 ### c.
 
+Numerical Predictor: statsquo (I'll go with "N" )
+
+"per 1-unit increase in the scale of support for the status quo, the odds of someone voting no over abstain will decrease by a factor of $e^{1.82}$, ceteris paribus." (decrease by a factor of $e^{1.82}$ ~ multiply by $e^{-1.82}$)
+
+Dummy Variable: SexM "N"
+
+"The odds of voting no over abstain is $e^{0.699}$ times greater for males than females, ceteris paribus."
+
 ### d.
 
+```{r}
+round(confint(fit1_chile),3)
+```
+
+Numerical Predictor: statsquo "N"
+
+"per 1-unit increase in the scale of support for the status quo, we are 95% confident that the odds of someone voting no over abstain will decrease by a factor between $e^{2.081}$ and $e^{1.565}$, ceteris paribus."
+
+Dummy Variable: SexM "N"
+
+"We are 95% confident that the odds of voting no over abstain is between $e^{0.359}$ and $e^{1.040}$ times greater for males than females, ceteris paribus."
+
+Both of these seem practically significant at first look, as their effect sizes seem large enough. If further study was needed for the practicality, we could "standardize" the numerical variables.
+
+```{r}
+summary1 <- summary(fit1_chile)
+summary1
+```
+
 ## 5.
+
+$$
+\hat{\beta}'_0 = (-0.388 - (-0.13)), \; \hat{\beta}'_1 = (-0.025 - 0.006), \; \hat{\beta}'_2 = (-0.104 - 0.699), \; \hat{\beta}'_3 = (1.51 - 0.84)
+$$
+
+$$
+\hat{\beta}'_4 = (0.081 - (-0.31)), \; \hat{\beta}'_5 = (0.41 - 0.33), \; \hat{\beta}'_6 = (0.23 - (-0.09)), \; \hat{\beta}'_7 = (1.88 - (-1.82))
+$$
+
+```{r}
+summary1$coefficients[3,] - summary1$coefficients[1,]
+```
+
+
+$$
+log(\frac{\hat{p}_{yes}}{\hat{p}_{no}}) = -0.26 + 0.02age_i  - 0.803I_{sexM,i} + 0.67I_{regionM,i} + 0.39I_{regionN,i} + 0.08I_{regionS,i} + 0.31I_{regionSA,i} + 3.70stquo_i
+$$
+
+$$
+\; where \; I_{sexM} \in \{0 = female,1=male\} \; and \; I_{regionK} \in \{0 = \text{not in region K} ,1= \text{in region K}\}, \; K = M, N, S, SA
+$$
 
 # Problem 2
 
 ## 1.
 
+```{r}
+fit2_chile <- multinom(vote ~ age + sex + region + statusquo + age:statusquo, data = chile)
+fit2_chile
+```
+
+
 ## 2.
+
+There were three new parameters added, being $\beta_{j,i}, j=1,2,3$. The term "age:statusquo" (or age X statusquo) represents the interaction between the two variables.
 
 ## 3.
 
+```{r}
+```
+
+
+```{r}
+Anova(fit2_chile)
+```
+
+Based on our LRT statistics, we find that all of our estimates are statistically significant. The interaction between age and statusquo has the largest p-value, but still is below the threshhold of 0.05.
+
 ## 4.
 
+"Per 1-unit increase in statusqo, the odds of voting yes over abstaining will increase, and will increase at a faster rate as age increases, ceteris paribus."
+
 ## 5.
+
+```{r}
+fit2_effects <- effect("age:statusquo", fit2_chile,
+                       xlevels = list(statusquo = seq(-2,2,.5)))
+
+plot(fit2_effects, style = "stacked",
+     colors = c("blue", "red", "orange", "yellow"), rug = FALSE)
+```
+
+By looking at the effect displays (holding region and age constant), we can see how the effects of age and statusquo interact and change the probability of voting in a specific category. As we increase in age, we can see that as the voters get older, they are less likely to abstain. It seems that as age increases, people tend to be more active voters and those that abstain at older ages tend to be more against the statusquo. IT also appears as there is more "diversity" in active voter decisions (abstentions are not included), as voters are more "spread" between voting yes, no, and being undecided.
 
 # Problem 3
 
 ## 1.
 
+```{r}
+seq_vals <- seq(0, 30, 1)
+plamb_2 <- dpois(seq_vals, 2)
+plamb_4 <- dpois(seq_vals, 4)
+plamb_8 <- dpois(seq_vals, 8)
+plamb_16 <- dpois(seq_vals, 16)
+layout(matrix(c(1,2,3, 4),ncol=2)) 
+plot(seq_vals, plamb_2, pch=20, main=expression(paste("(c) ", mu, " = 2")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_2)
+plot(seq_vals, plamb_4, pch=20, main=expression(paste("(d) ", mu, " = 4")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_4)
+plot(seq_vals, plamb_8, pch=20, main=expression(paste("(e) ", mu, " = 8")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_8)
+plot(seq_vals, plamb_16, pch=20, main=expression(paste("(f) ", mu, " = 16")), 
+     xlab =expression(bold("y")), ylab=expression(bold("p(y)")))
+segments(seq_vals, 0, seq_vals, plamb_16)
+```
+
+**Note: I was able to make the graps have 1x1 aspect ratios like in the slides, but the graphs were too small in the pdf output for some reason. If you would like to see the code so they are exactly the same (besides the size), I will be happy to provide it.**
+
 ## 2.
 
+```{r}
+# mu = 2
+ppois(10, 2, lower.tail = TRUE) - ppois(5,2, lower.tail = TRUE) 
+
+# mu = 4
+ppois(10, 4, lower.tail = TRUE) - ppois(5,4, lower.tail = TRUE) 
+
+# mu = 8
+ppois(10, 8, lower.tail = TRUE) - ppois(5,8, lower.tail = TRUE) 
+
+# mu = 16
+ppois(10, 16, lower.tail = TRUE) - ppois(5,16, lower.tail = TRUE) 
+```
+
+$P(X \in [5,10])$, where $X \sim Pois(2)$, is 0.0166
+
+$P(X \in [5,10])$, where $X \sim Pois(4)$, is 0.212
+
+$P(X \in [5,10])$, where $X \sim Pois(8)$, is 0.625
+
+$P(X \in [5,10])$, where $X \sim Pois(16)$, is 0.076
+
+
 ## 3.
+
+We are working with count data for the number of interlocks. Clearly right-skewed (wow. this looks familiar at the surface level).
+```{r, message=FALSE}
+plot(table(Ornstein$interlocks), xlab="Number of Interlocks", ylab="Frequency")
+```
+
+Since we want to find $\hat{\mu}$ using MLE, we need to find the value of $\mu$ that maximizes the likelihood, given our distribution. We can get an idea by looking at the the density plot.
+
+```{r}
+ggplot(data = ornstein, aes(x=interlocks, y = ..density..))+
+  geom_density(bins = 100, col = "blue", size = 1.3) +
+  geom_histogram(bins = 100)
+```
+
+Now, we could estimate $\mu$ by simply finding the mean of the distribution as it is the most likely estimate given our data. That value you would be (rounding to nearest whole number): 14
+
+```{r}
+mean(ornstein$interlocks)
+```
+
+We can then plot the poisson distribution given $\hat{\mu}$ (notice the scale for y-axis).
+
+```{r}
+seq_vals <- seq(0, 50)
+estimates <- dpois(seq_vals, 14)
+df <- data.frame(seq_vals, estimates)
+colnames(df) <- c("values", "estimates")
+
+plot(table(Ornstein$interlocks)/length(Ornstein$interlocks), xlab="Number of Interlocks", ylab="Frequency")
+lines(df$values, df$estimates, col ="blue")
+```
+
+This doesn't seem like a great model, as there is a lot more data closer to 0 and the distribution is right-skewed, meaning the mean of our data is highly affected by the skew.
+
+
