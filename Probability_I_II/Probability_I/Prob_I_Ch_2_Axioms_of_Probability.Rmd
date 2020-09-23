@@ -1,0 +1,164 @@
+---
+title: "Probability: Chapter 2 - Axioms of Probability"
+author: "Joshua Ingram"
+output: pdf_document
+fontsize: 11pt
+geometry: margin=0.5in
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 2.2 Sample Space and Events
+
+***Sample Space*** - the set of all possible outcomes in an experiment
+
+  - Denoted $S = \{outcome_1, outcome_2...\}$
+  
+***Event*** - any subset of the sample space
+
+***Union of Events*** - the event that contains any outcomes in all the "unioned" events *(e.g. blue OR black)*
+
+  - Denoted $E \cup F$
+  - Denoted $EF$
+  
+***Intersection of Events*** - the event that contains any outcomes that occur in both events
+
+  - Denoted $E \cap F$
+  
+- An event $E$ that is a subset of an event $F$ is denoted:
+  - $E \subset F$ *"E subset of f"*
+  - $F \supset E$ *"F superset of E"*
+  
+These follow rules several familiar rules:
+
+- ***Commutative Laws***
+  - $E \cup F = F \cup E$
+  - $EF = FE$
+- ***Associative Laws***
+  - $(E \cup F)\cup G = E \cup (F \cup G)$
+  - $(EF)G = E(FG)$
+- ***Distributive Laws***
+  - $(E\cup F)G = EG \cup FG$
+  - $EF \cup G = (E \cup G)(F \cup G)$
+  
+### DeMorgan's Laws
+
+$$
+\boxed{(\cup_{i=1}^n E_i)^c = \cap_{i=1}^nE_i^c}
+$$
+
+$$
+\boxed{(\cap_{i=1}^n E_i)^c = \cup_{i=1}^nE_i^c}
+$$
+
+# 2.3 Axioms of Probability
+
+We can define the probability of an event in terms of its long-run *relative frequency*
+
+$$
+\boxed{P(E) = \lim_{n \to \infty}\frac{n(E)}{n}}
+$$
+
+## Three Axioms of Probability
+
+### Axiom 1
+
+$$
+0 \le P(E) \le 1
+$$
+
+### Axiom 2
+
+$$
+P(S) = 1
+$$
+
+### Axiom 3
+
+For any sequence of *mutually exlcusive* events $E_1, E_2,...$
+
+$$
+P(\cup_{i=1}^n) = \sum_{i=1}^\infty P_(E_i)
+$$
+
+# 2.4 Some Simple Propositions
+
+***Proposition 4.1***
+
+$$
+P(E^c) = 1 - P(E)
+$$
+
+***Proposition 4.2***
+
+$$
+\text{If } E \subset F, \text{ then } P(E) \le P(F)
+$$
+
+***Proposition 4.3***
+
+$$
+P(E \cup F) = P(E) + P(F) - P(EF)
+$$
+
+***Proposition 4.4***
+
+$$
+P(E_1 \cup ... \cup E_n) = \sum_{i=1}^n P(E_i) - \sum_{i_1 < i_2}P(E_{i_1}E_{i_2}) ... + ... (-1)^{r+1}\sum_{i_1<...<i_r}P(E_{i_1}E_{i_2}...E_{i_r}) +...+ (-1)^{n+1}P(E_1...E_n)
+$$
+
+# 2.5 Sample Spaces Having Equally Likely Outcomes
+
+For a sample space of a finite set, $S = \{1,2,...,N\}$, if all single outcomes are equally then
+
+$$
+P(\{1\}) = P(\{2\}) = ... = P(\{N\})
+$$
+
+Which implies
+
+$$
+P(\{i\}) = \frac{1}{N}, \; i = 1,2,...,N
+$$
+
+For any event,
+
+$$
+P(\{E\}) = \frac{\text{number of outcomes in E}}{\text{number of outcomes in S}}
+$$
+
+# 2.6 Probability as a Continuous Set Function
+
+A sequence of events $\{E_n, n\ge 1\}$ is increasing if
+
+$$
+E_1 \subset E_2 \subset ... \subset E_n \subset E_{n+1} \subset ...
+$$
+
+A sequence of events $\{E_n, n\ge 1\}$ is decreasing if
+
+$$
+E_1 \supset E_2 \supset ... \supset E_n \supset E_{n+1} \supset ...
+$$
+
+For an increasing sequence of events, we define a new event by
+
+$$
+\lim_{n \to \infty}E_n = \cup_{i=1}^\infty E_i
+$$
+
+For decreasing sequence of events, we define a new event by
+
+$$
+\lim_{n \to \infty}E_n = \cap_{i=1}^\infty E_i
+$$
+
+***Propisition 6.1***
+
+If $\{E_n, n \ge 1\}$ is either an increasing or decreasing sequence of events, then
+
+$$
+\lim_{n \to \infty}P(E_n) = P(\lim_{n \to \infty}E_n)
+$$

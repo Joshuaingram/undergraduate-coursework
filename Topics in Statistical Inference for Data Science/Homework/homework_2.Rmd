@@ -125,7 +125,7 @@ log(\mu_i) = \beta_0 + \beta_1chronic_i + \beta_2age_i + \beta_3I_{gender,i} + \
 $$
 
 $$
-I_{chronic} \in \{0=female, 1=male\}, \; I_{insurance} \in \{0=no, 1=yes\}
+I_{gender} \in \{0=female, 1=male\}, \; I_{insurance} \in \{0=no, 1=yes\}
 $$
 
 ## 3. 

@@ -1,0 +1,191 @@
+---
+title: "Homework_3"
+author: "Joshua Ingram"
+date: "9/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nnet)
+library(car)
+library(effects)
+library(AER)
+library(pscl)
+
+data("NMES1988")
+ornstein <- read.csv("c:/main/projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Datasets/Ornstein.txt", sep="")
+nmes <- NMES1988
+```
+
+# Problem 1
+
+## 1.
+
+***Note:*** I am using $\lambda$ instead of $\mu$ for my notation in this homework. I've been doing other work with the poisson distribution and am using $\lambda$ for notation for that. It's just easier to stay consistent all around. Let me know if I need to stick with $\mu$ after this.
+
+$$
+Y_i \sim_{ind.} Pois(\lambda), \; i = 1, 2,...,248, \text{ where } \lambda \text{is the average number of interlocks}
+$$
+$$
+log(\lambda_i) = \beta_0 + \beta_1(assets_i) + \beta_2I_{nationOTH, i} + \beta_3I_{nationUK,i} + \beta_4I_{nationUS,i} +
+$$
+$$
+\beta_5(I_{nationOTH, i} * assets_i) + \beta_6(I_{nationUK, i} * assets_i) + \beta_7(I_{nationUS, i} * assets_i)
+$$
+$$
+\text{CAN is baseline category, } I_{nationOTH} \in \{0= not \; other \; foreign, 1=other \; foreign\}
+$$
+$$
+I_{nationUK} \in \{0=not \; UK, 1=UK\}, \; I_{nationUS} \in \{0=not \; US, 1=US\}
+$$
+
+
+## 2.
+
+```{r}
+fit_1 <- glm(interlocks ~ assets + nation + nation:assets, family = poisson, data = ornstein)
+summary(fit_1)
+```
+
+Test for Interaction:
+
+$H_0: \; \beta_5 = \beta_6 = \beta_7 = 0$
+
+$H_A: \; \{\exists \; \beta_{j} \neq 0 \; | \;  j = 5,6,7\}$
+
+$\alpha = 0.05$
+
+Null Model: $Y_i \sim_{ind.} Pois(\lambda), \; i = 1, 2,...,248, \; log(\lambda_i) = \beta_0 + \beta_1(assets_i) + \beta_2I_{nationOTH, i} + \beta_3I_{nationUK,i} + \beta_4I_{nationUS,i}$
+
+LRT statistic = $2log(\frac{L_1}{L_0} ) = G^2_0 \sim \chi^2_3$
+
+p-value: $P(\chi^2_{3} \geq G^2_0)$
+
+```{r}
+fit_null <-  glm(interlocks ~ assets + nation, family = poisson, data = ornstein)
+anova(fit_null, fit_1, test = "LRT")
+```
+
+After performing the likelihood ratio test, we get an extremely small p-value (basically 0). We have significant evidence to reject the null hypothesis and our interaction term is statisically significant.
+
+## 3.
+
+```{r}
+1- summary(fit_1)$deviance/summary(fit_1)$null.deviance
+```
+
+$R^2$ = 0.433715
+
+43.4% of the variation in our response, the number of interlocks, is explained by our model.
+
+## 4.
+
+For a firm with the U.S. as the nation of control, per 1 million dollar increase in assets, the average number of interlocks will increase by a factor of $e^{7.647e-7}$. If the U.S. controlled firm has 0 dollars in assets, the average number of interlocks will be $e^{1.072e+00}$ time LESS than a Canadian controlled firm.
+
+*I'm not specifying "ceteris paribus" since nation and assets are our only two variables in the model and these are being explicitly addressed in the interpretation.*
+
+# Problem 2
+
+## 1.
+
+```{r}
+fit_2 <- glm(visits ~ chronic + age + gender + income + insurance, family = poisson, data = nmes)
+summary(fit_2)
+```
+
+### a.
+
+Yes, there is evidence of overdispersion because the residual deviance is much greater than the residual degrees of freedom. This means that our variance is greater than expected, which under a poisson model, should be the same as the mean.
+
+### b.
+
+We should use a Quasi-Poisson model.
+
+```{r}
+fit_quasi <- glm(visits ~ chronic + age + gender + income + insurance, family = quasipoisson, data = nmes)
+summary(fit_quasi)
+```
+
+Differences:
+
+The standard errors are greater for the quasi-poisson, thus affecting the t-statistics and p-values given for each beta. The inverse is true for the regular poisson model.
+
+Similarities:
+
+Both the quasi-poisson model and the poisson model have the same exact estimates for the betas and the Null/Residual deviances are the same (and degrees of freedom). 
+
+### c.
+
+```{r}
+Anova(fit_2)
+Anova(fit_quasi)
+```
+
+With the quasi-poisson model I would drop the age and incoe predictors, but for the regular poisson model I would drop only the income predictor.
+
+## 2.
+
+### a.
+
+By looking at the distribution of counts of interlocks, we may be running into an issue of having too many zero-counts of interlocks. It may be more appropriate to fit a zero-inflated poisson model to our data.
+
+### b.
+
+Full GLM Model Formulation:
+
+$$
+p_i = P(Y_i \in \; "no \; visists)
+$$
+$$
+log(\frac{p_i}{1-p_i}) = \gamma_0 + \gamma_1chronic_i + \gamma_2age_i + \gamma_3I_{gender,i} + \gamma_4income_i + \gamma_5I_{insurance,i}
+$$
+$$
+Y_i \sim_{ind.} Pois(\lambda_i), \; \text{where } \lambda \text{ average number of physician visits}
+$$
+$$
+log(\lambda_i) \beta_0 + \beta_1chronic_i + \beta_2age_i + \beta_3I_{gender,i} + \beta_4income_i + \beta_5I_{insurance,i}
+$$
+$$
+I_{gender} \in \{0=female, 1=male\}, \; I_{insurance} \in \{0=no, 1=yes\}
+$$
+
+### c.
+
+```{r}
+fit_3 <- zeroinfl(visits ~ chronic + age + gender + income + insurance, data = nmes)
+summary(fit_3)
+Anova(fit_3)
+```
+
+We use the Anova() function to test the predictor as a whole. Although the name was not explicitly given in class, the test statistic follows a chi-square distribution.
+
+For age:
+
+$H_0: \gamma_2 = \beta_2 = 0$
+
+$H_0: \{\exists \; \beta_{2} \; or \; \gamma_2 \neq 0 \}$
+
+$\alpha = 0.05$
+
+income is statistically insignificant based on the output from Anova().
+
+### d.
+
+```{r}
+fit_4 <- zeroinfl(visits ~ chronic + age + gender + insurance, data = nmes)
+summary(fit_4)
+```
+
+Chronic:
+
+logit - For every one additional chronic conditions, the odds of an individual not having any physician visits decrease by a factor of $e^{0.554}$, ceteris paribus.
+
+poisson - For every one additional chronic condition, the average number of physician visits will increase by a factor of $e^{0.154}$, ceteris paribus.
+
+Insurance:
+
+logit - For a person with insurance, the odds of them having no physician visits is $e^{0.92}$ times lower than those that have no insurance, ceteris paribus.
+
+poisson - For a person with insurance, the average number of physician visits is $e^{0.11}$ times greater than those without insurance, ceteris paribus.
