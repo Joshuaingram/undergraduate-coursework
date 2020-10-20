@@ -1,0 +1,203 @@
+% Encoding: UTF-8
+
+@Misc{BloombergQuickTake2019,
+  author       = {{Bloomberg QuickTake}},
+  howpublished = {Youtube},
+  month        = oct,
+  title        = {Who Wants To Be a Trillionaire?},
+  year         = {2019},
+  url          = {https://www.youtube.com/watch?v=VGosZWBTF7A},
+}
+
+@Article{Wall2019,
+  author  = {Mike Wall},
+  journal = {Space.com},
+  title   = {No Digging Required: Space Mining on the Moon and Beyond May Be Solar Powered},
+  year    = {2019},
+  month   = sep,
+  url     = {https://www.space.com/moon-asteroid-space-mining-with-concentrated-sunlight.html},
+}
+
+@Article{Pearson2018,
+  author  = {Ezzy Pearson},
+  journal = {Science Focus},
+  title   = {Space Mining: The New Gold Rush},
+  year    = {2018},
+  month   = dec,
+  url     = {https://www.sciencefocus.com/space/space-mining-the-new-goldrush/},
+}
+
+@Misc{USEPA,
+  author       = {{US EPA}},
+  howpublished = {Website},
+  title        = {Basic Information about Electronics Stewardship},
+  url          = {https://www.epa.gov/smm-electronics/basic-information-about-electronics-stewardship},
+}
+
+@Article{King,
+  author       = {Hobart M. King},
+  journal      = {Geology.com},
+  title        = {REE - Rare Earth Elements and their Uses},
+  howpublished = {Website},
+  url          = {https://geology.com/articles/rare-earth-elements/},
+}
+
+@Article{Chepkemoi2017,
+  author  = {Joyce Chepkemoi},
+  journal = {WorldAtlas},
+  title   = {What is the Environmental Impact of the Mining Industry},
+  year    = {2017},
+  month   = apr,
+  url     = {https://www.worldatlas.com/articles/what-is-the-environmental-impact-of-the-mining-industry.html},
+}
+
+@Article{Hudson1999,
+  author  = {T. L. Hudson; F. D. Fox; G. S. Plumlee},
+  journal = {American Geosciences Institute},
+  title   = {Metal Mining and the Environment},
+  year    = {1999},
+  pages   = {7,20-27,21-35,38-39},
+  url     = {https://www.americangeosciences.org/critical-issues/faq/how-can-metal-mining-impact-environment},
+}
+
+@Conference{Singh2016,
+  author       = {Raj S. Singh},
+  title        = {Environmental and social impacts of mining and their mitigation},
+  year         = {2016},
+  organization = {National Seiminar},
+}
+
+@Misc{NASAScience2020,
+               = {Solar System Exploration},
+  author       = {{NASA Science}},
+  howpublished = {Website},
+  month        = oct,
+  title        = {Asteroids},
+  year         = {2020},
+  url          = {https://solarsystem.nasa.gov/asteroids-comets-and-meteors/asteroids/in-depth/},
+}
+
+@Article{Gradie1982,
+  author  = {Jonathan C. Gradie; Clark R. Chapman; Ed Tedesco},
+  journal = {American Association for the Advancement of Science},
+  title   = {Distribution of taxonomic classes and the compositional structure of the asteroid belt},
+  year    = {1982},
+}
+
+@Article{Cain2015,
+  author  = {Fraser Cain},
+  journal = {Phys.org},
+  title   = {Will we mine asteroids?},
+  year    = {2015},
+  url     = {https://phys.org/news/2015-01-asteroids.html},
+}
+
+@Unpublished{Calla2019,
+  author = {Pablo Calla; Dan Fries; Chris Welch},
+  title  = {Asteroid mining with small spacecraft and its economic feasibility},
+  year   = {2019},
+}
+
+@Conference{Jones2018,
+  author    = {Harry W. Jones},
+  booktitle = {48th International Conference on Environmental Systems},
+  title     = {The Recent Large Reduction in Space Launch Cost},
+  year      = {2018},
+}
+
+@Misc{SpaceX2020,
+  author       = {SpaceX},
+  howpublished = {Website},
+  month        = sep,
+  year         = {2020},
+}
+
+@Article{Wall2015,
+  author  = {Mike Wall},
+  journal = {Space.com},
+  title   = {Lunar Pit Stop? Mars-Bound Astronauts May Refuel Near Moon},
+  year    = {2015},
+  url     = {https://www.space.com/30838-manned-mars-mission-moon-refueling.html},
+}
+
+@InProceedings{Ross2002,
+  author = {S. Ross},
+  title  = {Near-Earth Asteroid Mining},
+  year   = {2002},
+}
+
+@Article{Abrahamian2019,
+  author  = {Atossa Araxia Abrahamian},
+  journal = {MIT Technology Review},
+  title   = {How the asteroid-mining bubble burst},
+  year    = {2019},
+  url     = {https://www.technologyreview.com/2019/06/26/134510/asteroid-mining-bubble-burst-history/},
+}
+
+@Article{Boyle2019,
+  author  = {Alan Boyle},
+  journal = {GeekWire},
+  title   = {One year after Planetary Resources faded into history, space mining retains its appeal},
+  year    = {2019},
+  url     = {https://www.geekwire.com/2019/one-year-planetary-resources-faded-history-space-mining-retains-appeal/},
+}
+
+@Article{History.comEditors2020,
+  author  = {{History.com Editors}},
+  journal = {History},
+  title   = {The Space Race},
+  year    = {2020},
+  url     = {https://www.history.com/topics/cold-war/space-race},
+}
+
+@Article{Carlson2019,
+  author  = {Erika K. Carlson},
+  journal = {Astronomy},
+  title   = {Apollo booster the economy, just not the way you think},
+  year    = {2019},
+  url     = {https://astronomy.com/news/2019/05/apollo-boosted-the-economy-just-not-the-way-you-think},
+}
+
+@Article{David2019,
+  author  = {Leonard David},
+  journal = {Space.com},
+  title   = {Moon Mining Could Actually Work, with the Right Approach},
+  year    = {2019},
+  url     = {https://www.space.com/moon-mining-space-exploration-report.html},
+}
+
+@InBook{Gerber2018,
+  author    = {James Gerber},
+  editor    = {42-62},
+  chapter   = {3},
+  pages     = {65-91},
+  publisher = {Pearson},
+  title     = {International economics},
+  year      = {2018},
+  address   = {New York, NY},
+  isbn      = {9780134472096},
+}
+
+@InBook{Gerber2018b,
+  author    = {James Gerber},
+  chapter   = {4},
+  pages     = {65-91},
+  publisher = {Pearson},
+  title     = {International economics},
+  year      = {2018},
+  address   = {New York, NY},
+  isbn      = {9780134472096},
+}
+
+@InBook{Gerber2018a,
+  author    = {James Gerber},
+  chapter   = {5},
+  pages     = {94-113},
+  publisher = {Pearson},
+  title     = {International economics},
+  year      = {2018},
+  address   = {New York, NY},
+  isbn      = {9780134472096},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

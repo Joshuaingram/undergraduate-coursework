@@ -1,0 +1,91 @@
+---
+output: 
+  pdf_document:
+    keep_tex: false
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm-latex-ms.tex
+citation_package: natbib
+bibliography: master.bib
+nocite: '@*'
+graphics: yes
+header-includes:
+  -  \usepackage{hyperref}
+biblio-style: apsr
+title: "The Next Space Race: Developing a Space Mining Industry in the International Economy"
+thanks:
+author:
+- name: Joshua D. Ingram
+  affiliation: New College of Florida
+abstract: ""
+keywords: 
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontsize: 12pt
+# spacing: double
+endnote: no
+---
+
+# Introduction
+
+- short conisderation of current economic integration, trade, etc
+- Discuss the push towards "big tech" being most profitable and with that, space is the next frontier
+- people have romanticized space, but with profit comes a reality 
+- with companies like spacex, blue origin, the development of starlink, need for satellites, and desire to explore, there is a push for more materials for tech, more rockets, propellant
+- space mining has been discussed in sci fi literature, but with the advent of privatization of space, space mining may be realistic and start off somewhere unexpected
+- there are raw materials on planets, moons, asteroids, and they are useful for tech, but also for space travel
+- fuel, etc
+- developing an industry for space mining may be the next space race, as the horizons of revenues from space are limitless if the tech, logistics, and infrustucture is created to make it profitable
+- often public support, as seen by the support in the first space race, so could be realistic to enact new policies
+- In this paper we consider the HO model to determine the type of country that would most likely succeed in developing a space industry and how it could trade to other countries
+- We also consider the limits of this model
+- Discuss industrial policies that could support developing this industry, protecting it, and growing it
+- short considerating of the product life cycle model on how the industry might change over time as it grows and spreads
+- benefits, limits, time scale
+
+# The Space Industry
+
+- current state and companies
+- how is money made
+- brief history
+
+# Space Mining
+
+## Current Attempts
+
+## Scientific Support
+
+# Profitability of Space Mining Industry
+
+- simplify, just like musk
+- centralize to lower costs
+- what would be sold
+
+# Factors needed for industry
+
+- what should countries developing this industry import
+- export?
+- skilled labor
+- high level of tech
+- support from markets and culture
+- infrastructure to launch and transport
+- land, near water for launch and retrieval
+- similar industries that could support or push this
+
+# H-O Model: Which countries should trade the space mining goods
+
+# Industrial Policies to change comparative advantage and support development
+
+- protectionism?
+- funding
+- free market alternative?
+- lower initial risks
+- lower barriers to entry
+
+# Product Life Cycle Model
+
+# Other Considerations
+
+# Conclusion
+
+# References
