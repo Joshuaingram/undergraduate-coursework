@@ -68,7 +68,6 @@
 }
 
 @Misc{NASAScience2020,
-               = {Solar System Exploration},
   author       = {{NASA Science}},
   howpublished = {Website},
   month        = oct,
@@ -142,8 +141,8 @@
   url     = {https://www.geekwire.com/2019/one-year-planetary-resources-faded-history-space-mining-retains-appeal/},
 }
 
-@Article{History.comEditors2020,
-  author  = {{History.com Editors}},
+@Article{HistoryEditors2020,
+  author  = {{History Editors}},
   journal = {History},
   title   = {The Space Race},
   year    = {2020},
@@ -198,6 +197,112 @@
   year      = {2018},
   address   = {New York, NY},
   isbn      = {9780134472096},
+}
+
+@Article{Meyer2009,
+  author  = {Charles Meyer},
+  journal = {Astromaterials Research & Exploration Science},
+  title   = {Lunar Sample Compendium: Contingency Soil (10010)},
+  year    = {2009},
+  groups  = {NASA},
+}
+
+@Article{Akhmanova1978,
+  author  = {M Akhmanova; B Dement'ev; M Markov},
+  journal = {Geochemistry International},
+  title   = {Possible Water in Luna 24 Regolith from the Sea of Crises},
+  year    = {1978},
+}
+
+@Article{TerfisTeam2020,
+  author  = {{Terfis Team}},
+  journal = {Forbes},
+  title   = {Revisting SpaceX's $36-Billion Valuation After Its First Manned Mission},
+  year    = {2020},
+  month   = jun,
+  url     = {https://www.forbes.com/sites/greatspeculations/2020/06/02/revisiting-spacexs-36-billion-valuation-after-its-first-manned-mission/#242346b244fb},
+}
+
+@Article{May2018,
+  author  = {Sandra May},
+  journal = {NASA},
+  title   = {What is the International Space Station},
+  year    = {2018},
+  url     = {https://www.nasa.gov/audience/forstudents/5-8/features/nasa-knows/what-is-the-iss-58.html},
+}
+
+@Article{Seminari2019,
+  author  = {Simon Seminari},
+  journal = {Space News},
+  title   = {Op-ed | Global government space budgets continues to multiyear rebound},
+  year    = {2019},
+  month   = nov,
+  url     = {https://spacenews.com/op-ed-global-government-space-budgets-continues-multiyear-rebound/},
+}
+
+@Misc{SpaceForce2020,
+  author       = {{Space Force}},
+  howpublished = {Website},
+  title        = {About the Space Force},
+  year         = {2020},
+  url          = {https://www.spaceforce.mil/About-Us/About-Space-Force/},
+}
+
+@Article{Dooling2013,
+  author  = {Dave Dooling},
+  journal = {Britannica},
+  title   = {Private Spaceflight Takes Off},
+  year    = {2013},
+  url     = {https://www.britannica.com/topic/Private-Spaceflight-Takes-Off-1903140},
+}
+
+@Article{OCallaghan2020,
+  author  = {Jonathan O'Callaghan},
+  journal = {Forbes},
+  title   = {SpaceX Makes History With First-Ever Human Rocket Launch For NASA},
+  year    = {2020},
+}
+
+@Article{MorganStanley2020,
+  author  = {{Morgan Stanley}},
+  journal = {Morgan Stanley},
+  title   = {Space: Investing in the Final Frontier},
+  year    = {2020},
+  url     = {https://www.morganstanley.com/ideas/investing-in-space#:~:text=The Global Space Economy&text=Morgan Stanley estimates that the,from satellite broadband Internet access.},
+}
+
+@Article{Kormute2019,
+  author = {David Kormute; Angel Abbud-Mardrid; Jared Atkinson; Jonathan Barr; Gay Bernhard; Dallas Bienhoff; {et al}},
+  title  = {Commercial Lunar Propellant Architexture: A Collaborative Study of Lunar Propellant Production},
+  year   = {2019},
+  url    = {https://www.philipmetzger.com/wp-content/uploads/2018/11/Commercial-Lunar-Propellant-Architecture.pdf},
+}
+
+@InBook{Sodersten1994,
+  author    = {Bo Sodersten; Geoffrey Reed},
+  chapter   = {Chapter 3},
+  pages     = {59-69},
+  publisher = {Macmillan Education},
+  title     = {International Economics},
+  year      = {1994},
+  edition   = {3rd Edition},
+}
+
+@Article{Francis2016,
+  author  = {Norton Francis},
+  journal = {Urban Institution},
+  title   = {State Tax Incentives for Economic Development},
+  year    = {2016},
+  url     = {https://www.urban.org/sites/default/files/publication/78206/2000636-state-tax-incentives-for-economic-development.pdf},
+}
+
+@Article{Buchholz2020,
+  author  = {Katharina Buchholz},
+  journal = {Statista},
+  title   = {The Countries That Are the Biggest Miners in the World},
+  year    = {2020},
+  month   = may,
+  url     = {https://www.statista.com/chart/19839/biggest-miners-among-countries/#:~:text=China is not only a,non-ferrous and other metals.},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

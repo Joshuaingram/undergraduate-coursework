@@ -17,75 +17,201 @@ thanks:
 author:
 - name: Joshua D. Ingram
   affiliation: New College of Florida
-abstract: ""
+abstract: "Humanity has been staring into space for millennia, fantasizing about exploring its daunting and infinite reaches. With recent accomplishments in science, exploring space is now a possibility and the general public is willing to support these efforts. However, this romantic view of space exploration tends to ignore the economic feasibility of these ventures. Without efficient, profitable, and sound business models, a commercialized space industry will struggle to find success in a competitive and demanding international economy. Space mining, the exploitation of materials from extraterrestrial bodies, is a potential high-profit industry. The first country to successfully develop this industry will find near limitless benefits in production and trade. In this paper, we first consider the current state of the space industry as a whole, followed by an examination of technology and business efforts in space mining. Next, we investigate the necessary factor endowments for countries developing this industry and present theoretical trade patterns using the Heckscher-Ohlin (HO) Model. Finally, we discuss industrial policies that may facilitate lowering barriers to entry and improving a country's comparative advantage in trade. We conclude that a country with ... factor endowments will have comparative advantage and find most success in trade... Additionally, we propose industrial policies focusing on... that will allow a country to change its comparative advantage while supporting the industry..."
 keywords: 
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 geometry: margin=1in
 fontsize: 12pt
-# spacing: double
+spacing: double
 endnote: no
 ---
 
+```{r setup, include = FALSE}
+library(knitr)
+library(png)
+library(ggplot2)
+```
+
+
 # Introduction
 
-- short conisderation of current economic integration, trade, etc
-- Discuss the push towards "big tech" being most profitable and with that, space is the next frontier
-- people have romanticized space, but with profit comes a reality 
-- with companies like spacex, blue origin, the development of starlink, need for satellites, and desire to explore, there is a push for more materials for tech, more rockets, propellant
-- space mining has been discussed in sci fi literature, but with the advent of privatization of space, space mining may be realistic and start off somewhere unexpected
-- there are raw materials on planets, moons, asteroids, and they are useful for tech, but also for space travel
-- fuel, etc
-- developing an industry for space mining may be the next space race, as the horizons of revenues from space are limitless if the tech, logistics, and infrustucture is created to make it profitable
-- often public support, as seen by the support in the first space race, so could be realistic to enact new policies
-- In this paper we consider the HO model to determine the type of country that would most likely succeed in developing a space industry and how it could trade to other countries
-- We also consider the limits of this model
-- Discuss industrial policies that could support developing this industry, protecting it, and growing it
-- short considerating of the product life cycle model on how the industry might change over time as it grows and spreads
-- benefits, limits, time scale
+Minutes after taking the first step on the moon and proclaiming humanity's greatest scientific achievement, Neil Armstrong proceeded to collect a contingency sample of material from the lunar surface [@Meyer2009]. This simple act of prioritizing the collection of material from the moon is a testament to humanity's interest in analyzing and understanding the makeup of extraterrestrial bodies in the universe. Only a couple of years later, more samples were collected and water was discovered on the moon (Akhmanova1978). This marked an important moment, as water is comprised of two hydrogen atoms and one oxygen atom: essentials for life support and rocket propellant [@Wall2019].
+
+Whether by 15th century polymaths, 21st century business magnates, or backyard astronomers, the origins, behaviors, and composition of the universe have been studied and theorized with intense scrutiny. Ask the average young person about space and they will likely share some level of excitement about the current efforts put forth by space-focused organizations like NASA. The awe its wonderous expanse creates is a common experience for all humans, so new discoveries and progress in exploring our solar system is universally celebrated. With even more intensity, academics and scientists dedicate their lives to this area of research and continue to develop new ideas that inspire the masses.
+
+As inspiring as these ideas may be, this romantic view of space tends to set hopeful and often unrealistic expectations for its exploration. Requiring extremely risky investments and no obvious profits for the private sector, most significant progress was initially made only through intense political rivalry and by publicly funded institutions. However, within the modern era of the economy, several entrepreneurs and companies find themselves pushing the edge of innovation by taking advantage of spaced-based technology for profits. Some of the most popular American entrepreneurs include SpaceX and Tesla owner Elon Musk and Jeff Bezos, owner of Blue Origin and Amazon. Although receiving less publicity, major players in this space-based industry include Boeing, Airbus, and Lockheed Martin. 
+
+This industry generates its revenue from launching payloads, like satellites, for its customers into space [@TerfisTeam2020]. However, this is only the beginning of these companies' business ventures. Eventually, the sources of income will be diversified by transportation, tourism, and even space mining. Space mining, the exploitation of materials from extraterrestrial bodies, may be the most significant, but difficult, advancement in the future of commercializing space. With the existence of large quantities of precious metals like platinum, gold, and silver contained within asteroids in the reaches of our solar system, these deposits are just waiting to be exploited by the most daring companies [@Person2018]. However, with the present state of humanity's position in space, there may not be enough infrastructure to make collecting these raw materials at practical scale a reality anytime soon. The most at hand opportunity would be to mine deposits of frozen water in extraterrestrial bodies, like the moon. Because of water's chemical composition, developing an efficient business model around collecting and processing water, then distributing its products, rocket propellant and life support, to space transport vehicles would be rewarding as the space industry grows.
+
+The implementation of sound business models will be left to the hands of the savvy entrepreneurs, but the development of an entirely new and promising industry will be in the greatest interests of all countries in the international economy. With the potential for extreme growth and the notable ability to expand production beyond the limits of terrestrial borders, the next space race will be an intense economic and technological competition to make first claim to the uses of extraterrastrial resources. The countries making the greatest strides in this development will have the proper endowment of factors of production. The proper factors will include an educated work force, advanced technology, access to significant amounts of capital, and the right infrasructure in ideal locations.
+
+Put simply, the trajectory of the development of this industry will likely include three phases. Phase one will require creating the necessary technology and infrastructure for this industry, as well as the emergence of demand for access to more space-based ventures. The next phase will involve the extraction and supply of the processed components of water deposits in space to enable refueling outside the bounds of earth. Finally, within the more distant future, the mining of precious metals on asteroids and other celestial bodies will compete with the terrestrial mining industry and this may have the greatest and most interesting effects on international trade.
+
+Each of these phases will add new dynamics to the international economy, as a new market for materials outside the bounds of earth's atmosphere will be created. Developing the infrustructure needed will require new technology, funding, and other support, but industrial policies that facilitate the initial growth of the new industry may be a strategic advantage for countries taking part in the next space race. Implementing these policies may allow for a country to change its comparative advantage in trade. Additionally, once the extraction of precious metals is possible, the industry will likely cause a movement of focus and production in terrestrial mining over to space mining. The actual paths of development for this industry are countless and may differ significantly from what is set forth. The factors going into its development complicated, but considering some of the facets leading to a successful space mining industry is worthwhile. Modeling different trade patterns may prove insightful, especially as the commercialization of space expands, and at the very least, this will be an interesting application of economic theory to novel situations.
+
+This paper is organized into eight sections that successesively build upon eachother. The next section acts to set the stage for the build up to the current state of the space industry, followed by section that focuses on an examination of technology, business efforts, and possible courses of action within space mining. Next, two sections discuss the factors of production necessary for countries developing this industry, the Heckscher-Ohlin (HO) model, and any assumptions made within the theoretical framework. Afterwards, a section utilizing the theoretical model for several trade patterns under the three phases of the industry is presented and analyzed. Finally, the last three sections include a discussion on industrial policy, considerations of additional noteworthy subjects, and concluding remarks. With increasing economic integration and advancing technology, it is worthwhile to consider and adapth economic theory to include situations that a new generation of the economy may encounter in a limitless space frontier. 
 
 # The Space Industry
 
-- current state and companies
-- how is money made
-- brief history
+For thousands of years, people have been tracking those mysterious bright dots in the night sky, but until the likes of Galileo Galilei and his telescope, technologies dedicated to space were quite primitive. Today, the world finds itself with government funded organizations, companies worth billions of dollars, and amatuer scientists devoted to developing technologies to explore, understand, and exploit the universe. However, without the passion of curious people and a technological arms race, it is likely that the economy would not benefit from the developments initiated by publicly funded programs like NASA.
+
+## Public
+
+The famous Space Race originated from the cold war in the 1950s, with the Russian satellite, Sputnik, being the first man-made object to enter earth's orbit in 1957. This falling behind in advancemetns sparked alarm in the American government, now pushing the country to seek a new frontier in space. Just a year later, the United States sent up its own satellite, Explorer 1, and created the National Aeronautical and Space Administration (NASA). The next challenge was to see who would send up the first human into orbit, with the Russians taking the win by launching Luna 2 that carried Yuri Gagarin. As intensity increased, in 1961 president John F. Kennedy set forth the goal to land on the moon by the end of the decade. With huge strides in technological advancements, the United States put the first human on the moon in 1969 through the Apollo missions [@HistoryEditors2020]. 
+
+This ultimate "win" by the United States' NASA and Apollo program may have concluded the space race, but it only opened up new opportunities for the research community and the international economy. The following decades saw new achievements like the Hubble Space Telescope, lunar and mars rovers, and even the International Space Station. The International Space Station (ISS) is the largest spacecraft in orbit around the earth, with its construction starting in 1998 and concluding in 2011 [@May2018]. The ISS has hosted astronauts and cosmonauts from countries all around the world, allows for humanity to maintain a presence in space, and enables research to be conducted in the conditions of space.
+
+Tens of billions of dollars are dedicated to the funding of public space research programs and organizations by the international economy, with America spending over $20 billion on NASA each year [@Seminari2019]. Although a small percentage of international budgets, this amount of funding shows that a public and academic interest in space is maintained long after the conclusion of the space race. Militaries also have an interest in space technologies, sending up satellites and developing technologies for surveillance. Under the Trump Administration, the U.S. government has even gone so far as to create the Space Force in December of 2019 and NASA even plans to get the next man on the moon in the 2020's through its Artemis program [@SpaceForce2020]. With a continued government expansion into space and a public that has benefited from the path being cleared by publicly funded organizations, as the economy gets deeper into the 21st century the commercialization of space has started to compete with the role of public organizations.
+
+## Private
+
+The primary source of revenue for the private space industry has come from launching state and commercial satellites into space. The first privately launched rocket was Space Service Inc's Conestoga 1 rocket in 1982, which marked the beginning of a commercialized space market. The expansion of telecommunications, research, and internet has been the foundation of generating revenue for this private industry and companies will compete against one another and state-owned agenicies by bidding to send up satellites to space [@Dooling2013]. However, a new step has been taken for this industry in the past two decades and the possibilities seem endless.
+
+Elon Musk, the rather famous South African-born and American entrepreneur, has taken the spotlight in inspiring millions about the possibilities in space. After taking his profits from PayPal, Musk placed millions into two companies: Tesla and SpaceX. After a close failure, SpaceX is a leader in redefining the industry, focusing on a simple, cost effective, and in-house business model. The company has taken on a new approach to spacecraft by reusing the first stage of rockets, allowing for millions to be saved on each launch and astronomically reducing the cost to send payloads into space via its Falcon 9 rockets [@Jones2018]. The company even made a recent significant accompishment by being the first American commercial company to launch humans aboard the Crew Dragon to the ISS in May 2020 [@OCallaghan2020]. The Company's next goal is to send people to mars aboard the Starship rocket.
+
+While SpaceX may receive a lot of media attention because of its popular CEO and almost crazy goals, there are several new and old players competiting in the industry. Blue Origin, owned by Jeff Bezos, has been competeting directly against SpaceX by developing its own reusable rockets and winning its own revenue-generating contracts. Additionally, well-settled aerospace companies like Lockheed Martin, Airbus, and Boeing have claimed their own territory in the space industry. Although not taking up a large market share like the previously stated companies, there are also numerous private labs and startups dedicated to developing technology for uses in the setting of space. This industry will not be going away anytime soon and is only going to grow.
+
+## Outlook
+
+On July 24, 2020, Morgan Stanly released an analysis and projection of the growth of the global space industry after conducting extensive research. They estimated that the industry could generate over \$1 trillion in revenue by 2040, with the driver for the growth coming from the satellite broadband internet access. These projected numbers are up by nearly three times the industry's current yearly revenue of \$350 billion [@MorganStanley2020].
+
+![Global Space Industry Growth Projections [^1]]("D:/main/Projects/undergraduate-coursework/International_Economics/images/morgan stanley chart.png")
+
+[^1]: Source: Haver Analytics, Morgan Stanley Research forecasts.
+
+The growth of the industry will primarly come from increasing the number of launches dedicated to sending up satellites for internet access, but several entrepreneurs are looking to expand into other potentially profitable areas. Realizing there is probably a market of people willing to pay millions to visit space, Virgin Galactic has been working to develop space tourism. Additionally, with the increasing interest to get back on the moon and to place men on mars, the industry will be focusing efforts towards more space travel and exploration. Finally, talk of a new venture is coming up and it focuses on utilizing the materials that can be collected outside of earth: space mining.
 
 # Space Mining
 
-## Current Attempts
+While it may seem like an idea straight out of sci-fi, space mining has been proposed and sought after by scientists and entrepreneurs alike. Essentially, it is the exploitation of materials from extraterrestrial bodies and would allow humanity to go beyond the scarce resources found on earth. This activity can take place on planets, moons, or even asteroids, as long as there is a resource worth mining. Precious resources like silver, gold, and platinum have been thought to be naturally occurring on asteroids in the solar system, with there possibly being deposits worth trillions of dollars on some larger asteroids [@Cain2015]. While collecting rare metals may be a far-off reality, water may be the most realstic near-term possibility for space mining after its discovery on the moon. 
 
-## Scientific Support
+The water molecule, $H_2O$, can be broken down into two hydrogen atoms and one oxygen atom. Its composition can be used for rocket propellant and life support, necessitites for extended trips and operations in the solar system. Given the plans for NASA to land on the moon in the near future and for SpaceX to send people to mars, there will eventually be a developing market that could find utility from purchasing processed fuel and life support available on the moon. Rocket fuel is heavy, so launches from earth that extend beyond orbit require considerable amounts of fuel. Without the ability to refuel in space, payloads are even heavier when launching from earth, so launches are more expensive and risky. Developing a space mining industry that can provide the infrastructure for spacecraft to refuel in space will not only be more cost effective, but necessary in the long run development of the human presence in space [@Wall2015].
 
-# Profitability of Space Mining Industry
+## Current Efforts
 
-- simplify, just like musk
-- centralize to lower costs
-- what would be sold
+A large-scale mining effort has not been implemented yet, but there have been several attempts in creating the first successful extraterrestrial mining company. Planetary Resources and Deep Space Industries are the two most notable startups focused on mining. Unfortunately, before reaching 2020, both startups failed in their efforts and were acquired by other companies with no sign of coninuing [@Abrahamian2019]. Their failure was due to the inability to raise the necessary funds, high long-term risks for investors, and a lack of profit within a reasonable amount of time.
 
-# Factors needed for industry
+While these companies did fail, they did show that it is possible to get funding from the public for this sort of effort. Additionally, they set an example of the need to create some form of short-term revenue generation to reach the long-term goal of collecting resources from celestial bodies. While no startups have made significant efforts in collecting resources, a private non-profit called B612 is dedicated to the sciences behind asteroids and near earth objects (NEOs). They created the Sentinel Mission to start cataloging asteroids and NEOs, making the data freely available to the world. While not directly related to mining, cataloging asteroids is one step to creating the necessary infrustructure for large-scale space mining. 
 
-- what should countries developing this industry import
-- export?
-- skilled labor
-- high level of tech
-- support from markets and culture
-- infrastructure to launch and transport
-- land, near water for launch and retrieval
-- similar industries that could support or push this
+It seems that with the combined efforts of companies like SpaceX and organizations like NASA, infrastructure in space will be developed further on places like the moon and mars. If NASA does in fact reach the moon, they plan to set up a base of operations. While startups dedicated to mining may be at a halt, the humans presence in space is only expaning, and the only major barriers preventing any success in mining is the required technology and a sound business model.
 
-# H-O Model: Which countries should trade the space mining goods
+## Technology
 
-# Industrial Policies to change comparative advantage and support development
+The technology required for a large-scale space mining effort may be expensive, but it is not out of reach as it includes databases for cataloging resource deposits, rockets for transportation of payloads, and mining equipment to collect and process the raw materials. Rockets have already been in development for decades and with the commercial spaceflight industry, it would likely be best to outsource launching payloads to companies like Blue Origin and SpaceX that will already have competitive pricing [@SpaceX2020]. However, some scientific and economic analysis suggests that small spacecraft (less than 500 kg) may be the best option for a scale that is economically feasible, which differs from the commercial rocket industry's typical spacecraft size [@Calla2019].
 
-- protectionism?
-- funding
-- free market alternative?
-- lower initial risks
-- lower barriers to entry
+Before collecting materials, it is necesssary to prospect for deposits that are worthwhile. This could have several approaches, one of which would involve utilizing spectroscopy to determine the properties of asteroids, planets, and moons. This method may allow for cataloging asteroid compositions in greater volume and the foundation is already in place through organizations like B612. Another option would be to send unmanned spacecraft and robotics directly to the celestial bodies of interest to determine its composition, though this is less cost effective.
 
-# Product Life Cycle Model
+Once a reasonable amount of prospecting has been completed and a database is set up, the technology required to collect and process the materials vary. Mining water from the lunar surface is the best near-future option for economic gains, so it is best to focus on the technology required for the collection of this material in space. To extract the frozen deposits of water, there are several extraction techniques that have their own advantages and disadvantages outlined by research conducted by Calla, Fries, and Welch. The ideal technique selected was the microwave technique, which inolves heating the deposits by using high power radio waves. Once an appropriate extraction technique is developed, scientists often suggest the *in situ* method, which involves mining and processing the resource at the extraction site [@Ross2002].
 
-# Other Considerations
+Breaking down water into its main components has already been done before, but the machinery will need to be applicable in low-gravity environments and must be transportable. After processing, it will also be necessary to create the infrastructure to distribute rocket propellant in space to any customers. Developing these technologies will need to be performed in an economically feasible way, so a profitable business model will be necessary to accomplish this goal.
+
+## Profitability
+
+As fascinating as this industry and its technologies may be, without an economic incentive not much will be accomplished by the private sector. As previously mentioned, the initial development of mining will likely need to be centered around the extraction and processing of water to sell life support and rocket fuel. The rocket fuel is likely the most profitable portion of mining water, as it will likely have the most demand for its uses in supporting other economic activities in space that involve long-distance transportation.
+
+The largest barrier to entry is a high upfront cost, which has been estimated in a report titled *Commercial Lunar Propellant Architecture: A Collaborative Study of Lunar Propellant Production*. It suggests an initial investment of \$4 billion would be needed to create the necessary infrastructure to collect and distribute the aformentioned products, resulting in a potential \$2.4 billion annual revenue from lunar-derived fuel [@Kormute2019]. This upfront cost is considerable and risky, but a phased approach would likely be the best steps for development.
+
+This phased approach would be dependent on several players in the space industry. First, to grow revenue there would need to be a demand for fuel in space, so the industry would only grow as more space travel is conducted beyond earth's orbit. Given NASA, SpaceX, and the world's interest in reaching the moon and mars, it would be expected that this demand would develop as these activities increase in the coming decades. While a "moon base" is being built and expansion continues, a firm looking to take on this venture would need develop the technologies and look for initial investments, potentially through the venture capital market if it is a start-up. In order to avoid turning out like another Planetary Resources, the firm would need to have some short-term revenue generation. This could be done through the sale of its technology to the terrestrial mining industry and any other industries where the technologies can be utilized. Additionally, this would also be the time to start prospecting and adding to a database of potential profitable deposits. These steps would lower risk, keep investors satisfied for the time being, and set forth a plan once mining begins.
+
+Once more infrastructure is developed in space by other institutions, it would then be the time to start setting up the extraction sites and collecting materials. If the *in situ* method is utilized, the fuel could be distributed near the extraction site or it could be transported to ideal fueling stations on the lunar surface or in orbits. The ideal fuelling stations would be within reach of rockets travelling to and from earth, allowing for lighter payloads on launches out of the earth's atmosphere and it would enable rockets to make longer distanced journeys. Once the mining infrastructure is consildated and demand increases, the benefits of economies of scale should begin to take place, lowering cost and allowing for further expansion.
+
+SpaceX seems to be the exemplar for the modern space industry, focusing on in-house development and a minimalist business model by getting really good at doing one thing. This might be a reasonable way to develop the mining industry, only focusing on technology to mine, process, and distribute resources. This would leave out the entire issue of creating modes of transportation to outsourcing. Minimizing costs, efficiently collecting materials, and creating the infrastructure to readily distribute fuel to a new market seems like the best strategy once the initial investment has been made. Taking on the phased approach would allow for consistent progress with lower, though still high, risk for investors.
+
+# Heckscher-Ohlin Model
+
+While the intricacies of space mining companies are extremely interesting and nearly endless, it is important to consider the application of modern economic trade theory on these rather novel industries. The space mining industry will have limited growth if it finds itself within an autarky, as it would be limited to the size of one national market. Trade will be an integral part of this industry's success. As we take a step back to take on a more macroeconomic view, we will be utilizing the Heckscher-Ohlin (HO) model to analyze the gains from trade for goods produced by this industry. 
+
+The HO model is founded on the idea that each country is endowed with differing levels of the factors of production. To produce the same good, two countries will require different combinations of input due to these differing factors, so the theory asserts that a country's comparative advantage is dependent upon the relative abundance of these factors of input. The HO Theorem states that the country with the relative abundance in a factor, say capital, will have comparative advantage in the capital intensive goood and the same manner for the labor abundant country [@Sodersten1994]. These results may be similar to the Ricardian model, but the HO model does not suggest complete specialization between two countries in order for them to maximize their gains from trade [@Gerber2018b].
+
+We choose to utilize the Heckscher-Ohlin model because it enables us to set forth notions about the ideal mix of input factors that would be required for a country that would like to develop this industry and trade its products. We are then able to discuss the best type of country that would find success in establishing a space mining industry. Additionally, we are able to consider how the quality of factors will differ between countries and can observe the effects in the production possibilities curves (PPCs). Finally, we can then discuss what industrial policies, if any, a country may begin to apply to change their comparative advantage in trading goods from such a lucrative industry.
+
+## Assumptions
+
+In order to implement this model, it is important to clarify its assumptions, as well as the assumptions being made about the state of the space mining industry. First, the HO model makes the following assumptions[^2]:
+
+- Two countries partake in the trade of two goods
+- No barriers to trade
+- Countries have identical technologies
+- Technologies used to produce the two goods differ
+- Factors of production are immobile between countries, but are perfectly mobile between industries
+- Perfect competition within markets for the commodities and factors
+- Production output has constant returns to scale
+
+[^2]: See Chapter 3.3 of *International Economics* by Reed and Sodersten for an in depth discussion of these assumptions.
+
+Given the space mining industry is not established, it is necessary that we make our own assumptions about its state and the interactions between the two trading countries. In addition to the HO model assumptions, we assume the following:
+
+- Labor and capital are the only two factors of production
+- The two goods being traded will be raw terrestrial materials and processed rocket propellant
+- Given that there is perfect competition, the space mining industry will be well established in both countries
+- There are no transport costs associated with delivering the rocket propellant or the raw materials
+
+Admittedly, these assumptions are rather limiting, especially since the space mining industry is not yet established. Even if it were, it is likely that the industry would experience an oligopoly. This is because of the high amount of capital investments associated with entering the industry. Basically, the first few firms to get settled in the industry will experience economies of scale as they grow and new firms trying to compete with established firms will struggle. Another type of theory that allows for the aforementioned issues would be more appropriate, such as New Trade Theory [^3]. In addition to the assumptions about the state of the industry, we assume that two countries will be trading only raw terrestrial materials (iron, copper, etc.) and processed rocket propellant. We assume these two goods because of the supposition that a country devoting more resources to extraterrestrial mining efforts may devote less effort to terrestrial mining and will import these raw materials found on earth. We also choose to focus on the rocket propellant, derived from mined lunar water, as opposed to rare metals like gold. This is because of the higher likelihood that initial business models in this industry will be centered around collecting and processing water, then selling the fuel and life support. This also allows for more differentiation between the two goods being traded.
+
+[^3]: See chapter 4, pages 95-100, of International Economics by Gerber for more on New Trade Theory.
+
+# Factors of Production
+
+In this section we discuss the factors of production for both goods being traded in our model. First, we briefly discuss the technologies for the production of both goods, followed by a consideration of which good will be more capital intensive and which will be more labor intensive. These discussions will lead to the framework of the application of the HO model, allowing us to consider the ideal endowments for a country trading goods from the space mining industry. From this point forward we will refer to the "raw terrestrial materials" as RTMs and the "processed rocket propellant" from space as just fuel. This is done for the sake of brevity. 
+
+## Technology
+
+Given that we assume there are only two countries partaking in trade and that their technologies are identical, we need only briefly consider the technology that an ideal candidate for establishing this industry needs. In our model, we will assume that any technological requirements for RTM and fuel production are fully met and unchanging. However, in reality only a developed country at the level of G7 would likely find itself with having the necessary economic support, research abilities, and work force to begin developing these technologies anytime in the near future. Additionally, access to launch sites would be necessary, so the infrastructure would need to already be in place or the geographic location for a launch site is necessary.
+
+## Capital
+
+As discussed in previous sections, the required investments to develop the technology, infrastructure, and to fund mining activities to produce fuel are quite high. We will assume that the production of fuel in our model is a capital-intensive activity relative to the production of RTMs. We propose this because of our assumption that the industry is well-established. It would seem that given a business model centered around unmanned missions, labor would be limited to operation centers and research for space mining, with small volumes of labor associated with the mining activities. Terrestrial mining may also require large investments of capital, but if it remains at the level at which the industry finds itself today, there are still considerable labor activites like working machinery, prospecting, and research. Given this, we will assume that the production of fuel is more capital-intensive *relative* to the production of RTMs, though both industries require consdierable amounts of capital.
+
+## Labor
+
+For reasons similar to the last section, we will assume that the RTM industry will be labor-intensive activity relative to the production of fuel by the space mining industry. While we may make these assumptions about the factor intensiveness of each good's production, we may not assume a production possibilities curve with constant costs. Labor and capital in the production of RTM may well transfer over to the produciton of fuel, though there will be increasing costs as one unit of a factor is transferred over to the other industry.
+
+# Theoretical Trade Patterns
+
+Now that we have discussed each goods' factor intensiveness and have clarified our assumptions, we will now present a potential trade pattern between two countries trading raw terrestrial materials (RTMs) and processed rocket fuel from space. We will select the United States and China as our two countries partaking in trade for our model. Both are large countries with significant amounts of economic activity, with the US being a developed, G7 country. Although China's GDP per capita may suggest it does not uphold a "developed" standard, its economic and technological advancements are not to be disregarded. China also extracts the most mining products out of any country in the world and the United States is next in line [@Buchholz2020]. Additionally, the United States has some of the largest and most successful space-based companies in the world, with China also having notable scientific and technological achievements in space.
+
+## Factor Endowments
+
+## Production Possibilities Curves
+
+## Results
+
+# Industrial Policy
+
+Now that we have considered the factors of production for a space mining industry and modeled the trade of RTMs and fuel between two countries, how exactly would a country go about changing the supposedly "endowed"  factors of production for these goods? There would quite clearly be motivation for countries to get their stake in this industry, so they would be able to make these improvements to their, resulting in issues like rent seeking, an industry that has high risks, requires advanced technologies, and needs immense upfront costs is worth supporting if it has the potential for great payoff [@Gerber2018a]. Rather than suggesting the limited, though obvious policy of directly subsidizing the industry, we propose giving tax breaks throughout its development and allowing for support through infrastructure and research and development (R&D). These industrial policies seem more reasonable for an industry with considerable capital investments and reliance upon technological advancements.
+
+## Tax Breaks
+
+Whithin the United States, tax incentives are often utilized as an economic incentive for development of industries to compete with other states and even internationally. These strategies are also utilized by other countries to grow and promote their own industry. The technology industry is often an attractive industry to promote, as it often expands economic activity, has higher paying jobs, and attracts the highly educated [@Francis2016]. Given that the space mining industry would likely be a lucrative industry, its work force would be higher educated because of its technological focus. 
+
+Just like in other tech-based industries, countries could utilize tax incentives to assist companies in their growth in this industry. For example, a country like the United States could allow for reduced taxes when purchasing expensive technology and other goods to be processed by the companies trying to build the infrastructure for space mining. This would not only be less of a burden for the companies and its investors, but would incentivize businesses to stay within the country.
+
+## Infrastructure and R&D
+
+The greatest impedement to starting an industry of the likes of space mining is the infrastructural and technological requirements. Without preexisting economic activity in space, there is no purpose to creating a business model centered around selling processed fuel to customers in space. Additionally, developing countries may find themselves without the technology to develop an industry like this. Government space agencies like NASSA, the European Space Agency (ESA), or the Japan Aerospace Exploration Agency (JAXA) will be pioneers in clearing the way by setting up some form of an infrastructural foundation, continuing to research new sciencies, and to share their findings with the greater public.
+
+An strategic decision would be for a country to collaborate with its space mining industry by making new information freely and readily available to these companies. On top of that, prioritizing any contracts to within its own country can help support the revenue for these companies. Finally, if the infrasctructure for bases is created on other celestial bodies, say the moon, allowing companies to have access to or information about these locations could prove to be useful. Essentially, governments can utilize their space agencies, technology, and infrastructure to support its companies while they are growing and at their riskiest stages of development to stimulate activity and generate revenue.
+
+# Further Considerations
+
+While we have considered the technological and business approach of the space industry, as well as deliberation of its effects in international trade, the path forward into space and the collection of its resources leave several topics that are worth mentioning. While these topics will be briefly touched upon, it would certainly be worthwhile to have a dedicated dialogue on these subjects. 
+
+## Externalities
+
+Terrestrial mining is essential to collecting resources necessary for many modern economics ventures, whether it be the materials for buildings, cars, or technology. However, mining on earth can also lead to externalities that cause air and water pollution, damange to land, and a loss of biodiversity. Combined with these environmental effects, the mining practices can also have adverse effects on the local populations [@Chepkemoi2017]. Although certainly not the main contributor, mining on earth can also contribute to pollution and climate change. Seeking net zero or carbon neutral is quite difficult in this industry, even with the push towards cleaner practices and technologies [@Singh2016].
+
+One advantage of moving more mining operations into space is that it can lessen the effects of negative externalities here on earth. With the possibility of collecting resources like gold, silver, and platinum, a significant amount of mining efforts may transferred to the extraterrestrial setting. Although, these benefits would not occur until space mining is well-established, reliable, and profitable. The environmental impacts are certainly worth considering for the earth's long run well-being.
+
+## Ethical and Legal
+
+When discussing the collection and sale of resources of space, the idea of claiming private ownership comes up quite quickly. Currently, there is no legal protections for claiming onwership of any celestial bodies. It's basically like "international waters." However, with increasing activity in space and an industry centered around extractions of resrouces, these issues will need to be deeply considered. How will the capital and efforts of mining companies be protected, if at all, in space? How would we go about allowing the appropriation of land, or even entire moon, in outer space? These are only some of the ethical and legal questions that will need to be answered after intense contemplation.
 
 # Conclusion
+
+sum up results, mention considerations and other areas to consider, limitations, and inspirational closing, Implementing New Trade Theory would be the next step to durther developing a more realistic theory of trade in this context, given the dependency upon economies of scale and the winner industry will likely be the first company/country to get into space. Also, this would likely follow monopolistic compeititon, not perfect competition. allow for eocnomies of scale, olgopoly, and product differentiation (like closer fuel which is more expensive, etC)
+
+assuming that tech is equal, but in reality it's not and one country will be the first to win... Mention a couple of models from the international economics textbook
+
+\pagebreak
 
 # References

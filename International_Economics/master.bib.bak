@@ -288,21 +288,4 @@
   edition   = {3rd Edition},
 }
 
-@Article{Francis2016,
-  author  = {Norton Francis},
-  journal = {Urban Institution},
-  title   = {State Tax Incentives for Economic Development},
-  year    = {2016},
-  url     = {https://www.urban.org/sites/default/files/publication/78206/2000636-state-tax-incentives-for-economic-development.pdf},
-}
-
-@Article{Buchholz2020,
-  author  = {Katharina Buchholz},
-  journal = {Statista},
-  title   = {The Countries That Are the Biggest Miners in the World},
-  year    = {2020},
-  month   = may,
-  url     = {https://www.statista.com/chart/19839/biggest-miners-among-countries/#:~:text=China is not only a,non-ferrous and other metals.},
-}
-
 @Comment{jabref-meta: databaseType:bibtex;}
