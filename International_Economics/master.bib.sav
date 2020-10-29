@@ -272,7 +272,7 @@
 }
 
 @Article{Kormute2019,
-  author = {David Kormute; Angel Abbud-Mardrid; Jared Atkinson; Jonathan Barr; Gay Bernhard; Dallas Bienhoff; {et al}},
+  author = {David Kormute; Angel Abbud-Mardrid; Jared Atkinson; Jonathan Barr; Gay Bernhard; Dallas Bienhoff},
   title  = {Commercial Lunar Propellant Architexture: A Collaborative Study of Lunar Propellant Production},
   year   = {2019},
   url    = {https://www.philipmetzger.com/wp-content/uploads/2018/11/Commercial-Lunar-Propellant-Architecture.pdf},
@@ -281,7 +281,7 @@
 @InBook{Sodersten1994,
   author    = {Bo Sodersten; Geoffrey Reed},
   chapter   = {Chapter 3},
-  pages     = {59-69},
+  pages     = {40-69},
   publisher = {Macmillan Education},
   title     = {International Economics},
   year      = {1994},
