@@ -1,0 +1,162 @@
+---
+title: "Homework 8"
+author: "Joshua Ingram"
+date: "10/30/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+```
+
+# Problem 1
+
+## 1.
+
+Given
+
+$$
+Y_t - Y_{t-1} = \epsilon_t, \; \epsilon_t \sim_{i.i.d.} N(0, \sigma^2) \Longrightarrow Y_t = \sum^t_{s = 1} \epsilon_s, \; \epsilon_s \sim_{i.i.d.} N(0, \sigma^2)
+$$
+
+### Mean
+
+$$
+E[Y_t] = E[\sum^t_{s = 1} \epsilon_s] = E[\epsilon_1] + E[\epsilon_2] + \dots + E[\epsilon_t] = 0 + 0 + \dots + 0 = 0
+$$
+
+Thus
+
+$$
+E[Y_t] = 0 
+$$
+
+### Variance
+$$
+Var[Y_t] = Var[\sum^t_{s = 1} \epsilon_s] = Var[\epsilon_1] + Var[\epsilon_2] + \dots + Var[\epsilon_t] = \sigma^2 + \sigma^2 + \dots + \sigma^2 = t\sigma^2
+$$
+
+Thus
+
+$$
+V[Y_t] = t\sigma^2
+$$
+
+### Covariance
+$$
+Cov(Y_t, Y_{t-k}) = Cov(\sum^t_{s = 1} \epsilon_s, \sum^{t-k}_{s = 1} \epsilon_s) = Cov(\sum^{t-k}_{s = 1} \epsilon_s + \sum^{t}_{s = t-k+1} \epsilon_s, \sum^{t-k}_{s = 1} \epsilon_s)
+$$
+
+$$
+= Cov(\sum^{t-k}_{s = 1} \epsilon_s, \sum^{t-k}_{s = 1} \epsilon_s) + Cov(\sum^{t}_{s = t-k+1} \epsilon_s, \sum^{t-k}_{s = 1} \epsilon_s) = Cov(Y_{t-k}, Y_{t-k}) + 0 = Var(Y_{t-k})
+$$
+
+Thus
+
+$$
+Cov(Y_t, Y_{t-k}) = Var(Y_{t-k})
+$$
+
+Given these formulas, the random walk is not stationary because the variance is not constant.
+
+## 2.
+
+```{r}
+set.seed(422)
+y <- 10
+for(j in 1:500) y <-c(y,tail(y,1)+ rnorm(1))
+```
+
+
+### a.
+
+```{r}
+autoplot(ts(y))
+```
+
+The plot does not look stationary because there does not appear to be constant variance throughout. Although I know this is a random walk with no drift, this random occurance when plotted does exhibit some form of a "downtrend" within a certain range, but clearly no seasonality.
+
+### b.
+
+I would expect a mostly slow decay in autocorrelation with no pattern for in certain lags due to seasonality. This is because the data doesn't appear to be seasonal and the variance is not constant.
+
+```{r}
+ggAcf(y, lag.max=150)
+```
+
+
+# Problem 2
+
+For the following, $\epsilon_t \sim_{i.i.d.}N(0,1)$
+
+## 1. ARMA(1,1)
+
+$$
+Y_t = 0.7Y_{t-1} + 0.3\epsilon_{t-1} + \epsilon_t
+$$
+
+
+```{r}
+ts.length <- 500
+set.seed(1)
+err <- rnorm(ts.length, sd=1)
+ARMA11 <- err[1] 
+
+for (i in 2:ts.length){
+  ARMA11 <- c(ARMA11, 0.7*ARMA11[i-1] + 0.3*err[i-1] + err[i])
+}
+plot(ARMA11, type = "l")
+Acf(ARMA11, lag.max = 100)
+```
+
+The line plot appears to be stationary, with the mean at about 0 and the variance is pretty constant. The ACF looks like that of a stationary process, with the first AR being a spoke and then decaying quite quickly.
+
+## 2. ARMA(3,1)
+
+$$
+Y_t = 0.7Y_{t-1} - 0.3Y_{t-2} + 0.5Y_{t-3}+ 0.3\epsilon_{t-1} + \epsilon_t
+$$
+
+
+
+```{r}
+set.seed(1)
+err <- rnorm(ts.length, sd=1)
+ARMA31 <- err[1:3] 
+
+for (i in 4:ts.length){
+  ARMA31 <- c(ARMA31, sum(c(0.7,-0.3,0.5)*ARMA31[c(i-1, i-2, i-3)]) + 0.3*err[i-1] + err[i])
+}
+plot(ARMA31, type = "l")
+Acf(ARMA31, lag.max = 100)
+```
+
+This line plot has a different pattern than the last, but it does appear to be stationary given a pretty constant variance and mean. The ACF does appear to be that of a stationary process and is what we would expect given there are more AR terms. The decay to zero occurs at a decent pace and then alternates between positive and negative.
+
+## 3. ARMA(1,3)
+
+$$
+Y_t = 0.7Y_{t-1} - 0.7\epsilon_{t-1} + 0.3\epsilon_{t-2} + 0.5\epsilon_{t-3} + \epsilon_t
+$$
+
+
+
+```{r}
+set.seed(1)
+err <- rnorm(ts.length, sd=1)
+ARMA13 <- err[1:3] 
+
+for (i in 4:ts.length){
+  ARMA13 <- c(ARMA13, 0.7*ARMA13[i-1] + sum(c(-0.7, 0.3, 0.5)*err[c(i-1, i-2, i-3)]) + err[i])
+}
+plot(ARMA13, type = "l")
+Acf(ARMA13, lag.max = 100)
+```
+
+This process is also stationary according to the line plot, with the variance and mean being constant. The ACF is yet again what we would expect from a stationary process and one where there are more MA terms, as seen by the quick drop off after the first few ACs.
+
+We could potentially determine the order for *q* by looking at the ACF as would expect the ACF to start to drop after the first *q* spikes and we see that this drop occurs after the 3rd spike.
