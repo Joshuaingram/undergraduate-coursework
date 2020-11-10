@@ -1,0 +1,103 @@
+---
+title: "16.2 Line Integrals"
+date: "Joshua D. Ingram"
+author: "Pages: 1075 - 1087"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Line Integrals
+
+Similar to integrating over an interval $[a,b]$, we take a line integral by integrating over a curve $C$. First, define a plane curve C given by the parametric equations
+
+$$
+x = x(t) \;\;\;\;\;\;\; y = y(t) \;\;\;\;\;\;\; a \leq t \leq b
+$$
+
+This curve C can also be written as
+
+$$
+\textbf{r}(t) = x(t)\textbf{i} + y(t)\textbf{j}
+$$
+
+#### Definition - Line Integral along a Plane Curve
+
+If $f$ is defined on a smooth curve C as given above, then the **line integral of** $\textbf{f}$ **along C** is
+
+$$
+\int_C f(x,y)ds = \lim_{n \rightarrow \infty} \sum^n_{i=1}f(x^*_i, y^*_i)\Delta s_i
+$$
+
+Rewritten as
+
+$$
+\boxed{\int_C f(x,y)ds = \int_a^bf(x(t), y(t))\sqrt{(\frac{dx}{dt})^2 + (\frac{dy}{dt})^2}dt}
+$$
+\
+
+To parametrize a line segment, it's useful to remember the vector representation of the line segment that starts at $\textbf{r}_0$ and ends at $\textbf{r}_1$ is given by
+
+$$
+\mathbf{r}(t) = (1 - t)\mathbf{r}_0 + t \mathbf{r}_1 \;\;\;\;\;\;\; 0 \leq t \leq 1
+$$
+
+# Line Integrals in Space
+
+#### Definition - Line Integral along a Space Curve
+
+Suppose that C is a smooth space curve given by the parametric equations
+
+$$
+x = x(t) \;\;\;\;\;\;\; y = y(t) \;\;\;\;\;\;\; z = z(t) \;\;\;\;\;\;\; a \leq t \leq b
+$$
+
+or by a vector equation 
+
+$$
+\textbf{r}(t) = x(t)\textbf{i} + y(t)\textbf{j} + z(t)\textbf{k}
+$$
+
+If $f$ is a function of three variables that is continuous on some region containing C, then we define the **line integral of** $\textbf{f}$ **along C** 
+
+$$
+\int_C f(x,y,z)ds = \lim_{n \rightarrow \infty} \sum^n_{i=1}f(x^*_i, y^*_i, z^*_i)\Delta s_i
+$$
+
+Rewritten as
+
+$$
+\boxed{\int_C f(x,y,z)ds = \int_a^bf(x(t), y(t), z(t))\sqrt{(\frac{dx}{dt})^2 + (\frac{dy}{dt})^2 + (\frac{dz}{dt})^2}dt}
+$$
+\
+
+We can write it in an even more compact form
+
+$$
+\int_C f(x,y,z)ds = \int_a^bf(\mathbf{r}(t))|\mathbf{r}'(t)|dt
+$$
+\
+
+- Note that $ds = \sqrt{ \left(\frac{dx}{dt}\right)^2 + \left(\frac{dy}{dt}\right)^2 + \left(\frac{dz}{dt}\right)^2}dt = | \mathbf{r}'(t)| dt$
+
+# Line Integrals of Vector Fields
+
+#### Definition - Line Integral along of Vector Fields
+
+Let **F** be a continuous vector field definied on a smooth curve C given by a vector function $\mathbf{r}(t)$, $a \leq t \leq b$. Then the **line integral of F along C** is
+
+$$
+\boxed{\int_C \mathbf{F} \cdot d\mathbf{r} = \int_a^b \mathbf{F}(\mathbf{r}(t)) \cdot \mathbf{r}'(t) dt = \int_C \mathbf{F} \cdot \mathbf{T} \; ds}
+$$
+\
+
+- Note that $\mathbf{T}ds = d \mathbf{r} = \mathbf{r}'(t) dt$

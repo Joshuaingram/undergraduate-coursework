@@ -1,0 +1,44 @@
+---
+title: "16.4 Green's Theorem"
+date: "Joshua D. Ingram"
+author: "Pages: 1096 - 1103"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Green's Theorem
+
+Green's Theorem gives the relationship between a line integral around a simple closed curve C and a double integral over the plane region D bounded by C.
+
+- The convention of **positive orientation** is used in Green's Theorem, refering to a single *counterclockwise* traversal of C. In other words, the region is always to the left as a function $\mathbf{r}(t)$ traverses C.
+
+#### Theorem 16.4.1 - Green's Theorem
+
+Let C be a positively oriented, piecewise-smooth, simple closed curve in the plane and let D be the region bounded by C. If P and Q have continuous partial derivatives on an open region that contains D, then
+
+$$
+\oint_C P dx + Q dy = \oint_C \mathbf{F} \cdot d\mathrm{r} = \iint_D (\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y})dA
+$$
+\
+
+We can also use Green's Theorem to find areas. Since the area of D is $\iint_D 1 dA$, we wish to choose P and Q such that
+
+$$
+\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y} = 1
+$$
+
+Given this, Green's theorem gives the following formulas for the area of D:
+
+$$
+A = \oint_C x dy = - \oint_C y dx = \frac{1}{2} \oint_C xdy - ydx
+$$

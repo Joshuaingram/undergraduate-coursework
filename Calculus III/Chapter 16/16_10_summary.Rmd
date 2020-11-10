@@ -1,0 +1,51 @@
+---
+title: "16.10 - Summary"
+date: "Joshua D. Ingram"
+author: "Pages: 1147"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Fundamental Theorem of Calculus
+
+$$
+\int_a^b F'(x)dx = F(b) - F(a)
+$$
+\
+
+# Fundamental Theorem of Line Integrals
+
+$$
+\int_C \nabla f \cdot d\mathbf{r} = f(\mathbf{r}(b)) -  f(\mathbf{r}(a))
+$$
+\
+
+# Green's Theorem
+
+$$
+\iint_D (\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}) \; dA = \int_C P \; dx + Q \; dy
+$$
+\
+
+# Stoke's Theorem
+
+$$
+\iint _S curl \; \mathbf{F} \cdot d\mathbf{S} = \int_C \mathbf{F} \cdot d\mathbf{r}
+$$
+\
+
+# Divergence Theorem
+
+$$
+\iiint_E div \; \mathbf{F} \; dV = \iint_S \mathbf{F} \cdot d\mathbf{S}
+$$

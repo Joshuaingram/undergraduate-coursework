@@ -1,0 +1,19 @@
+---
+title: "16.8 - Stoke's Theorem"
+date: "Joshua D. Ingram"
+author: "Pages: 1134 - 1140"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+

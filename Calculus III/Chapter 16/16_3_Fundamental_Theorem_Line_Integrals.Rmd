@@ -1,0 +1,83 @@
+---
+title: "16.3 The Fundamental Theorem for Line Integrals"
+date: "Joshua D. Ingram"
+author: "Pages: 1087 - 1095"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Fundamental Theorem of Line Integrals
+
+#### Theorem 16.3.1 - Fundamental Theorem of Calculus
+
+$$
+\int_a^b F'(x)dx = F(b) - F(a)
+$$
+\
+
+If we think of the gradient vector $\nabla f$ as a sort of derivative of f, then we can regard the following as the "fundamental theoreom of line integrals:"
+
+#### Theorem 16.3.2 - Fundamental Theorem of Line Integrals*
+
+Let C be a smooth curve given by the vector function $\textbf{r}(t)$, $a \leq t \leq b$. Let $f$ be a differentiable function of two or three variables whose gradient vector $\nabla f$ is continuous on C. Then
+
+$$
+\boxed{\int_C \nabla f \cdot d\mathbf{r} = f(\mathbf{r}(b)) - f(\mathbf{r}(a))}
+$$
+\
+
+# Independence of Path
+
+Suppose $C_1$ and $C_2$ are two piecewise-smooth curves, or **paths**, that have the same initial point A and terminal point B. One implication of *Theorem 16.3.2* is that 
+
+$$
+\int_{C_1} \nabla f \cdot d\mathbf{r} = \int_{C_2} \nabla f \cdot d\mathbf{r}
+$$
+whenver $\nabla f$ is continuous. 
+
+- The line integral of a *conservative* vector field depends only on the initial point and the terminal point of the curve.
+- If **F** is a continuous vector field with domain D, we say that the line integral $\int_C \nabla f \cdot d\mathbf{r}$ is **independent of path** if $\int_{C_1} \nabla f \cdot d\mathbf{r} = \int_{C_2} \nabla f \cdot d\mathbf{r}$ for any two paths $C_1$ and $C_2$ in D that have the same initial points and terminal points.
+- A curve is called **closed** if its terminal point coincides with its initial point, $\mathbf{r}(b) = \mathbf{r}(a)$
+
+#### Theorem 16.3.3 - Independence of Path
+
+$\int_C \mathbf{F} \cdot d\mathbf{r}$ is independent of path in D if and only if $\int_C \mathbf{F} \cdot d\mathbf{r} = 0$ for every closed path C in D.
+\
+
+#### Theorem 16.3.4 - Independence of Path and Conservative Vector Fields
+
+Suppose **F** is a vector field that is continuous on an open connected region D. If $\int_C \mathbf{F} \cdot d\mathbf{r}$ is independent of path in D, then **F** is a conservative vector field on D; that is, there exists a function $f$ such that $\nabla f = \mathbf{F}$.
+\
+
+#### Theorem 16.3.5*
+
+If $\mathbf{F}(x,y) = P(x,y)\mathbf{i} + Q(x,y)\mathbf{j}$ is a conservative vector field, where P and Q have continuous first-order partial derivatives on a domain D, then throughout D we have
+
+$$
+\boxed{\frac{\partial P}{\partial y} = \frac{\partial Q}{\partial x}}
+$$
+\
+
+- A **simple curve** is a curve that doesn't intersect itself anywhere between its endpoints.
+- A **simply-connected region** in the plane is a connected region D such that every simple closed curve in D encloses only points that are in D.
+
+#### Theorem 16.3.6*
+
+Let $\mathbf{F} = P\mathbf{i} + Q\mathbf{j}$ be a vector field on an open simply-connected region D. Suppose that P and Q have continuous first-order partial derivatives and
+
+$$
+\frac{\partial P}{\partial y} = \frac{\partial Q}{\partial x} \; \; \; \; \; \text{throughout D}
+$$
+
+Then **F** is conservative.
+\

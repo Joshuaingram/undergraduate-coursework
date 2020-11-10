@@ -1,0 +1,27 @@
+---
+title: "16.6 - Parametric Surfaces and Their Areas"
+date: "Joshua D. Ingram"
+author: "Pages: 1111 - 1122"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Parametric Surfaces
+
+# Surfaces of Revolution
+
+# Tangent Planes
+
+# Surface Area
+
+# Surface Area of the Graph of a Function

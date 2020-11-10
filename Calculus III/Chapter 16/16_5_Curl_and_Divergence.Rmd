@@ -1,0 +1,103 @@
+---
+title: "16.5 Curl and Divergence"
+date: "Joshua D. Ingram"
+author: "Pages: 1103 - 1111"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Curl
+
+#### Definition - Curl
+
+If $\mathbf{F} = P\mathbf{i} + Q\mathbf{j} + R\mathbf{k}$ is a vector field on $\mathbb{R}^3$ and the partial derivatives of P, Q, and R all exist, then the curl of $\mathbf{F}$ is the vector field on $\mathbb{R}^3$ defined by
+
+$$
+\boxed{curl\;\mathbf{F} = (\frac{\partial R}{\partial y} - \frac{\partial Q}{\partial z}) \mathbf{i} \; + (\frac{\partial P}{\partial z} - \frac{\partial R}{\partial x}) \mathbf{j} \; + (\frac{\partial Q}{\partial x} - \frac{\partial P}{\partial y}) \mathbf{k}}
+$$
+
+To aid in remembering the formula above, know that
+
+$$
+\nabla = \frac{\partial}{\partial x} \mathbf{i} \; + \; \frac{\partial}{\partial y} \mathbf{j} \; + \; \frac{\partial}{\partial z} \mathbf{k} 
+$$
+
+This allows us to write
+
+$$
+curl\;\mathbf{F} = \nabla \times \mathbf{F} =
+\begin{vmatrix}
+\mathbf{i} & \mathbf{j} & \mathbf{k}\\
+\frac{\partial}{\partial x} & \frac{\partial}{\partial y} & \frac{\partial}{\partial z}\\
+P & Q & R
+\end{vmatrix}
+$$
+
+Which is equal to the boxed equation above.
+\
+
+#### Theorem 16.5.3
+
+If $f$ is a function of three variables that has continuous second-order partial derivatives, then
+
+$$
+curl(\nabla f) = \mathbf{0}
+$$
+\
+
+#### Theorem 16.5.4
+
+If **F** is a vector field defined on all of $\mathbb{R}^3$ whose component functions have continuous partial derivatives and $curl \; \mathbf{F} = \mathbf{0}$, then **F** is a conservative vector field.
+\
+
+- *curl* is associated with rotations, so if we think about particles in a fluid near a point (x,y,z) that rotate about an axis, the $curl\; \mathbf{F}(x,y,z)$ points in the direction of that axis and its length measures how quickly the particles move about that axis. (see page 1106)
+- If $curl \; \mathbf{F} = \mathbf{0}$ at a point P, then the fluid is free from rotations at P and **F** is called **irrotational** at P.
+
+# Divergence
+
+#### Definition - Divergence
+
+If $\mathbf{F} = P\mathbf{i} + Q\mathbf{j} + R\mathbf{k}$ is a vector field on $\mathbb{R}^3$ and the partial derivatives of P, Q, and R exist, then the **divergence of F** is the function of three variables defined by
+
+$$
+\boxed{div \; \mathbf{F} = \frac{\partial P}{\partial x} + \frac{\partial Q}{\partial y} + \frac{\partial R}{\partial z}}
+$$
+
+In terms of $\nabla$, the divergence of **F** can be written as
+
+$$
+div \; \mathbf{F} = \nabla \cdot \mathbf{F}
+$$
+
+- Note that $curl \; \mathbf{F}$ is a vector field but $div \; \mathbf{F}$ is a scalar field.
+
+#### Theorem 16.5.11
+
+If $\mathbf{F} = P\mathbf{i} + Q\mathbf{j} + R\mathbf{k}$ is a vector field on $\mathbb{R}^3$ and P, Q, and R have continuous second-order partial derivatives, then
+
+$$
+div \; curl \; \mathbf{F} = 0
+$$
+
+- If **F**(x,y,z) is the velocity of a fluid, then $div \; \mathbf{F}(x,y,z)$ measures the tendency of the fluid to diverge from the point (x,y,z).
+- If $div \; \mathbf{F}(x,y,z) = 0$, then **F** is said to be **incompressible**.
+- $\nabla^2 = \nabla \cdot \nabla$ is called the **Laplace Operator**.
+\
+
+# Vector Forms of Green's Theorem
+
+Given the curl and divergence operators, we can rewrite Green's Theorem as follows
+
+$$
+\boxed{\oint_C \mathbf{F} \cdot d\mathbf{r} = \iint_D (curl \; \mathbf{F}) \cdot \mathbf{k} \;dA}
+$$

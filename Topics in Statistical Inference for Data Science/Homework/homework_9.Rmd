@@ -1,0 +1,340 @@
+---
+title: "Homework 9"
+author: "Joshua Ingram"
+date: "11/9/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+library(tseries)
+data("usgdp")
+data("ausair")
+```
+
+
+# Problem 1
+
+Given
+
+$$
+Y_t = \delta t + \epsilon_t, \; \epsilon_t \sim_{i.i.d.} N(0,\sigma^2)
+$$
+
+## 1.
+
+$$
+Y_t' = Y_t - Y_{t-1}
+$$
+
+### a.
+
+$$
+E[Y_t'] = E[Y_t - Y_{t-1}] = E[Y_t] - E[Y_{t-1}] = E[\delta t + \epsilon_t] - E[\delta (t-1) + \epsilon_{t-1}] = E[\delta t] + 0 - E[\delta (t-1)] - 0
+$$
+
+$$
+= E[\delta t] - E[\delta t] + E[\delta] = \delta
+$$
+
+Thus 
+
+$$
+E[Y_t'] = \delta
+$$
+
+### b.
+
+$$
+Var(Y_t') = Var(Y_t - Y_{t-1}) = Var(Y_t) + Var(Y_{t-1}) = Var(\delta t + \epsilon_t) + Var(\delta (t-1) + \epsilon_{t-1}) 
+$$
+
+$$
+Var(\delta t) + Var(\epsilon_t) + Var(\delta (t-1)) + Var(\epsilon_{t-1}) = 0 + \sigma^2 + 0 + \sigma^2 = 2\sigma^2
+$$
+
+Thus
+
+$$
+Var(Y_t') = 2\sigma^2
+$$
+
+### c.
+
+Given
+
+$$
+Y_t' = Y_t - Y_{t-1} = \delta t + \epsilon_t - \delta (t-1) - \epsilon_{t-1} = \delta t - \delta t + \delta + \epsilon_t - \epsilon_{t-1} = \delta + \epsilon_t - \epsilon_{t-1}
+$$
+
+and 
+
+$$
+Y_{t-1}' = Y_{t-1} - Y_{t-2} =  \delta (t - 1) + \epsilon_{t-1} - \delta (t-2) - \epsilon_{t-2} = \delta t - \delta t - \delta + 2\delta +  \epsilon_{t-1}- \epsilon_{t-2} = \delta + \epsilon_{t-1} - \epsilon_{t-2}
+$$
+
+Then 
+
+$$
+cov(Y_t',\; Y_{t-1}') = cov(Y_t - Y_{t-1}, \;Y_{t-1} - Y_{t-2}) = cov(\delta + \epsilon_t - \epsilon_{t-1},\; \delta + \epsilon_{t-1} - \epsilon_{t-2})
+$$
+
+Given $\delta$ is a constant and each $\epsilon_t$ is i.i.d.
+
+$$
+= cov(\epsilon_t - \epsilon_{t-1}, \; \epsilon_{t-1} - \epsilon_{t-2}) = cov(- \epsilon_{t-1}, \; \epsilon_{t-1}) = -\sigma^2
+$$
+
+### d.
+
+Given 
+
+$$
+Y_t' = \delta + \epsilon_t - \epsilon_{t-1}
+$$
+
+and
+
+$$
+Y_{t-k}' = Y_{t-k} - Y_{t-(k+1)} = \delta (t - k) + \epsilon_{t-k} - \delta (t-(k +1)) - \epsilon_{t-(k+1)} = \delta t - \delta t - k\delta + (k+1)\delta +  \epsilon_{t-k}- \epsilon_{t-(k+1)} = \delta + \epsilon_{t-k} - \epsilon_{t-(k+1)}
+$$
+
+Such that k > 1, then
+
+$$
+cov(Y_t, Y_{t-k}) = cov(Y_t - Y_{t-1},\; Y_{t-k} - Y_{t-(k+1)}) = cov(\delta + \epsilon_t - \epsilon_{t-1},\;\delta + \epsilon_{t-k} - \epsilon_{t-(k+1)})
+$$
+
+Given $\delta$ is a constant and each $\epsilon_t$ is i.i.d.
+
+$$
+= cov(\epsilon_t - \epsilon_{t-1},\; \epsilon_{t-k} - \epsilon_{t-(k+1)}) = 0
+$$
+
+Thus
+
+$$
+cov(Y_t, Y_{t-k}) = 0
+$$
+
+for all t where k > 1.
+
+Given the preceding properties, differencing a linear trend makes the data stationary.
+
+## 2.
+
+```{r}
+set.seed(420)
+y <- 0
+for(i in 1:500){
+  y <- c(y, 0.5*i+ rnorm(1,0,30))
+}
+```
+
+### a.
+
+```{r}
+plot(y, type="l", xlab="Time")
+title("Linear Trend Time Series")
+```
+
+This time series data is clearly nto stationary, as the mean is non-constant. I would expect a slowly decreasing ACF because of the increasing trend in the data with no seasonality.
+
+```{r}
+Acf(y)
+```
+
+### b.
+
+```{r}
+diff_y <- diff(y)
+
+plot(diff_y, type="l", xlab="Time")
+title("Differenced Linear Trend Time Series")
+```
+
+This does look like a stationary time series because the mean is constant and same for the variance. I would expect an ACF where all autocorrelations are within the blue lines with no clear patern. There would likely be a high autocorrelation for lag 1.
+
+```{r}
+Acf(diff_y)
+```
+
+## 3.
+
+```{r}
+# original time series
+kpss.test(y)
+
+# differenced time series
+kpss.test(diff_y)
+```
+
+We use the KPSS test to determine whether the series is stationary. For the original time series data, we receive a small p-value which gives us significant evidence to reject the null, that the series is stationary, in favor of the alternative, that the series is not stationary.
+
+For the differenced time series, we receive a p-value of 0.1, so we retain the null, that the time series is stationary. These tests do confirm the visual intuitions.
+
+# Problem 2
+
+## 1.
+
+```{r}
+ts.length <- 500
+sigma <- 1
+
+set.seed(1)
+err <-rnorm(ts.length, sd=1)
+ARMA11 <- err[1]
+for (j in 2:ts.length){
+  ARMA11 <-c(ARMA11, 0.7*ARMA11[j-1]+0.3*err[j-1]+err[j])
+}
+
+plot(ARMA11, type="l")
+```
+
+
+### a.
+
+```{r}
+kpss.test(ARMA11)
+```
+
+With a p-value of 0.1 after conducting the KSPSS test, we do not have significant evidence to reject the null, that the time series is stationary. This does confirm my intuition from HW 8.
+
+### b.
+
+```{r}
+ndiffs(ARMA11)
+```
+
+No differencing needed, so it corresponds to my conclusion from part a.
+
+### c.
+
+ndiffs yielded a 0.
+
+## 2.
+
+```{r}
+set.seed(1)
+err <-rnorm(ts.length, sd=1)
+ARMA31 <- err[1:3]
+for(j in 4:ts.length){
+  ARMA31 <-c(ARMA31,sum(c(0.7, -0.3, 0.5)*ARMA31[c(j-1,j-2,j-3)])+0.3*err[j-1]+err[j])
+}
+plot(ARMA31, type="l")
+```
+
+```{r}
+kpss.test(ARMA31)
+```
+
+With a p-value of 0.04475, we have significant evidence to reject the null in favor of the alternative, that the time series is not stationary. These results were in line with my intuition in the last homework.
+
+### b.
+
+```{r}
+ndiffs(ARMA31)
+```
+
+This result is consistent with the results in part a.
+
+### c.
+
+```{r}
+diff_ARMA31 <- diff(ARMA31)
+plot(diff_ARMA31, type="l")
+kpss.test(diff_ARMA31)
+```
+
+## 3.
+
+```{r}
+set.seed(1)
+err <-rnorm(ts.length, sd=1)
+ARMA13 <- err[1:3]
+for(j in 4:ts.length){
+  ARMA13 <-c(ARMA13, 0.3*tail(ARMA13,1)+ sum(c(-0.7, 0.3, 0.5)*err[c(j-1, j-2,j-3)])+err[j])
+}
+plot(ARMA13, type="l")
+```
+
+
+```{r}
+kpss.test(ARMA13)
+```
+
+With a p-value of 0.10, we do not have significant evidence to reject the null hypothesis, so the time series is stationary. This is consistent with my intution on the last homework.
+
+### b.
+
+```{r}
+ndiffs(ARMA13)
+```
+
+This is consistent with my results from the last part.
+
+### c.
+
+
+# Problem 3
+
+## 1.
+
+### a.
+
+```{r}
+autoplot(ausair)
+```
+
+Variane looks fine.
+
+### b.
+
+```{r}
+tsdisplay(ausair)
+ndiffs(ausair)
+diff_ausair <- diff(ausair, differences = 2)
+tsdisplay(diff_ausair)
+```
+
+
+### c.
+
+For this time series, ARIMA(0,2,1) would be appropriate. I chose this because of the spike in the ACF for lag 1 and the sudden drop off, as well as the quick decrease in the PACF plot. d is 2 because of the second order differencing.
+
+$$
+y_t = \mu + \theta_1 \epsilon_{t-1} + \epsilon_t, \; d = 2
+$$
+
+## 2.
+
+### a.
+
+```{r}
+autoplot(usgdp)
+```
+
+Variance looks fine.
+
+### b.
+
+```{r}
+tsdisplay(usgdp)
+ndiffs(usgdp)
+nsdiffs(usgdp)
+diff_usgdp <- diff(usgdp, differences = 2)
+tsdisplay(diff_usgdp)
+```
+
+
+### c.
+
+For this, ARIMA(1,2,1) would be appropriate. I chose this because of the spike for lag 1 in the ACF and the spike in the PACF, followed by sudden drops in both plots. d is two because of the differencing being on the second order.
+
+$$
+y_t = \mu + \phi_1 y_{t-1} + \theta_1 \epsilon_{t-1} + \epsilon_t, \; d = 2
+$$

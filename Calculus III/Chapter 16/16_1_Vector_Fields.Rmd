@@ -1,0 +1,75 @@
+---
+title: "16.1 Vector Fields"
+date: "Joshua D. Ingram"
+author: "Pages: 1068 - 1074"
+output: pdf_document
+geometry: margin=1in
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(pracma)
+library(matlib)
+library(ggquiver)
+```
+
+# Vector Fields
+
+#### Definition - 2D Vecor Field
+
+Let *D* be a set in $\mathbb{R}^2$. A **vector field on** $\mathbb{R}^2$ is a function **F** that assigns to each point (x,y) in *D* a two-dimensional vector **F**(x,y) \
+
+**F** can be written in terms of its *component functions* *P* and *Q*: 
+
+$$
+\boxed{\textbf{F}(x,y) = P(x,y)\textbf{i} + Q(x,y)\textbf{j} = \langle P(x,y), Q(x,y) \rangle}
+$$
+
+or in a shorter form,
+
+$$
+\textbf{F} = P\textbf{i} + Q\textbf{j}
+$$
+\
+**Example** 
+
+Vector field such that $\textbf{F}(x,y) = \langle y-x, sin(y) \rangle$:
+
+```{r, echo = FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+expand.grid(x=seq(-pi/2,pi/2,.5), y=seq(-pi/2,pi/2,.5)) %>%
+ggplot(aes(x=x,y=y,u=y-x,v=sin(y))) +
+geom_quiver()
+```
+
+
+#### Definition - 3D Vector Field
+
+Let *E* be a subset of $\mathbb{R}^3$. A **vector field on** $\mathbb{R}^3$ is a function **F** that assigns to each point (x,y,z) in *E* a three-dimensional vector **F**(x,y,z) \
+
+$$
+\boxed{\textbf{F}(x,y,z) = P(x,y,z)\textbf{i} + Q(x,y,z)\textbf{j} + R(x,y,z)\textbf{k}= \langle P(x,y,z), Q(x,y,z), R(x,y,z) \rangle}
+$$
+\
+
+# Gradient Fields
+
+#### Definition - Gradient Vector
+
+If $f$ is a scalar function of three variables x, y, and z, then the **gradient** of $f$ is the vector function $\mathbf{\nabla} f(x,y,z)$ defined by
+
+$$
+\boxed{\mathbf{\nabla} f(x,y,z) = f_x(x,y,z)\textbf{i} + f_y(x,y,z)\textbf{j} + f_z(x,y,z)\textbf{k}}
+$$
+
+#### Definition - Conservative Vector Field
+
+If there exists a function $f$ such that $\textbf{F}=\mathbf{\nabla}f$, then **F** is a **conservative vector field**.
+
+# Side Notes
+
+- For a vector field function **F**, $\textbf{F}(x,y,z)$ can also be written as $\textbf{F}(\textbf{x})$, such that $\textbf{x} = (x,y,z)$
+- $\nabla f(x,y,z)$ is called a **gradient vector field**
+- For $\textbf{F}=\mathbf{\nabla}f$, $f$ is called the **potential function** of **F**

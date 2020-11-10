@@ -1,0 +1,128 @@
+---
+output: 
+  pdf_document:
+    keep_tex: false
+    fig_caption: true
+    latex_engine: pdflatex
+    template: svm-latex-ms.tex
+citation_package: natbib
+bibliography: 
+graphics: yes
+header-includes:
+  -  \usepackage{hyperref}
+biblio-style: apsr
+title: "RHESSI Dataset"
+thanks:
+author:
+- name: Joshua Ingram, Courtney Miller
+  affiliation: New College of Florida
+abstract: "This document contains an overview of the RHESSI dataset to be used in the Topics in Statistical Inference for Data Science final project. Variable definitions, units, and some basic data visualizations are given, as well as a link to some background information on the RHESSI satellite."
+keywords: 
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+geometry: margin=1in
+fontsize: 12pt
+# spacing: double
+endnote: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+library(lubridate)
+
+RHESSI <- read_csv("D:/main/Datasets/Solar_REU/RHESSI_data/RHESSI_clean.csv")
+RHESSI$cycle <- as.factor(RHESSI$cycle)
+
+# creating a dataframe that has the dates for solar extrema
+dates <- c(as.Date("2008-12-01 00:00:01 UTC"), 
+           as.Date("2001-11-15 00:00:01 UTC"), 
+           as.Date("2014-04-15 00:00:01 UTC"))
+
+extrema <- c("Minimum", "Maximum", "Maximum")
+
+solar_extrema <- data.frame(dates, extrema)
+```
+
+# Data Overview
+
+1. *Title*: RHESSI Solar Flare Data
+
+2. *Dates of collection*: 2002 - 2018
+
+3. *Instrument for data colleciton*: Reuven Ramaty High Energy Solar Spetroscopic Imager [(RHESSI)](https://hesperia.gsfc.nasa.gov/rhessi3/data-access/rhessi-data/flare-list/index.html)
+
+4. *Dataset versions*: RHESSI_clean.csv
+
+5. *Data Dimensions*: observations - 115,227, variables - 28
+
+## Variables
+
+Variable | Definition | Units
+-------- | ---------- | -----
+Rflarenum | flare event number as YYYYMMDD_HHMMSS |
+Rstart | flare start time | YYYY-MM-DDTHH:MM:SS
+Rpeak | flare peak time | YYYY-MM-DDTHH:MM:SS
+Rstop | flare start time | YYYY-MM-DDTHH:MM:SS
+RTstart | flare start time in decimal years |
+RTpeak | flare peak time in decimal years |
+RTstop | flare stop time in decimal years |
+Rduration | duration of the flare | $sec$
+Rrise | rise time of flare, from Rstart to Rpeak | $sec$
+Rfall | fall time of flare, from Rstart to Rpeak | $sec$
+Rctrt | corrected peak count rate | $ct/s$
+Rcttot | corrected total counts | ct
+RARreg | closest AR, if available |
+Rxpos | X-position of flare on sun, if known |
+Rypos | Y-position of flare on sun, if known |
+RGclass | GOES class of closest flare, if known |
+RGflxpeak | peak flux in GOES band at earth | $ergs/s/cm^2$
+Rflxpeak | peak RHESSI flux | $ergs/s/cm^2$
+Rflxpeakerr | error on Rflxpeak | $ergs/s/cm^2$
+Rflxtot | total RHESSI fluence | $ergs/cm^2$
+Rflxtoterr | error on Rflxtot | $ergs/cm^2$
+RFlrPkDur | product of peak flare flux and flare duration | $ergs/cm^2$
+Rflrlum | flare peak luminosity at sun | $ergs/s$
+RFlrTotalEnergy| flare total energy at sun | $ergs$
+class | alphabetical GOES class assigned to flare peak |
+calctotalenergy | calculated total energy from RFlrPkDur/2 | $ergs$
+cycle | solar cycle the flare occurred in (24 or 25) |
+year | integer year the flare occurred in |
+
+
+# Visualizations
+
+```{r, echo=FALSE, fig.width = 7, fig.height = 5, fig.show = "hold", out.width = "52%", warning = FALSE}
+## Data Summary and Visualizations
+
+### General Visualizations
+
+# Flare counts by year, class, and Solar Cycle
+ggplot(data = RHESSI, aes(x=RTpeak, fill = cycle)) +
+  geom_histogram(bins = 50) +
+  geom_vline(data = solar_extrema, mapping = aes(xintercept = decimal_date(dates), linetype = extrema), size = .85) +
+  facet_wrap(~ class) +
+  scale_y_log10() +
+  labs(y = "Count", x = "Event Year", title = "Distribution of Flares by Year, Class, and Solar Cycle") +
+  theme_bw()
+
+# Distribution of Class
+ggplot(data = RHESSI, aes(x=class, y =..prop.., group = 1)) +
+  geom_bar(fill = "lightblue") +
+  labs(y = "Count", x = "Class", title = "Distribution of Flare Class") +
+  theme_bw()
+
+# Flare Counts by Solar Cycle
+ggplot(data = RHESSI, aes(x=RTpeak, fill = cycle)) +
+  geom_histogram(bins = 50) +
+  labs(y = "Count", x = "Event Year", title = "Distribution of Flares by Solar Cycle") +
+  theme_bw() +
+  geom_vline(data = solar_extrema, mapping = aes(xintercept = decimal_date(dates), linetype = extrema), size = 1.3)
+
+### Total Energy
+ggplot(data = RHESSI, aes(x = RFlrTotalEnergy, fill = class)) +
+  geom_histogram(bins = 50, alpha = .9) + 
+  scale_x_log10() +
+  labs(y = "Count", x = "Total Energy (ergs)", title = "Distribution of Total Energy by Class") +
+  theme_bw()
+```
