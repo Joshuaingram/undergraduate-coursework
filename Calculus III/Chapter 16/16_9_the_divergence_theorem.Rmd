@@ -15,3 +15,17 @@ library(pracma)
 library(matlib)
 library(ggquiver)
 ```
+
+# The Divergence Theorem
+
+#### Theorem 16.9.1 - The Divergence Theorem
+
+Let E be a simple solid region and let S be the boundary surface of E, given with positive (outward) orientation. Let **F** be a vector field whose component functions have continuous partial derivatives on an open region that contains E. Then 
+
+$$
+\iint_S \mathbf{F} \cdot d\mathbf{S} = \iiint_E div \: \mathbf{F} \: dV
+$$
+\
+\
+
+The Divergence Theorem states that, under the given conditions, the flux of **F** across the boundary surface of E is equal to the triple integral of the divergence of **F** over E.

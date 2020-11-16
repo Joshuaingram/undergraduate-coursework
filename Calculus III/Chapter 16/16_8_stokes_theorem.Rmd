@@ -16,4 +16,36 @@ library(matlib)
 library(ggquiver)
 ```
 
+# Stokes' Theorem
 
+#### Theorem 16.8.1 - Stokes' Theorem
+
+Let S be an oriented piecewise-smooth surface that is bounded by a simple, closed, piecewise-smooth boundary curve C with positive orientation. Let **F** be a vector field whose components have continuous partial derivatives on an open region in $\mathbb{R}^3$ that contains S. Then
+
+$$
+\boxed{\int_C \mathbf{F} \cdot d\mathbf{r} = \iint_S curl \: \mathbf{F} \cdot d \mathbf{S}}
+$$
+\
+
+Since
+
+$$
+\int_C \mathbf{F} \cdot d\mathbf{r} = \int_C \mathbf{F} \cdot \mathbf{T} \: ds \; \; \; \; \; \text{and} \; \; \; \; \; \iint_S curl \: \mathbf{F} \cdot d \mathbf{S} = \iint_S curl \: \mathbf{F} \cdot \mathbf{n} \: dS
+$$
+
+Stokes' Theorem say that the line integral around the boundary curve of S of the tagential component of **F** is equal to the surface integral over S of the normal component of the curl of **F**.
+\
+
+This positively oriented boundary curve of the oriented surface S is often written as $\partial S$, so the theorem can be rewritten as
+
+$$
+\iint_S curl \: \mathbf{F} \cdot d \mathbf{S} = \int_{\partial S} \mathbf{F} \cdot d\mathbf{r}
+$$
+\
+\
+
+If $S_1$ and $S_2$ are oriented surfaces with the same oriented boundary curve C and both satisfy the hypothesis of Stokes' Theorem, then
+
+$$
+\iint_{S_1} curl \: \mathbf{F} \cdot \: d\mathbf{S} = \int_C \mathbf{F} \cdot d\mathbf{r} = \iint_{S_2} curl \: \mathbf{F} \cdot \: d\mathbf{S}
+$$

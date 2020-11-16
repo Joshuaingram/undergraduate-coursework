@@ -18,10 +18,110 @@ library(ggquiver)
 
 # Parametric Surfaces
 
+We can describe a surface by a vector function $\mathbf{r}(u,v)$ of two parameters $u$ and $v$. Suppose that
+
+$$
+\mathbf{r}(u,v) = x(u,v)\mathbf{i} + y(u,v)\mathbf{j} + z(u,v)\mathbf{k}
+$$
+
+is a vector valued function defined on a region D in the $uv$-plane. So x, y, and z are functions of two variables $u$ and $v$ with domain D. The set of all points (x,y,z) in $\mathbb{R}^3$ such that
+
+$$
+x = x(u,v) \; \; \; \; \; \; y = y(u,v) \; \; \; \; \; \; z = z(u,v)
+$$
+
+and (u,v) varies throughout D, is called a **parametric surface** S. The above equations are called **parametric equations**.
+\
+
+- Whenever we trace out the parametric surface, we may do this by holding $u$ (or $v$) constant, say $u = u_0$ (or $v = v_0$), and tracing the curve given by $\mathbf{r}(u_0,v)$ (or $\mathbf{r}(u,v_0)$). These curves are called **grid curves**.
+
 # Surfaces of Revolution
+
+Surfaces of revolution can be represented parametrically. Consider a surface S obtained by rotating the curve $y= f(x)$, $a \leq x \leq b$, about the x-axis, where $f(x) \geq 0$, and let $\theta$ be the angle of rotation. If (x,y,z) is a point on S then
+
+$$
+x = x \; \; \; \; \; \; y = f(x)cos(\theta) \; \; \; \; \; \; z = f(x)sin(\theta)
+$$
+
+We take $x$ and $\theta$ as parameters and regard the above equations as parametric equations of S. The parameter domain is given by $a \leq x \leq b, \; 0 \leq \theta \leq 2\pi$.
 
 # Tangent Planes
 
+Given a parametric surface S traced out by a vector function
+
+$$
+\mathbf{r}(u,v) = x(u,v)\mathbf{i} + y(u,v)\mathbf{j} + z(u,v)\mathbf{k}
+$$
+
+We can find its **tangent plane** at a point $P_0$ with position vector $\mathbf{r}(u_0,v_0)$.
+\
+
+By setting $u$ constant at $u = u_0$, $\mathbf{r}(u_0,v)$ becomes a vector function of a single parameter and defines a grid curve $C_1$ on S. The tangent vector to $C_1$ at $P_0$ is obtained by
+
+$$
+\mathbf{r}_v = \frac{\partial x}{\partial v}(u_0, v_0)\mathbf{i} + \frac{\partial y}{\partial v}(u_0, v_0)\mathbf{j} + \frac{\partial z}{\partial v}(u_0, v_0)\mathbf{k}
+$$
+\
+
+Similarly, by setting $v$ constant at $v = v_0$, $\mathbf{r}(u,v+0)$ becomes a vector function of a single parameter and defines a grid curve $C_2$ on S. The tangent vector to $C_2$ at $P_0$ is obtained by
+
+$$
+\mathbf{r}_u = \frac{\partial x}{\partial u}(u_0, v_0)\mathbf{i} + \frac{\partial y}{\partial u}(u_0, v_0)\mathbf{j} + \frac{\partial z}{\partial u}(u_0, v_0)\mathbf{k}
+$$
+\
+
+If $\mathbf{r}_u \times \mathbf{r}_v \neq 0$, then the surface S is **smooth** and the **tangent plane** to this surface at a point $P_0$ contains the tangent vectors $\mathbf{r}_u$ and $\mathbf{r}_v$ where $\mathbf{r}_u \times \mathbf{r}_v \neq 0$ is its normal vector.
+
 # Surface Area
 
+#### Definition - Surface Area of a Parametric Surface
+
+If a smooth parametric surface S is given by
+
+$$
+\mathbf{r}(u,v) = x(u,v)\mathbf{i} + y(u,v)\mathbf{j} + z(u,v)\mathbf{k} \; \; \; \; (u,v) \in D
+$$
+
+and S is covered just once as $(u,v)$ ranges throughout the parameter domain D, then the **surface area** of S is
+
+$$
+A(S) = \iint_D |\mathbf{r}_u \times \mathbf{r}_v|dA
+$$
+
+where
+
+$$
+\mathbf{r}_u = \frac{\partial x}{\partial u}\mathbf{i} + \frac{\partial y}{\partial u}\mathbf{j} + \frac{\partial z}{\partial u}\mathbf{k} \; \; \; \text{and} \; \; \; \mathbf{r}_v = \frac{\partial x}{\partial v}\mathbf{i} + \frac{\partial y}{\partial v}\mathbf{j} + \frac{\partial z}{\partial v}\mathbf{k}
+$$
+
 # Surface Area of the Graph of a Function
+
+For the special case of a surface S with equation $z = f(x,y)$, where $(x,y)$ lies in D and $f$ has continuous partial derivatives, we take $x$ and $y$ as parameters. Thus the parametric equations are
+
+$$
+x = x \; \; \; \; \; \; y = y \; \; \; \; \; \; z = f(x,y)
+$$
+
+then
+
+$$
+\mathbf{r}_x = \mathbf{i} + \frac{\partial f}{\partial x}\mathbf{k} \; \; \; \text{and} \; \; \; \mathbf{r}_y = \mathbf{j} + \frac{\partial f}{\partial y}\mathbf{k}
+$$
+
+and
+
+$$
+\mathbf{r}_x \times \mathbf{r}_y = -\frac{\partial f}{\partial x}\mathbf{i} - \frac{\partial f}{\partial y}\mathbf{j} + \mathbf{k}
+$$
+
+Thus we get
+
+$$
+|\mathbf{r}_x \times \mathbf{r}_y| = \sqrt{1 + (\frac{\partial f}{\partial x})^2 + (\frac{\partial f}{\partial y})^2} = \sqrt{1 + (\frac{\partial z}{\partial x})^2 + (\frac{\partial z}{\partial y})^2}
+$$
+
+and we can then define the surface area formula as
+
+$$
+A(S) = \iint_D \sqrt{1 + (\frac{\partial z}{\partial x})^2 + (\frac{\partial z}{\partial y})^2} \; dA
+$$
