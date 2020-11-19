@@ -63,7 +63,7 @@ $$
 $$
 \
 
-Similarly, by setting $v$ constant at $v = v_0$, $\mathbf{r}(u,v+0)$ becomes a vector function of a single parameter and defines a grid curve $C_2$ on S. The tangent vector to $C_2$ at $P_0$ is obtained by
+Similarly, by setting $v$ constant at $v = v_0$, $\mathbf{r}(u,v_0)$ becomes a vector function of a single parameter and defines a grid curve $C_2$ on S. The tangent vector to $C_2$ at $P_0$ is obtained by
 
 $$
 \mathbf{r}_u = \frac{\partial x}{\partial u}(u_0, v_0)\mathbf{i} + \frac{\partial y}{\partial u}(u_0, v_0)\mathbf{j} + \frac{\partial z}{\partial u}(u_0, v_0)\mathbf{k}

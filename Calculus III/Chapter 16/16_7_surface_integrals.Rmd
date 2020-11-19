@@ -18,9 +18,144 @@ library(ggquiver)
 
 # Parametric Surfaces
 
+Suppose that a surface S has a vector equation
+
+$$
+\mathbf{r}(u,v) = x(u,v)\mathbf{i} + y(u,v)\mathbf{j} + z(u,v)\mathbf{k} \; \; \; \; \; \; (u,v) \in D
+$$
+\
+
+#### Definition - Riemann Sum Definition of a Surface Integral of a Parametric Surface
+
+We assume that the parameter domain D is a rectangle and we divide it into subrectangles $R_{ij}$ with dimensions $\Delta u$ and $\Delta v$. The surface S is then divided into corresponding patches $S_{ij}$. We then evaluate $f$ at a point $P_{ij}^*$ in each patch, multiply by the area $\Delta S_{ij}$ of the patch, and form the Riemann sum
+
+$$
+\sum^m_{i=1} \sum^n_{j=1} f(P_{ij}^*) \; \Delta S_{ij}
+$$
+
+We can then take the limit as the number of patches increases and we define the **surface integral of** $\mathbf{f}$ **over the surface S** as
+
+$$
+\iint_S f(x,y,z) dS = \lim_{m,n \rightarrow \infty}\sum^m_{i=1} \sum^n_{j=1} f(P_{ij}^*) \; \Delta S_{ij}
+$$
+\
+
+
+#### Definition - Surface Integral of a Parametric Surface
+
+We can approximate the patch area $\Delta S_{ij}$ by the area of an approximating parallelogram in the tangent plan. We use
+
+$$
+\Delta S_{ij} \approx |\mathbf{r}_u \times \mathbf{r}_v| \: \Delta u \: \Delta v
+$$
+
+Where
+
+$$
+\mathbf{r}_u = \frac{\partial x}{\partial u}\mathbf{i} + \frac{\partial y}{\partial u}\mathbf{j} + \frac{\partial z}{\partial u}\mathbf{k} \; \; \; \text{and} \; \; \; \mathbf{r}_v = \frac{\partial x}{\partial v}\mathbf{i} + \frac{\partial y}{\partial v}\mathbf{j} + \frac{\partial z}{\partial v}\mathbf{k}
+$$
+
+are the tangent vectors at a corner of $S_{ij}$. If the components are continuous and $\mathbf{r}_u$ and $\mathbf{r}_v$ are nonzero and nonparallel in the interior of D, it can be shown that
+
+$$
+\boxed{\iint_S f(x,y,z) dS = \iint_D f(\mathbf{r}(u,v))|\mathbf{r}_u \times \mathbf{r}_v|dA}
+$$
+\
+
+
+## Mass and Center of Mass
+
+If a thin sheet has the shape of a surface S and the density at the point (x,y,z) is $\rho (x,y,z)$, then the total **mass** of the sheet is
+
+$$
+m = \iint_S \rho (x,y,z) d\mathbf{S}
+$$
+
+Its **center of mass** is $(\bar{x}, \bar{y}, \bar{z})$, where
+
+$$
+\bar{x} = \frac{1}{m} \iint_S x \rho (x,y,z) d\mathbf{S} \; \; \; \; \; \; \bar{y} = \frac{1}{m} \iint_S y \rho (x,y,z) d\mathbf{S} \; \; \; \; \; \; \bar{z} = \frac{1}{m} \iint_S z \rho (x,y,z) d\mathbf{S}
+$$
+\
+
 # Graphs of Functions
+
+Any surface S with equation $z = g(x,y)$ can be regarded as a parametric surface with parametric equations
+
+$$
+x = x \; \; \; \; \; \; y = y \; \; \; \; \; \; z = g(x,y)
+$$
+
+Thus
+
+$$
+\mathbf{r}_x = \mathbf{i} + \frac{\partial g}{\partial x}\mathbf{k} \; \; \; \text{and} \; \; \; \mathbf{r}_y = \mathbf{j} + \frac{\partial g}{\partial y}\mathbf{k}
+$$
+
+where
+
+
+$$
+|\mathbf{r}_x \times \mathbf{r}_y| = \sqrt{(\frac{\partial z}{\partial x})^2 + (\frac{\partial z}{\partial y})^2 + 1}
+$$
+
+Therefore,
+
+$$
+\boxed{\iint_S f(x,y,z) dS = \iint_D f(x,y,g(x,y))\sqrt{(\frac{\partial z}{\partial x})^2 + (\frac{\partial z}{\partial y})^2 + 1}dA}
+$$
+\
 
 # Oriented Surfaces
 
+To define surface integrals of vector fields, we must rule out *nonorientable* surfaces like the Mobius strip since it only has one side. We only consider *orientable* (two-sided) surfaces moving forward.
+
+#### Definition - Orientable Surface
+
+We first start with a surface S that has a tangent plane at every point (x,y,z) on S. There are then two unit normal vectors $\mathbf{n}_1$ and $\mathbf{n}_2 = \mathbf{1}_1$ at every point.
+
+If it is possible to choose a unit normal vector at every point (x,y,z) so that **n** varies continuously over S, then S is called an **orientable surface** and the given choice of **n** provides S with an **orientation**.
+
+For a surface $z = g(x,y)$ given as the graph of $g$, we can use the following equation to associate with the surface a natural orientation given by the unit normal vector
+
+$$
+\mathbf{n} = \frac{-\frac{\partial g}{\partial x}\mathbf{i} - \frac{\partial g}{\partial y}\mathbf{j} + \mathbf{k}}{\sqrt{1 + (\frac{\partial g}{\partial x})^2 + (\frac{\partial g}{\partial y})^2}}
+$$
+
+Since the **k** component is positive, this gives the *upward* orientation of the surface.
+\
+
+If S is a smooth orientable surface given in parametric form by a vector function $\mathbf{r}(u,v)$, then it is automatically supplied with the orientation of the unit normal vector
+
+$$
+\mathbf{n} = \frac{\mathbf{r}_u \times \mathbf{r}_v}{|\mathbf{r}_u \times \mathbf{r}_v|}
+$$
+
+and the opposite orientation is given by **-n**.
+\
+
 # Surface Integrals of Vector Fields
 
+#### Definition - Surface Integral of F over S
+
+If **F** is a continuous vector field defined on an oriented surface S with unit normal vector **n**, then the **surface integral of F over S** is
+
+$$
+\boxed{\iint_S \mathbf{F} \cdot d\mathbf{S} = \iint_S \mathbf{F} \cdot \mathbf{n} \: dS}
+$$
+
+This integral is also called the **flux** of **F** across S.
+\
+
+If S is given by a vector function $\mathbf{r}(u,v)$, then
+
+$$
+\boxed{\iint_S \mathbf{F} \cdot d\mathbf{S} = \iint_D \mathbf{F} \cdot (\mathbf{r}_u \times \mathbf{r}_v) dA}
+$$
+\
+
+In the case of a surface S given by a graph $z = g(x,y)$, we can think of $x$ and $y$ as parameters and then
+
+$$
+\iint_S \mathbf{F} \cdot d\mathbf{S} = \iint_D(-P\frac{\partial g}{\partial x} - Q \frac{\partial g}{\partial y} + R)dA
+$$
