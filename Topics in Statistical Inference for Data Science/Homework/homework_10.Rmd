@@ -1,0 +1,290 @@
+---
+title: "Homework 10"
+author: "Joshua Ingram"
+date: "11/19/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+library(tseries)
+data("internet")
+data("h02")
+```
+
+# Problem 1
+
+## 1.
+
+### a.
+
+```{r}
+tsdisplay(internet)
+#tsdisplay(log(internet))
+#tsdisplay(BoxCox(internet,BoxCox.lambda(internet)))
+```
+
+After checking the original time series and testing some transformations, it doesn't seem that it is necessary to make any transformations on the data to stabalize the variance. (commented out log/BoxCox so I don't flood the pages with graphs)
+
+### b.
+
+```{r}
+tsdisplay(diff(internet), lag.max = 100)
+```
+
+The mean does not appear to be constant, so a first-order differencing appears to stabalize the mean and the data has pretty stable variance.
+
+### c.
+
+(looking at the ACf/PACF plots above)
+
+The ACF plot decays exponentially with a sinusoidal pattern and here is a "spike" in the PACF at a lag 1. For these reasons, I would suggest p = 1, q = 0.
+
+### d.
+
+For ARMIMA(1,1,0) and given $y_t' = y_t - y_{t-1}$, the modeling equation is:
+
+$$
+y_t' = \mu + \phi_1 y'_{t-1} + \epsilon_t, \; \; \epsilon_t \sim_{i.i.d.} N(0,\sigma^2)
+$$
+
+```{r}
+fit1 <- Arima(internet, order=c(1,1,0))
+summary(fit1)
+```
+
+Fitted Equation:
+
+$$
+\hat{y}_t' = 0.8026 y'_{t-1}
+$$
+
+```{r}
+checkresiduals(fit1)
+```
+
+Based upon the Ljung-Box test, we receive a small p-value, the residuals are serially correlated (not white noise) and the model is not a good fit.
+
+## 2.
+
+### a.
+
+```{r}
+arima.param <- list(c(1,1,0),c(2,1,0),c(3,1,0), c(4,1,0), c(1,1,1), c(1,1,2))
+
+#AICc
+arima.aicc <- sapply(arima.param,function(x) Arima(internet, order=x)$aicc)
+print(arima.aicc)
+print(arima.param[[which.min(arima.aicc)]])
+
+# RMSE for test data
+train <- window(internet,start=c(1), end=c(90))
+test <- window(internet, start=c(91))
+test.rmse <- c()
+for (param in arima.param){  
+  fit <- Arima(train, order=param[1:3])  
+  test.rmse <- c(test.rmse, accuracy(forecast(fit,24), test)[2,"RMSE"])
+}
+
+# printing RMSE and best ARIMA
+print(test.rmse)
+print(arima.param[[which.min(test.rmse)]])
+
+```
+
+The ARIMA(3,1,0) model was the best fit for both the AICc and RMSE (for test data). 
+
+### b.
+
+```{r}
+fit2 <- Arima(internet, order=c(3,1,0))
+summary(fit2)
+checkresiduals(fit2)
+```
+
+After checking the residuals and conducting the Ljung-Box test, we may conclude that the ARIMA(3,1,0) model is a good fit. The residuals are normally distributed, the p-value from our test was large, the AC value in the ACF plot are all within the bands, and the mean is constant.
+
+## 3.
+
+```{r}
+fit3 <- auto.arima(internet, approximation = FALSE) 
+fit3
+```
+
+ARIMA(1,1,1) was selected by the auto.arima function.
+
+```{r}
+checkresiduals(fit3)
+```
+
+Based upon the p-value from the Ljung-Box test, we don't reject the null hypothesis so there is no serial correlation and the data is white noise. We can also see this in the data, as it has constant mean, the residuals are normally distributed, and the ACF values are within the bands.
+
+This constitutes a good fit.
+
+## 4. 
+
+The ARIMA(3,1,0) model was the best fit by the AICc (512) and residual diagnostics (largest p-value in the Ljung-Box test and passes other assumptions).
+
+```{r}
+autoplot(forecast(fit2, h = 10))
+```
+
+
+
+# Problem 2
+
+## 1.
+
+### a.
+
+```{r}
+tsdisplay(h02)
+tsdisplay(log(h02))
+#tsdisplay(BoxCox(h02,BoxCox.lambda(h02)))
+h02_log <- log(h02)
+```
+
+The variance is non-constant in time so a transformation is needed. After comparing the BoxCox estimate and the log transformation, I decided to go with the log transformation.
+
+### b.
+
+```{r}
+tsdisplay(diff(h02_log, lag = 12))
+tsdisplay(diff(h02_log))
+tsdisplay(diff(diff(h02_log, lag = 12)), lag.max = 24)
+```
+
+Differencing is needed to stabalize the mean. I first attempted seasonal differencing (due to the seasonal trend shown in the ACF plot), but it was still not stable. I continued on to add first-order differencing to the seasonal difference and the time series now has a stable mean.
+
+### c.
+
+There does not appear to be any need for the seasonal ARIMA parameters since there is no clear pattern seen at lags 12, 24, etc in the ACF/PACF plots. This could be because the seasonal and first-order differencing took care of it. However, there appears to be a subtle exponenetial decay in the PACF plot, with a spike at lag 1 in the ACF plot. This woul suggest an ARIMA(0,1,1)(0,1,0) model would be appropriate.
+
+### d.
+
+Given
+
+$$
+y'_t = (y_t - y_{t-12}) - y_{t-1}
+$$
+
+$$
+y'_t = \mu + \theta \epsilon_{t-1} + \epsilon_t, \; \; \epsilon_t \sim_{i.i.d.} N(0, \sigma^2)
+$$
+
+```{r}
+fit4 <- Arima(h02, lambda = 0, order=c(0,1,1), seasonal=c(0,1,0))
+fit4
+```
+
+$$
+y'_t = -0.7219 \epsilon_{t-1}
+$$
+
+```{r}
+summary(fit4)
+checkresiduals(fit4)
+```
+
+This model is not a great fit. The residuals are normally distributed and the mean is constant, but the ACF is not looking great with several spikes. The Ljung-Box test returned a small p-value, so the residuals are serially correlated (not white noise).
+
+## 2.
+
+### a.
+
+```{r}
+arima.param <- list(c(0,1,1,0,1,0),
+                    c(1,1,1,0,1,0),
+                    c(1,1,2,0,1,0), 
+                    c(1,1,1,1,1,0), 
+                    c(1,1,1,1,1,1), 
+                    c(1,1,2,1,1,1),
+                    c(0,1,2,0,1,0),
+                    c(0,1,2,1,1,1),
+                    c(0,1,1,1,1,0),
+                    c(0,1,1,0,1,1))
+
+#AICc
+arima.aicc <- sapply(arima.param,function(x) Arima(h02, order=x[1:3], seasonal=x[4:6])$aicc)
+print(arima.aicc)
+print(arima.param[[which.min(arima.aicc)]])
+
+# RMSE for test data
+train <- window(h02,start=c(1991,7), end=c(2006,6))
+test <- window(h02, start=c(2006,7))
+test.rmse <- c()
+for (param in arima.param){  
+  fit <- Arima(train, lambda=0, order=param[1:3], seasonal = param[4:6])  
+  test.rmse <- c(test.rmse, accuracy(forecast(fit,24), test)[2,"RMSE"])
+}
+
+# printing RMSE and best ARIMA
+print(test.rmse)
+print(arima.param[[which.min(test.rmse)]])
+```
+
+According to the AICc, the ARIMA(1,1,1)(1,1,1) model was best, while the model with the lowest RMSE was ARIMA(0,1,2)(1,1,1).
+
+### b.
+
+```{r}
+# ARIMA(1,1,1)(1,1,1)
+fit5 <- Arima(h02, lambda = 0, order=c(1,1,1), seasonal = c(1,1,1))
+summary(fit5)
+checkresiduals(fit5)
+
+# ARIMA(0,1,2)(1,1,1)
+fit6 <- Arima(h02, lambda = 0, order=c(0,1,2), seasonal = c(1,1,1))
+summary(fit6)
+checkresiduals(fit6)
+```
+
+These models are better than the ARIMA(0,1,1)(0,1,0) model, but do not constitute goods fits as their residuals are not white noise by the Ljung-Box test. 
+
+## 3.
+
+```{r}
+fit7 <- auto.arima(h02, lambda = 0)
+fit7
+```
+
+ARIMA(2,1,1)(0,1,2) was selected by auto.arima.
+
+```{r}
+checkresiduals(fit7)
+```
+
+This model selected does constitute a good fit, as the residuals are normally distributed, the mean and variance are stable, and the residuals are white noise by the Ljung-Box test.
+
+## 4.
+
+ARIMA(2,1,1)(0,1,2), selected by auto.arima, was the best overall fit. It had one of the lower AICc, but most importantly the residuals were white noise (passed the Ljung-Box test), unlike the other models.
+
+```{r}
+autoplot(forecast(fit7, h = 24))
+```
+
+# Problem 3
+
+$$
+y_t = 0.7 y_{t-4} + \epsilon_t, \; \; \epsilon_t \sim_{i.i.d.} N(0, 1)
+$$
+
+```{r}
+ts.length <- 200
+set.seed(1)
+err <- rnorm(ts.length, sd=1)
+ARIMA <- err[1] 
+
+for (i in 2:ts.length){
+  ARIMA <- c(ARIMA, 0.7*ARIMA[i-4] + err[i])
+}
+
+plot(ARIMA, type = "l")
+tsdisplay(ARIMA, lag.max = 200)
+```
+
+The ACF plot is decaying while the PACF has a spike at lag 4. This is as expected from the way we generated the quarterly data with ARIMA(0,0,0)(1,0,0)
