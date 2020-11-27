@@ -79,33 +79,136 @@ start_time <- strptime(region_1[1,]$Rpeak, format = "%Y-%m-%d %H:%M:%S")
 end_time <- strptime(region_1[nrow(region_1),]$Rpeak, format = "%Y-%m-%d %H:%M:%S")
 length <- difftime(end_time, start_time)
 
-region_1_ts <- ts(region_1_TE$avg_TE, )
+region_1_ts <- ts(region_1_TE$avg_TE)
 autoplot(region_1_ts)
+
+# 150 minute intervals
 
 date <- as.POSIXlt("2004-01-01 00:40:06")
 mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
 time <- C()
 
 while (date <= as.POSIXlt("2004-01-15 08:18:38")){
   date_1 <- date + minutes(150)
   
-  mean_current <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_te <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$Rduration)
   
-  mean_TE <- c(mean_TE, mean_current)
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
   time <- c(time, date_1)
   
   date <- date_1
 }
 
-mean_TE["=-Inf"] <- 0
-ts_region1 <- ts(log(mean_TE))
-autoplot(ts_region1)
-ts_region1 <- as.data.frame(ts_region1)$x
-ts_region1[is.nan(ts_region1)] <- 0
+ts_region1_150_te <- ts(log(mean_TE))
+autoplot(ts_region1_150_te)
+ts_region1_150_te <- as.data.frame(ts_region1_150_te)$x
+ts_region1_150[is.nan(ts_region1_150_te)] <- 0
 
-write.csv(ts_region1, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/data/region1.csv")
+ts_region1_150_pk <- ts(log(mean_PK))
+autoplot(ts_region1_150_pk)
+ts_region1_150_pk <- as.data.frame(ts_region1_150_pk)$x
+ts_region1_150_pk[is.nan(ts_region1_150_pk)] <- 0
 
-plot()
+ts_region1_150_dur <- ts(log(mean_DR))
+autoplot(ts_region1_150_dur)
+ts_region1_150_dur <- as.data.frame(ts_region1_150_dur)$x
+ts_region1_150_dur[is.nan(ts_region1_150_dur)] <- 0
+
+region1_150 <- data.frame(ts_region1_150_te, ts_region1_150_pk, ts_region1_150_dur)
+colnames(region1_150) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region1_150, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region1_150.csv")
+
+# 60 minute intervals
+
+date <- as.POSIXlt("2004-01-01 00:40:06")
+mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
+time <- C()
+
+while (date <= as.POSIXlt("2004-01-15 08:18:38")){
+  date_1 <- date + minutes(60)
+  
+  mean_current_te <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_1[which(region_1$Rpeak < date_1 & region_1$Rpeak >= date),]$Rduration)
+  
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
+  time <- c(time, date_1)
+  
+  date <- date_1
+}
+
+ts_region1_60_te <- ts(log(mean_TE))
+autoplot(ts_region1_60_te)
+ts_region1_60_te <- as.data.frame(ts_region1_60_te)$x
+ts_region1_60[is.nan(ts_region1_60_te)] <- 0
+
+ts_region1_60_pk <- ts(log(mean_PK))
+autoplot(ts_region1_60_pk)
+ts_region1_60_pk <- as.data.frame(ts_region1_60_pk)$x
+ts_region1_60_pk[is.nan(ts_region1_60_pk)] <- 0
+
+ts_region1_60_dur <- ts(log(mean_DR))
+autoplot(ts_region1_60_dur)
+ts_region1_60_dur <- as.data.frame(ts_region1_60_dur)$x
+ts_region1_60_dur[is.nan(ts_region1_60_dur)] <- 0
+
+region1_60 <- data.frame(ts_region1_60_te, ts_region1_60_pk, ts_region1_60_dur)
+colnames(region1_60) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region1_60, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region1_60.csv")
 
 # region 2 - Occurred in Aug. 2004
 # start - "2004-08-05 05:26:50 UTC"
@@ -124,28 +227,133 @@ length <- difftime(end_time, start_time)
 region_2_ts <- ts(region_2_TE$avg_TE)
 autoplot(region_2_ts)
 
+# 150 minute intervals
+
 date <- as.POSIXlt("2004-08-05 05:26:50 UTC")
 mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
 time <- c()
 
 while (date <= as.POSIXlt("2004-08-18 04:30:46 UTC")){
   date_1 <- date + minutes(150)
   
-  mean_current <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_te <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$Rduration)
   
-  mean_TE <- c(mean_TE, mean_current)
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
   time <- c(time, date_1)
   
   date <- date_1
 }
 
-mean_TE["=-Inf"] <- 0
-ts_region2 <- ts(log(mean_TE))
-autoplot(ts_region2)
-ts_region2 <- as.data.frame(ts_region2)$x
-ts_region2[is.nan(ts_region2)] <- 0
+ts_region2_150_te <- ts(log(mean_TE))
+autoplot(ts_region2_150_te)
+ts_region2_150_te <- as.data.frame(ts_region2_150_te)$x
+ts_region2_150[is.nan(ts_region2_150_te)] <- 0
 
-write.csv(ts_region2, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/data/region2.csv")
+ts_region2_150_pk <- ts(log(mean_PK))
+autoplot(ts_region2_150_pk)
+ts_region2_150_pk <- as.data.frame(ts_region2_150_pk)$x
+ts_region2_150_pk[is.nan(ts_region2_150_pk)] <- 0
+
+ts_region2_150_dur <- ts(log(mean_DR))
+autoplot(ts_region2_150_dur)
+ts_region2_150_dur <- as.data.frame(ts_region2_150_dur)$x
+ts_region2_150_dur[is.nan(ts_region2_150_dur)] <- 0
+
+region2_150 <- data.frame(ts_region2_150_te, ts_region2_150_pk, ts_region2_150_dur)
+colnames(region2_150) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region2_150, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region2_150.csv")
+
+# 60 minute intervals
+
+date <- as.POSIXlt("2004-08-05 05:26:50 UTC")
+mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
+time <- c()
+
+while (date <= as.POSIXlt("2004-08-18 04:30:46 UTC")){
+  date_1 <- date + minutes(60)
+  
+  mean_current_te <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_2[which(region_2$Rpeak < date_1 & region_2$Rpeak >= date),]$Rduration)
+  
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
+  time <- c(time, date_1)
+  
+  date <- date_1
+}
+
+ts_region2_60_te <- ts(log(mean_TE))
+autoplot(ts_region2_60_te)
+ts_region2_60_te <- as.data.frame(ts_region2_60_te)$x
+ts_region2_60[is.nan(ts_region2_60_te)] <- 0
+
+ts_region2_60_pk <- ts(log(mean_PK))
+autoplot(ts_region2_60_pk)
+ts_region2_60_pk <- as.data.frame(ts_region2_60_pk)$x
+ts_region2_60_pk[is.nan(ts_region2_60_pk)] <- 0
+
+ts_region2_60_dur <- ts(log(mean_DR))
+autoplot(ts_region2_60_dur)
+ts_region2_60_dur <- as.data.frame(ts_region2_60_dur)$x
+ts_region2_60_dur[is.nan(ts_region2_60_dur)] <- 0
+
+region2_60 <- data.frame(ts_region2_60_te, ts_region2_60_pk, ts_region2_60_dur)
+colnames(region2_60) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region2_60, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region2_60.csv")
 
 # region 3 - Occurred in Jan. 2005
 # start - "2005-01-10 15:01:17 UTC"
@@ -164,28 +372,133 @@ length <- difftime(end_time, start_time)
 region_3_ts <- ts(region_3_TE$avg_TE)
 autoplot(region_3_ts)
 
+# 150 minute intervals
+
 date <- as.POSIXlt("2005-01-10 15:01:17 UTC")
 mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
 time <- c()
 
 while (date <= as.POSIXlt("2005-01-23 20:54:53 UTC")){
   date_1 <- date + minutes(150)
   
-  mean_current <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_te <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$Rduration)
   
-  mean_TE <- c(mean_TE, mean_current)
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
   time <- c(time, date_1)
   
   date <- date_1
 }
 
-mean_TE["=-Inf"] <- 0
-ts_region3 <- ts(log(mean_TE))
-autoplot(ts_region3)
-ts_region3 <- as.data.frame(ts_region3)$x
-ts_region3[is.nan(ts_region3)] <- 0
+ts_region3_150_te <- ts(log(mean_TE))
+autoplot(ts_region3_150_te)
+ts_region3_150_te <- as.data.frame(ts_region3_150_te)$x
+ts_region3_150[is.nan(ts_region3_150_te)] <- 0
 
-write.csv(ts_region3, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/data/region3.csv")
+ts_region3_150_pk <- ts(log(mean_PK))
+autoplot(ts_region3_150_pk)
+ts_region3_150_pk <- as.data.frame(ts_region3_150_pk)$x
+ts_region3_150_pk[is.nan(ts_region3_150_pk)] <- 0
+
+ts_region3_150_dur <- ts(log(mean_DR))
+autoplot(ts_region3_150_dur)
+ts_region3_150_dur <- as.data.frame(ts_region3_150_dur)$x
+ts_region3_150_dur[is.nan(ts_region3_150_dur)] <- 0
+
+region3_150 <- data.frame(ts_region3_150_te, ts_region3_150_pk, ts_region3_150_dur)
+colnames(region3_150) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region3_150, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region3_150.csv")
+
+# 60 minute intervals
+
+date <- as.POSIXlt("2005-01-10 15:01:17 UTC")
+mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
+time <- c()
+
+while (date <= as.POSIXlt("2005-01-23 20:54:53 UTC")){
+  date_1 <- date + minutes(60)
+  
+  mean_current_te <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_3[which(region_3$Rpeak < date_1 & region_3$Rpeak >= date),]$Rduration)
+  
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
+  time <- c(time, date_1)
+  
+  date <- date_1
+}
+
+ts_region3_60_te <- ts(log(mean_TE))
+autoplot(ts_region3_60_te)
+ts_region3_60_te <- as.data.frame(ts_region3_60_te)$x
+ts_region3_60[is.nan(ts_region3_60_te)] <- 0
+
+ts_region3_60_pk <- ts(log(mean_PK))
+autoplot(ts_region3_60_pk)
+ts_region3_60_pk <- as.data.frame(ts_region3_60_pk)$x
+ts_region3_60_pk[is.nan(ts_region3_60_pk)] <- 0
+
+ts_region3_60_dur <- ts(log(mean_DR))
+autoplot(ts_region3_60_dur)
+ts_region3_60_dur <- as.data.frame(ts_region3_60_dur)$x
+ts_region3_60_dur[is.nan(ts_region3_60_dur)] <- 0
+
+region3_60 <- data.frame(ts_region3_60_te, ts_region3_60_pk, ts_region3_60_dur)
+colnames(region3_60) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region3_60, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region3_60.csv")
 
 # region 4 - occurred in Sept. 2005
 # start - "2005-09-06 13:48:41 UTC"
@@ -204,28 +517,133 @@ length <- difftime(end_time, start_time)
 region_4_ts <- ts(region_4_TE$avg_TE)
 autoplot(region_4_ts)
 
+# 150 minute intervals
+
 date <- as.POSIXlt("2005-09-06 13:48:41 UTC")
 mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
 time <- c()
 
 while (date <= as.POSIXlt("2005-09-21 04:09:25 UTC")){
   date_1 <- date + minutes(150)
   
-  mean_current <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_te <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$Rduration)
   
-  mean_TE <- c(mean_TE, mean_current)
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
   time <- c(time, date_1)
   
   date <- date_1
 }
 
-mean_TE["=-Inf"] <- 0
-ts_region4 <- ts(log(mean_TE))
-autoplot(ts_region4)
-ts_region4 <- as.data.frame(ts_region4)$x
-ts_region4[is.nan(ts_region4)] <- 0
+ts_region4_150_te <- ts(log(mean_TE))
+autoplot(ts_region4_150_te)
+ts_region4_150_te <- as.data.frame(ts_region4_150_te)$x
+ts_region4_150[is.nan(ts_region4_150_te)] <- 0
 
-write.csv(ts_region4, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/data/region4.csv")
+ts_region4_150_pk <- ts(log(mean_PK))
+autoplot(ts_region4_150_pk)
+ts_region4_150_pk <- as.data.frame(ts_region4_150_pk)$x
+ts_region4_150_pk[is.nan(ts_region4_150_pk)] <- 0
+
+ts_region4_150_dur <- ts(log(mean_DR))
+autoplot(ts_region4_150_dur)
+ts_region4_150_dur <- as.data.frame(ts_region4_150_dur)$x
+ts_region4_150_dur[is.nan(ts_region4_150_dur)] <- 0
+
+region4_150 <- data.frame(ts_region4_150_te, ts_region4_150_pk, ts_region4_150_dur)
+colnames(region4_150) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region4_150, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region4_150.csv")
+
+# 60 minute intervals
+
+date <- as.POSIXlt("2005-09-06 13:48:41 UTC")
+mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
+time <- c()
+
+while (date <= as.POSIXlt("2005-09-21 04:09:25 UTC")){
+  date_1 <- date + minutes(60)
+  
+  mean_current_te <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_4[which(region_4$Rpeak < date_1 & region_4$Rpeak >= date),]$Rduration)
+  
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
+  time <- c(time, date_1)
+  
+  date <- date_1
+}
+
+ts_region4_60_te <- ts(log(mean_TE))
+autoplot(ts_region4_60_te)
+ts_region4_60_te <- as.data.frame(ts_region4_60_te)$x
+ts_region4_60[is.nan(ts_region4_60_te)] <- 0
+
+ts_region4_60_pk <- ts(log(mean_PK))
+autoplot(ts_region4_60_pk)
+ts_region4_60_pk <- as.data.frame(ts_region4_60_pk)$x
+ts_region4_60_pk[is.nan(ts_region4_60_pk)] <- 0
+
+ts_region4_60_dur <- ts(log(mean_DR))
+autoplot(ts_region4_60_dur)
+ts_region4_60_dur <- as.data.frame(ts_region4_60_dur)$x
+ts_region4_60_dur[is.nan(ts_region4_60_dur)] <- 0
+
+region4_60 <- data.frame(ts_region4_60_te, ts_region4_60_pk, ts_region4_60_dur)
+colnames(region4_60) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region4_60, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region4_60.csv")
 
 # region 5 - Occurred in Oct. 2014
 # start - "2014-10-16 07:44:33 UTC"
@@ -244,25 +662,130 @@ length <- difftime(end_time, start_time)
 region_5_ts <- ts(region_5_TE$avg_TE)
 autoplot(region_5_ts)
 
+# 150 minute intervals
+
 date <- as.POSIXlt("2014-10-16 07:44:33 UTC")
 mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
 time <- c()
 
 while (date <= as.POSIXlt("2014-11-01 10:04:13 UTC")){
   date_1 <- date + minutes(150)
   
-  mean_current <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_te <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$Rduration)
   
-  mean_TE <- c(mean_TE, mean_current)
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
   time <- c(time, date_1)
   
   date <- date_1
 }
 
-mean_TE["=-Inf"] <- 0
-ts_region5 <- ts(log(mean_TE))
-autoplot(ts_region5)
-ts_region5 <- as.data.frame(ts_region5)$x
-ts_region5[is.nan(ts_region5)] <- 0
+ts_region5_150_te <- ts(log(mean_TE))
+autoplot(ts_region5_150_te)
+ts_region5_150_te <- as.data.frame(ts_region5_150_te)$x
+ts_region5_150[is.nan(ts_region5_150_te)] <- 0
 
-write.csv(ts_region5, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/data/region5.csv")
+ts_region5_150_pk <- ts(log(mean_PK))
+autoplot(ts_region5_150_pk)
+ts_region5_150_pk <- as.data.frame(ts_region5_150_pk)$x
+ts_region5_150_pk[is.nan(ts_region5_150_pk)] <- 0
+
+ts_region5_150_dur <- ts(log(mean_DR))
+autoplot(ts_region5_150_dur)
+ts_region5_150_dur <- as.data.frame(ts_region5_150_dur)$x
+ts_region5_150_dur[is.nan(ts_region5_150_dur)] <- 0
+
+region5_150 <- data.frame(ts_region5_150_te, ts_region5_150_pk, ts_region5_150_dur)
+colnames(region5_150) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region5_150, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region5_150.csv")
+
+# 60 minute intervals
+
+date <- as.POSIXlt("2014-10-16 07:44:33 UTC")
+mean_TE <- c()
+mean_PK <- c()
+mean_DR <- c()
+time <- c()
+
+while (date <= as.POSIXlt("2014-11-01 10:04:13 UTC")){
+  date_1 <- date + minutes(60)
+  
+  mean_current_te <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$RFlrTotalEnergy)
+  mean_current_pk <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$Rflxpeak)
+  mean_current_dur <- mean(region_5[which(region_5$Rpeak < date_1 & region_5$Rpeak >= date),]$Rduration)
+  
+  # naive interpolation - total energy
+  if (is.nan(mean_current_te) == TRUE){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  } else if (mean_current_te == 0){
+    mean_current_te <- mean_TE[length(mean_TE)]
+  }
+  
+  # naive interpolation - peak flux
+  if (is.nan(mean_current_pk) == TRUE){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  } else if (mean_current_pk == 0){
+    mean_current_pk <- mean_PK[length(mean_PK)]
+  }
+  
+  # naive interpolation - duration
+  if (is.nan(mean_current_dur) == TRUE){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  } else if (mean_current_dur == 0){
+    mean_current_dur <- mean_DR[length(mean_DR)]
+  }
+  
+  mean_TE <- c(mean_TE, mean_current_te)
+  mean_PK <- c(mean_PK, mean_current_pk)
+  mean_DR <- c(mean_DR, mean_current_dur)
+  time <- c(time, date_1)
+  
+  date <- date_1
+}
+
+ts_region5_60_te <- ts(log(mean_TE))
+autoplot(ts_region5_60_te)
+ts_region5_60_te <- as.data.frame(ts_region5_60_te)$x
+ts_region5_60[is.nan(ts_region5_60_te)] <- 0
+
+ts_region5_60_pk <- ts(log(mean_PK))
+autoplot(ts_region5_60_pk)
+ts_region5_60_pk <- as.data.frame(ts_region5_60_pk)$x
+ts_region5_60_pk[is.nan(ts_region5_60_pk)] <- 0
+
+ts_region5_60_dur <- ts(log(mean_DR))
+autoplot(ts_region5_60_dur)
+ts_region5_60_dur <- as.data.frame(ts_region5_60_dur)$x
+ts_region5_60_dur[is.nan(ts_region5_60_dur)] <- 0
+
+region5_60 <- data.frame(ts_region5_60_te, ts_region5_60_pk, ts_region5_60_dur)
+colnames(region5_60) <- c("totalEnergy", "peakFlux", "duration")
+
+write.csv(region5_60, file = "D:/main/Projects/undergraduate-coursework/Topics in Statistical Inference for Data Science/Project/Data/region5_60.csv")

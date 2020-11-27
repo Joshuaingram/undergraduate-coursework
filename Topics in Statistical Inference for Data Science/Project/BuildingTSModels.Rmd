@@ -1,0 +1,110 @@
+---
+title: "SettingUpModels"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(AER)
+library(fpp2)
+library(tidyverse)
+library(ggplot2)
+library(effects)
+library(car)
+library(AER)
+library(pscl)
+library(boot)
+library(gridExtra)
+library(tseries)
+
+## Importing data
+region1_60 <- read_csv("Data/60 Minute Frequency/region1_60.csv")
+region2_60 <- read_csv("Data/60 Minute Frequency/region2_60.csv")
+region3_60 <- read_csv("Data/60 Minute Frequency/region3_60.csv")
+region4_60 <- read_csv("Data/60 Minute Frequency/region4_60.csv")
+region5_60 <- read_csv("Data/60 Minute Frequency/region5_60.csv")
+
+
+region1_150 <- read_csv("Data/150 Minute Frequency/region1_150.csv")
+region2_150 <- read_csv("Data/150 Minute Frequency/region2_150.csv")
+region3_150 <- read_csv("Data/150 Minute Frequency/region3_150.csv")
+region4_150 <- read_csv("Data/150 Minute Frequency/region4_150.csv")
+region5_150 <- read_csv("Data/150 Minute Frequency/region5_150.csv")
+
+region1_60 <- ts(region1_60)
+region1_150 <- ts(region1_150)
+region2_150 <- ts(region2_150)
+region3_150 <- ts(region3_150)
+region4_150 <- ts(region4_150)
+region5_150 <- ts(region5_150)
+
+
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exploring data
+
+We start by looking at plots of the 60 freq data
+```{r}
+# plotting original data 
+autoplot(region1_150[,2])
+autoplot(region2_150[,2])
+autoplot(region3_150[,2])
+autoplot(region4_150[,2])
+autoplot(region5_150[,2])
+
+# try doing ARIMA model, look at some of the residuals, do what you would do for a normal ts 
+# work on figuring out setitng the frequency 
+
+
+```
+
+
+
+
+## Region1_150 Case Study Data Exploration Example 
+
+```{r}
+# checking how many times model should be differenced
+ndiffs(region1_150[,2]) 
+
+# Checking if model is stationary, won't run  
+#kpss.test(region1_150[,2])
+
+# Checking residuals
+ggAcf(region1_150[,2])
+
+# Checking what ARIMA values should be 
+# auto.arima(region1_150[,2]) # doesn't run because it says no suitable ARIMA model can be found 
+
+
+
+### Now I'm trying too see if things are more resonable if I remove the last entry which appears to be negative infiinity 
+NoNegInf <- region1_150[,2][-139]
+
+plot(NoNegInf, type="l")
+
+ndiffs(NoNegInf) # needs to be differenced once 
+
+kpss.test(diff(NoNegInf)) # Now it is stationary! 
+
+auto.arima(NoNegInf) # now it can find an ARIMA model! 
+
+plot(diff(NoNegInf), type="l") # well there's a weird thing going on with the variance but it looks much better than it did! 
+
+ggAcf(diff(NoNegInf)) # The residuals are a little weird still but definetely way better than last time \
+
+
+# fit <- stl(NoNegInf) + autoplot(fit) # doesn't run correctly, I think this might have to do with the seasonality issue 
+```
+
+
+
+
+
+
+
+
+
+
