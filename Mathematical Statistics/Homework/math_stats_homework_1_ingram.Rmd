@@ -1,0 +1,276 @@
+---
+title: "Homework 1"
+author: "Joshua Ingram"
+date: "2/17/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(reshape2)
+library(latex2exp)
+library(knitr)
+set.seed(2222021)
+```
+
+# Question 1 - Two Estimators for $\mathbf{\sigma}$
+
+For question 1, we will explore the performances of the two estimators $s$ and $s_{MLE}$ by using simulations in R. For a sample $x_1, x_2, \cdot, x_n$, the standard deviation $s$ is given by
+
+\begin{equation}
+  s = \sqrt{\frac{1}{n-1}\sum_{i=1}^n(x_i - \bar{x})^2}, \; \; \; n > 1. 
+\end{equation}
+
+Alternatively, the Maximum Likelihood Estimator $\sigma$ is given by
+
+\begin{equation}
+  s_{MLE} = \sqrt{\frac{1}{n}\sum_{i=1}^n(x_i - \bar{x})^2}, \; \; \; n \geq 1. 
+\end{equation}
+
+We use the `rnorm` function to create the simulated data, with parameters to determine sample size, $\mu$, and $\sigma$. To better understand these estimators and make comprehensive comparisons, we will vary the simulated data by sample size, $\mu$, and $\sigma$. We first create a function to compute $s_{MLE}$.
+
+```{r}
+# built-in sd function uses the formula given for s
+# Creating function for s_mle
+sd_mle <- function(x){
+  sqrt(sum((x - mean(x))^2)/length(x))
+}
+```
+
+Now we compare the estimators for a sample size of 30 when drawing from the standard normal distribution.
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+# n = 30, mu = 0, sd = 1
+data_5_0_1 <- lapply(1:100000, function(x) rnorm(30, 0, 1))
+sd_30_0_1 <- unlist(lapply(data_5_0_1, function(x) sd(x)))
+sdm_30_0_1 <- unlist(lapply(data_5_0_1, function(x) sd_mle(x)))
+
+df_30_0_1 <- data.frame(sd_30_0_1, sdm_30_0_1)
+colnames(df_30_0_1) <- c("s", "s_mle")
+df_plot <- melt(df_30_0_1)
+
+ggplot(df_plot, aes(x = variable, y = value)) + geom_boxplot() + theme_bw() + labs(title = TeX("Boxplots for s vs $s_{MLE}$ where $n = 30, \\; \\mu = 0, \\; \\sigma = 1$"),
+                                                                                  x = "Estimator", y = "Estimated Value")
+```
+
+Before delving into more simulations, we observe in the side-by-side boxplots that the estimate given by $s$ is closer to the true value $\sigma = 1$ than is $s_{MLE}$. However, the spread of the estimates given by $s_{MLE}$ is slightly less than that of $s$. See the following table for summaries.
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+summaries <- data.frame(mean = c(mean(sd_30_0_1), mean(sdm_30_0_1 )), sd = c(sd(sd_30_0_1), sd(sdm_30_0_1)))
+rownames(summaries) <- c("s", "s_mle")
+kable(summaries, caption = "Simulation Results - n = 30, mu = 0, sigma = 1")
+```
+
+
+After the initial exploration, we will now vary the sample sizes, as well as the mean and standard deviation of the distribution we draw from to see how our estimates perform. We create a function to get the estimates for the simulated datasets.
+
+```{r}
+sim_sd <- function(sim_count = 100000, s, mu, sigma){
+  
+  sim_data <- lapply(1:sim_count, function(x) rnorm(s, mu, sigma))
+  data_sd <- unlist(lapply(sim_data, function(x) sd(x)))
+  data_sdm <- unlist(lapply(sim_data, function(x) sd_mle(x)))
+
+  df_results <- data.frame(data_sd, data_sdm)
+  colnames(df_results) <- c("s", "s_mle")
+  
+  return(df_results)
+}
+```
+
+\pagebreak
+
+## Simulations Results - $\mathbf{\mu = 0}$ and $\mathbf{\sigma = 1}$
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+df_5 <- sim_sd(s = 5, mu = 0, sigma = 1)
+df_30 <- sim_sd(s = 30, mu = 0, sigma = 1)
+df_50 <- sim_sd(s = 50, mu = 0, sigma = 1)
+df_100 <- sim_sd(s = 100, mu = 0, sigma = 1)
+df_250 <- sim_sd(s = 250, mu = 0, sigma = 1)
+df_500 <- sim_sd(s = 500, mu = 0, sigma = 1)
+df_750 <- sim_sd(s = 750, mu = 0, sigma = 1)
+df_1000 <- sim_sd(s = 1000, mu = 0, sigma = 1)
+
+summaries <- data.frame(estimator = c("s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle"), 
+                        n = c(5, 5, 30, 30, 50, 50, 100, 100, 250, 250, 500, 500, 750, 750, 1000, 1000), 
+                        mean = c(mean(df_5[,1]), mean(df_5[,2]), mean(df_30[,1]), mean(df_30[,2]), mean(df_50[,1]), mean(df_50[,2]), 
+                                 mean(df_100[,1]), mean(df_100[,2]), mean(df_250[,1]), mean(df_250[,2]), mean(df_500[,1]), mean(df_500[,2]),
+                                 mean(df_750[,1]), mean(df_750[,2]), mean(df_1000[,1]), mean(df_1000[,2])),
+                        sd = c(sd(df_5[,1]), sd(df_5[,2]), sd(df_30[,1]), sd(df_30[,2]), sd(df_50[,1]), sd(df_50[,2]), 
+                                 sd(df_100[,1]), sd(df_100[,2]), sd(df_250[,1]), sd(df_250[,2]), sd(df_500[,1]), sd(df_500[,2]),
+                                 sd(df_750[,1]), sd(df_750[,2]), sd(df_1000[,1]), sd(df_1000[,2])))
+kable(summaries, caption = "Simulation Results - mu = 0, sigma = 1")
+
+ggplot(data = summaries, aes(x = n, y = mean, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Mean Estimates of Simulations Results - $\\mu = 0, \\; \\sigma = 1$"),
+       x = "Sample Size", y = "Mean of Estimates")
+ggplot(data = summaries, aes(x = n, y = sd, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Standard Deviations of Simulations Results - $\\mu = 0, \\; \\sigma = 1$"),
+       x = "Sample Size", y = "Standard Deviation of Estimates")
+```
+
+\pagebreak
+
+## Simulations Results - $\mathbf{\mu = 0}$ and $\mathbf{\sigma = 10}$
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+df_5 <- sim_sd(s = 5, mu = 0, sigma = 10)
+df_30 <- sim_sd(s = 30, mu = 0, sigma = 10)
+df_50 <- sim_sd(s = 50, mu = 0, sigma = 10)
+df_100 <- sim_sd(s = 100, mu = 0, sigma = 10)
+df_250 <- sim_sd(s = 250, mu = 0, sigma = 10)
+df_500 <- sim_sd(s = 500, mu = 0, sigma = 10)
+df_750 <- sim_sd(s = 750, mu = 0, sigma = 10)
+df_1000 <- sim_sd(s = 1000, mu = 0, sigma = 10)
+
+summaries <- data.frame(estimator = c("s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle"), 
+                        n = c(5, 5, 30, 30, 50, 50, 100, 100, 250, 250, 500, 500, 750, 750, 1000, 1000), 
+                        mean = c(mean(df_5[,1]), mean(df_5[,2]), mean(df_30[,1]), mean(df_30[,2]), mean(df_50[,1]), mean(df_50[,2]), 
+                                 mean(df_100[,1]), mean(df_100[,2]), mean(df_250[,1]), mean(df_250[,2]), mean(df_500[,1]), mean(df_500[,2]),
+                                 mean(df_750[,1]), mean(df_750[,2]), mean(df_1000[,1]), mean(df_1000[,2])),
+                        sd = c(sd(df_5[,1]), sd(df_5[,2]), sd(df_30[,1]), sd(df_30[,2]), sd(df_50[,1]), sd(df_50[,2]), 
+                                 sd(df_100[,1]), sd(df_100[,2]), sd(df_250[,1]), sd(df_250[,2]), sd(df_500[,1]), sd(df_500[,2]),
+                                 sd(df_750[,1]), sd(df_750[,2]), sd(df_1000[,1]), sd(df_1000[,2])))
+kable(summaries, caption = "Simulation Results - mu = 0, sigma = 10")
+
+ggplot(data = summaries, aes(x = n, y = mean, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Mean Estimates of Simulations Results - $\\mu = 0, \\; \\sigma = 10$"),
+       x = "Sample Size", y = "Mean of Estimates")
+ggplot(data = summaries, aes(x = n, y = sd, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Standard Deviations of Simulations Results - $\\mu = 0, \\; \\sigma = 10$"),
+       x = "Sample Size", y = "Standard Deviation of Estimates")
+```
+
+\pagebreak
+
+## Simulations Results - $\mathbf{\mu = 250}$ and $\mathbf{\sigma = 1}$
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+df_5 <- sim_sd(s = 5, mu = 250, sigma = 1)
+df_30 <- sim_sd(s = 30, mu = 250, sigma = 1)
+df_50 <- sim_sd(s = 50, mu = 250, sigma = 1)
+df_100 <- sim_sd(s = 100, mu = 250, sigma = 1)
+df_250 <- sim_sd(s = 250, mu = 250, sigma = 1)
+df_500 <- sim_sd(s = 500, mu = 250, sigma = 1)
+df_750 <- sim_sd(s = 750, mu = 250, sigma = 1)
+df_1000 <- sim_sd(s = 1000, mu = 250, sigma = 1)
+
+summaries <- data.frame(estimator = c("s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle"), 
+                        n = c(5, 5, 30, 30, 50, 50, 100, 100, 250, 250, 500, 500, 750, 750, 1000, 1000), 
+                        mean = c(mean(df_5[,1]), mean(df_5[,2]), mean(df_30[,1]), mean(df_30[,2]), mean(df_50[,1]), mean(df_50[,2]), 
+                                 mean(df_100[,1]), mean(df_100[,2]), mean(df_250[,1]), mean(df_250[,2]), mean(df_500[,1]), mean(df_500[,2]),
+                                 mean(df_750[,1]), mean(df_750[,2]), mean(df_1000[,1]), mean(df_1000[,2])),
+                        sd = c(sd(df_5[,1]), sd(df_5[,2]), sd(df_30[,1]), sd(df_30[,2]), sd(df_50[,1]), sd(df_50[,2]), 
+                                 sd(df_100[,1]), sd(df_100[,2]), sd(df_250[,1]), sd(df_250[,2]), sd(df_500[,1]), sd(df_500[,2]),
+                                 sd(df_750[,1]), sd(df_750[,2]), sd(df_1000[,1]), sd(df_1000[,2])))
+kable(summaries, caption = "Simulation Results - mu = 250, sigma = 1")
+
+ggplot(data = summaries, aes(x = n, y = mean, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Mean Estimates of Simulations Results - $\\mu = 250, \\; \\sigma = 1$"),
+       x = "Sample Size", y = "Mean of Estimates")
+ggplot(data = summaries, aes(x = n, y = sd, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Standard Deviations of Simulations Results - $\\mu = 250, \\; \\sigma = 1$"),
+       x = "Sample Size", y = "Standard Deviation of Estimates")
+```
+
+\pagebreak
+
+## Simulations Results - $\mathbf{\mu = 250}$ and $\mathbf{\sigma = 10}$
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+df_5 <- sim_sd(s = 5, mu = 250, sigma = 10)
+df_30 <- sim_sd(s = 30, mu = 250, sigma = 10)
+df_50 <- sim_sd(s = 50, mu = 250, sigma = 10)
+df_100 <- sim_sd(s = 100, mu = 250, sigma = 10)
+df_250 <- sim_sd(s = 250, mu = 250, sigma = 10)
+df_500 <- sim_sd(s = 500, mu = 250, sigma = 10)
+df_750 <- sim_sd(s = 750, mu = 250, sigma = 10)
+df_1000 <- sim_sd(s = 1000, mu = 250, sigma = 10)
+
+summaries <- data.frame(estimator = c("s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle", "s", "s_mle"), 
+                        n = c(5, 5, 30, 30, 50, 50, 100, 100, 250, 250, 500, 500, 750, 750, 1000, 1000), 
+                        mean = c(mean(df_5[,1]), mean(df_5[,2]), mean(df_30[,1]), mean(df_30[,2]), mean(df_50[,1]), mean(df_50[,2]), 
+                                 mean(df_100[,1]), mean(df_100[,2]), mean(df_250[,1]), mean(df_250[,2]), mean(df_500[,1]), mean(df_500[,2]),
+                                 mean(df_750[,1]), mean(df_750[,2]), mean(df_1000[,1]), mean(df_1000[,2])),
+                        sd = c(sd(df_5[,1]), sd(df_5[,2]), sd(df_30[,1]), sd(df_30[,2]), sd(df_50[,1]), sd(df_50[,2]), 
+                                 sd(df_100[,1]), sd(df_100[,2]), sd(df_250[,1]), sd(df_250[,2]), sd(df_500[,1]), sd(df_500[,2]),
+                                 sd(df_750[,1]), sd(df_750[,2]), sd(df_1000[,1]), sd(df_1000[,2])))
+kable(summaries, caption = "Simulation Results - mu = 250, sigma = 10")
+
+ggplot(data = summaries, aes(x = n, y = mean, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Mean Estimates of Simulations Results - $\\mu = 250, \\; \\sigma = 10$"),
+       x = "Sample Size", y = "Mean of Estimates")
+ggplot(data = summaries, aes(x = n, y = sd, color = estimator)) + 
+  geom_point()+ 
+  theme_bw() + 
+  labs(title = TeX("Standard Deviations of Simulations Results - $\\mu = 250, \\; \\sigma = 10$"),
+       x = "Sample Size", y = "Standard Deviation of Estimates")
+```
+
+\pagebreak
+
+After creating simulated data for several sample sizes and combinations of parameters, we obtained the estimates for the standard deviation given by $s$ and $s_{MLE}$. For small sample sizes, $s$ clearly peforms better on average for giving the point estimate for $\sigma$ and approaches the true value as $n$ increases. $s_{MLE}$ does not peform as well, especially for small sample sizes, but converges to the true value as $n$ increases. However, $s_{MLE}$ has the smaller standard deviation in its estimates for small sample sizes, though both $s$ and $s_{MLE}$ have small standard deviations as the sample size gets increasingly large. If we were to create side-by-side boxplots for all the combinations of parameters and sample sizes, the results would be similar to the first example where $n=30$.
+
+It does appear that changing $\mu$ results in a different performance of either estimator. The standard deviations in the estimates are larger when $\sigma$ is increased to 10, though this seems logical, and both $s$ and $s_{MLE}$ display the same patterns in their performances. To summarize, $s$ performs better on average for the "point estimate" of $\sigma$ for all sample sizes, as $s_{MLE}$ appears to have a slight bias, and $s_{MLe}$ has a considerably smaller standard deviation for small sample sizes.
+
+# Question 2 - Are $\mathbf{\bar{x}}$ and $\mathbf{s}$ independent?
+
+## a.
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+data_norm <- lapply(1:100000, function(x) rnorm(30, 0, 1))
+s_df <- unlist(lapply(data_norm, function(x) sd(x)))
+mean_df <- unlist(lapply(data_norm, function(x) mean(x)))
+
+norm_results <- data.frame(mean_df, s_df)
+colnames(norm_results) <- c("mean", "s")
+
+ggplot(norm_results, aes(x = mean, y = s)) + 
+  geom_point() + 
+  theme_bw() + 
+  labs(title = TeX("Scatterplot of $\\bar{x} \\; and \\; s$ where $n = 30, \\; \\mu = 0, \\; \\sigma = 1$"),
+       x = TeX("$\\bar{x}$"), y = TeX("s"))
+
+rho = cor(norm_results[,1], norm_results[,2])
+kable(rho, caption = "Correlation Coefficient")
+```
+
+There is no relationship between $\bar{x}$ and $s$, as the scatterplot just shows a dense cloud. The correlation coefficent is also extremely small, being less than 0.01. 
+
+## b.
+
+```{r, echo=FALSE, message=FALSE, error=FALSE}
+data_pois <- lapply(1:100000, function(x) rpois(n = 30, lambda = 3))
+s_df <- unlist(lapply(data_pois, function(x) sd(x)))
+mean_df <- unlist(lapply(data_pois, function(x) mean(x)))
+
+pois_results <- data.frame(mean_df, s_df)
+colnames(pois_results) <- c("mean", "s")
+
+ggplot(pois_results, aes(x = mean, y = s)) + 
+  geom_point() + 
+  theme_bw() + 
+  labs(title = TeX("Scatterplot of $\\bar{x} \\; and \\; s$ where $n = 30, \\; \\lambda = 1$"),
+       x = TeX("$\\bar{x}$"), y = TeX("s"))
+
+rho = cor(pois_results[,1], pois_results[,2])
+kable(rho, caption = "Correlation Coefficient")
+```
+
+There is a clear positive relationship between $\bar{x}$ and $s$ when sampling from a Poisson distribution, as seen in the scatterplot.The correlation coefficient supports this, being about 0.4. This makes sense, as the parameter $\lambda$ is both the mean and the variance of the distribution, so as one increases so does the other.

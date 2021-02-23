@@ -1,0 +1,199 @@
+---
+title: "Homework 11"
+author: "Joshua Ingram"
+date: "11/30/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+library(tseries)
+library(lmtest)
+library(car)
+data("advert")
+data("USeconomic")
+```
+
+# Problem 1
+
+## 1.
+
+```{r}
+autoplot(advert, facets = TRUE)
+```
+
+
+## 2.
+
+$$
+sales_t = \beta_0 + \beta_1 advert_t + \epsilon_t, \; \; \; \epsilon_t \sim_{i.i.d.}N(0,\sigma^2)
+$$
+
+```{r}
+lm_1 <- lm(sales ~ advert, data = advert)
+summary(lm_1)
+confint(lm_1)
+```
+
+
+## 3.
+
+We should not instantly trust the inference from part 2, as we need to check the assumptions on our residuals.
+
+```{r}
+plot(lm_1, 1)
+plot(lm_1, 2)
+checkresiduals(lm_1)
+```
+
+We find that there is autocorrelation in the residuals after conducting the Breusch-Godfrey test, as we received a small p-value (0.029). Our results are not reliable since the independence assumption of our residuals has been broken.
+
+## 4.
+
+We need to utilize regression with ARIMA errors.
+
+```{r}
+auto_1 <- auto.arima(advert[,"sales"],xreg = advert[,"advert"])
+summary(auto_1)
+checkresiduals(auto_1)
+```
+
+Taking a single-order difference makes the residuals uncorrelated. Written in ARMA form, we remove the intercept $\beta_0$ as we apply the differencing to all variables.
+
+$$
+sales_t' = \beta_1 advert_t' + \epsilon_t', \; \; \;\epsilon_t' \sim_{i.i.d.}N(0,\sigma^2)
+$$
+
+$$
+\epsilon_t' = \epsilon_t - \epsilon_{t-1}
+$$
+
+```{r}
+fit_2 <- Arima(advert[,"sales"],xreg = advert[,"advert"],order=c(0,1,0))
+```
+
+
+## 5.
+
+Classical Regression
+
+```{r}
+summary(lm_1)
+confint(lm_1)
+```
+
+Dynamic Regression
+
+```{r}
+coeftest(fit_2)
+confint(fit_2)
+```
+
+The classic regression and dynamic regression p-values and intervals differ. I'm hesitant to interpret the confidence intervals since this is for the DIFFERENCED time series, whereas the classical regression is not. The dynamic regression p-value is also much smaller than the classic regression p-value. The estimates differ slightly, as well.
+
+## 6.
+
+$$
+\hat{sales_t}' = 0.506346 \: advert_t'
+$$
+
+Per one unit increase in the consecutive advertising monthly expenditures, the consecutive monthly change in sales will increase by 0.506 units, on average.
+
+# Problem 2
+
+## 1.
+
+```{r}
+lm_2 <- lm(`log(GNP)` ~ ., data = USeconomic)
+vif(lm_2)
+lm_3 <- lm(`log(GNP)` ~ . - rl, data = USeconomic)
+vif(lm_3)
+lm_3
+```
+
+We dropped rl as it had the largest VIF over 5.
+
+## 2.
+
+$$
+log(GNP)_t = \beta_0 + \beta_1 log(M1)_t + \beta_2 rs_t + \epsilon_t, \; \; \; \epsilon_t \sim_{i.i.d.}N(0,\sigma^2)
+$$
+
+```{r}
+summary(lm_3)
+confint(lm_3)
+```
+
+
+## 3.
+
+No, we should not trust the inference from part 2 at face value. Check residuals!
+
+```{r}
+plot(lm_3, 1)
+plot(lm_3, 2)
+checkresiduals(lm_3)
+```
+
+Residuals are not independently distributed by the Breusch-Godfrey test, as the p-value was small and we reject the null that they are not autocorrelated. Our inference from classical regression is not reliable.
+
+## 4.
+
+We should use dynamic regression to utilize ARIMA errors.
+
+```{r}
+auto_2 <- auto.arima(USeconomic[,"log(GNP)"],xreg = USeconomic %>% as.data.frame %>% select(`log(M1)`, rs) %>% as.matrix)
+summary(auto_2)
+checkresiduals(auto_2)
+```
+
+$$
+log(GNP)_t' = \beta_1 log(M1)_t' + \beta_2 rs_t +  \epsilon_t'
+$$
+
+$$
+\epsilon_t' = \mu + \eta_t, \; \; \eta_t \sim_{i.i.d.}N(0,\sigma^2), \; \epsilon_t' = \epsilon_t - \epsilon_{t-1}
+$$
+
+```{r}
+fit_3 <- Arima(USeconomic[,"log(GNP)"],xreg = USeconomic %>% as.data.frame %>% select(`log(M1)`, rs) %>% as.matrix,order=c(0,1,0))
+```
+
+
+## 5.
+
+Classical Regression
+
+```{r}
+summary(lm_3)
+confint(lm_3)
+```
+
+
+Dynamic Regression
+
+```{r}
+coeftest(fit_3)
+confint(fit_3)
+```
+
+The p-values are larger from the dynamic regression model than in the classical model... I'm hesitant to interpret the confidence intervals since this is for the DIFFERENCED time series, whereas the classical regression is not. The estimates are different for both models, as well.
+
+We should trust the p-values from dynamic regression more than classical since the modeling assumptions are satisfied under the dynamic regression model.
+
+## 6.
+
+$$
+\hat{log(GNP)}_t' = 0.3835 \: log(M1)_t' + 0.45 rs_t', \; \; \epsilon_t' = 0.0068
+$$
+
+***log(M1)***
+
+Per one unit increase in the consecutive quarterly logged M1 money supply, the consecutive quarterly logged GNP will increase by 0.3835 units, on average, ceteris paribus. (holding all else constant)
+
+***rs***
+
+Per one percentage point increase in the consecutive quarterly discount rate on treasurey bills, the consecutive quarterly logged GNP will increase by 0.45 units, on average, ceteris paribus.
